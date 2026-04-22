@@ -6,14 +6,17 @@
 .profile-page__title {
   margin: 0 0 var(--space-5);
   font-size: var(--text-hero);
-  font-weight: 700;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.02em;
 }
 
 .profile-card {
-  padding: var(--space-5);
-  border-radius: 0.75rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  padding: var(--space-6);
+  border-radius: var(--crown-card-radius);
+  background: var(--crown-surface-dark);
+  border: 1px solid rgb(255 255 255 / 10%);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 3%);
 }
 
 .profile-card__list {
@@ -25,7 +28,7 @@
   grid-template-columns: 1fr 1.5fr;
   gap: var(--space-2);
   padding-block: var(--space-2);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
   font-size: var(--text-small);
 }
 
@@ -47,6 +50,12 @@
   margin: 0;
   text-align: right;
   word-break: break-all;
+  color: #f5f5f5;
+}
+
+.profile-card__row strong {
+  color: var(--crown-gold);
+  font-weight: 700;
 }
 
 .profile-card__error {
@@ -60,6 +69,11 @@
   flex-direction: column;
   gap: var(--space-3);
   margin-top: var(--space-5);
+}
+
+.profile-card__btn-full {
+  width: 100%;
+  text-transform: none;
 }
 
 .profile-card__hint {

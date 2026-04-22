@@ -7,10 +7,10 @@
   transform: translateX(-50%);
   width: min(26rem, calc(100vw - var(--page-pad) * 2));
   padding: var(--space-4);
-  border-radius: 0.75rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.45);
+  border-radius: var(--crown-card-radius);
+  background: var(--crown-surface-dark);
+  border: 1px solid rgb(255 255 255 / 12%);
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.55);
 }
 
 .pwa-banner__text {
@@ -38,15 +38,15 @@
 }
 
 .pwa-banner__btn--primary {
-  background: var(--color-accent);
-  color: #0a0a0a;
-  border-color: var(--color-accent);
+  background: linear-gradient(180deg, var(--crown-gold-hover) 0%, var(--crown-gold) 100%);
+  color: #1a1000;
+  border-color: var(--crown-gold-shadow);
 }
 
 .pwa-banner__btn--secondary {
-  background: var(--color-elevated);
+  background: rgb(255 255 255 / 8%);
   color: var(--color-text);
-  border-color: var(--color-border);
+  border-color: rgb(255 255 255 / 15%);
 }
 
 /* 小螢幕有固定底部導航時，安裝條上移到導航上方 */

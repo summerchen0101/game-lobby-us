@@ -25,6 +25,8 @@ export type Game = {
   subtitle?: string
   /** 完整遊戲啟動 URL */
   launchUrl: string
+  /** 大廳卡片／橫列縮圖（可選） */
+  thumbnailUrl?: string
   embedWidthPercent?: number
   embedHeightPercent?: number
   openInNewWindow?: boolean

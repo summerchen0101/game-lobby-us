@@ -1,16 +1,16 @@
-/* 設計 token：斷點、間距、安全區、可視高 — mobile-first */
+/* 設計 token：斷點、間距、安全區、可視高 — mobile-first（Crown 風格基底） */
 :root {
-  --color-bg: #000200;
-  --color-surface: #0a0e12;
-  --color-elevated: #12181f;
-  --color-border: #1e2836;
-  --color-text: #e8eaed;
-  --color-text-muted: #9aa0a6;
-  --color-accent: #4f8ff7;
-  --color-accent-hover: #6ba3ff;
+  --color-bg: #000000;
+  --color-surface: #0d0d0d;
+  --color-elevated: #191919;
+  --color-border: #2a2a2a;
+  --color-text: #f5f5f5;
+  --color-text-muted: #a3a3a3;
+  --color-accent: var(--crown-gold, #ffc600);
+  --color-accent-hover: var(--crown-gold-hover, #ffcf33);
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans TC',
-    'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  --font-sans: 'Outfit Variable', 'Outfit', system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
   --text-hero: clamp(1.35rem, 1rem + 1.5vw, 1.75rem);
   --text-body: clamp(0.9rem, 0.88rem + 0.2vw, 1rem);
   --text-small: 0.8125rem;

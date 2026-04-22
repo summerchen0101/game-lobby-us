@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
+import { MarketingTopBar } from '../../components/MarketingTopBar'
 import { ApiError } from '../../lib/api/client'
 import './AuthPages.css'
 
@@ -37,49 +38,55 @@ export function LoginPage() {
   }
 
   return (
-    <div className="page-container auth-page">
-      <h1 className="auth-page__title">登入</h1>
-      <p className="auth-page__lede">輸入帳號與密碼以進入大廳。</p>
-      <form className="auth-form" onSubmit={onSubmit} noValidate>
-        <div className="auth-form__field">
-          <label className="auth-form__label" htmlFor="login-account">
-            帳號
-          </label>
-          <input
-            id="login-account"
-            className="auth-form__input"
-            name="account"
-            autoComplete="username"
-            value={account}
-            onChange={(e) => setAccount(e.target.value)}
-            required
-          />
-        </div>
-        <div className="auth-form__field">
-          <label className="auth-form__label" htmlFor="login-password">
-            密碼
-          </label>
-          <input
-            id="login-password"
-            className="auth-form__input"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {error ? <p className="auth-form__error">{error}</p> : null}
-        <div className="auth-form__actions">
-          <button type="submit" className="btn btn--primary" disabled={submitting}>
-            {submitting ? '登入中…' : '登入'}
-          </button>
-        </div>
-      </form>
-      <p className="auth-page__link">
-        還沒有帳號？ <Link to="/register">註冊</Link>
-      </p>
+    <div className="auth-layout">
+      <MarketingTopBar
+        primary={{ to: '/register', label: '註冊' }}
+        secondary={{ to: '/login', label: '登入' }}
+      />
+      <div className="page-container auth-page">
+        <h1 className="auth-page__title">登入</h1>
+        <p className="auth-page__lede">輸入帳號與密碼以進入大廳。</p>
+        <form className="auth-form auth-form--card" onSubmit={onSubmit} noValidate>
+          <div className="auth-form__field">
+            <label className="auth-form__label" htmlFor="login-account">
+              帳號
+            </label>
+            <input
+              id="login-account"
+              className="auth-form__input"
+              name="account"
+              autoComplete="username"
+              value={account}
+              onChange={(e) => setAccount(e.target.value)}
+              required
+            />
+          </div>
+          <div className="auth-form__field">
+            <label className="auth-form__label" htmlFor="login-password">
+              密碼
+            </label>
+            <input
+              id="login-password"
+              className="auth-form__input"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          {error ? <p className="auth-form__error">{error}</p> : null}
+          <div className="auth-form__actions">
+            <button type="submit" className="btn-crown-primary auth-form__submit" disabled={submitting}>
+              {submitting ? '登入中…' : '登入'}
+            </button>
+          </div>
+        </form>
+        <p className="auth-page__link">
+          還沒有帳號？ <Link to="/register">註冊</Link>
+        </p>
+      </div>
     </div>
   )
 }

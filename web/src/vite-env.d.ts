@@ -13,6 +13,12 @@ interface ImportMetaEnv {
   readonly VITE_API_PATH_PAYMENT_DEPOSIT: string
   /** 僅 dev：Vite 將 /api 代理到此目標 */
   readonly VITE_DEV_PROXY: string
+  /** 大廳主視覺圖 URL（可覆寫預設 sample 圖） */
+  readonly VITE_LOBBY_HERO_IMAGE?: string
+  /** Trustpilot Business Unit ID；未設則不載入 widget */
+  readonly VITE_TRUSTPILOT_BUSINESS_UNIT_ID?: string
+  /** 浮動 CTA 點擊導向（預設 /profile） */
+  readonly VITE_FLOATING_CTA_PATH?: string
 }
 
 interface ImportMeta {

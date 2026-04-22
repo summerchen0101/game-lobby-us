@@ -12,6 +12,15 @@ const DEMO_URL = 'https://www.wikipedia.org/portal/wikipedia.org/assets/img/Wiki
 /** mock 內嵌遊戲用輕量可載入頁 */
 const GAME_IFRAME_DEMO = 'https://en.wikipedia.org/wiki/Special:BlankPage'
 
+const MOCK_THUMBS = [
+  'https://static.crowncoinscasino.com/production/assets/games/crownslots/olympics-alternate-all-KXkAo.webp',
+  'https://static.crowncoinscasino.com/production/assets/games/playson-infin/pls_coin_strike_xxl-cutThumbnailHr-bUafU.webp',
+  'https://static.crowncoinscasino.com/production/assets/games/booming/68b705d3800528273b1057c8-cutThumbnailShortHr-rBBMl.webp',
+  'https://static.crowncoinscasino.com/production/assets/games/koala/kg_5009-cutThumbnailShortHr-FAQcd.webp',
+  'https://static.crowncoinscasino.com/production/assets/games/penguin-king/103094-cutThumbnailHr-mQKpF.webp',
+  'https://static.crowncoinscasino.com/production/assets/games/onseo/1032-cutThumbnailShortHr-hmaJN.webp',
+] as const
+
 const mockUser: User = {
   id: 'mock-user-1',
   displayName: '測試玩家',
@@ -55,6 +64,7 @@ export async function mockGetGames(): Promise<GamesResponse> {
     title: g.title,
     subtitle: g.subtitle,
     launchUrl: i % 2 === 0 ? GAME_IFRAME_DEMO : DEMO_URL,
+    thumbnailUrl: MOCK_THUMBS[i % MOCK_THUMBS.length],
     embedWidthPercent: 90,
     embedHeightPercent: 85,
   }))

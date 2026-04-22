@@ -87,13 +87,18 @@ export function ProfilePage() {
         </dl>
         {error ? <p className="profile-card__error">{error}</p> : null}
         <div className="profile-card__actions">
-          <button type="button" className="btn btn--primary" onClick={onDeposit} disabled={depositing}>
+          <button
+            type="button"
+            className="btn-crown-primary profile-card__btn-full"
+            onClick={onDeposit}
+            disabled={depositing}
+          >
             {depositing ? '準備中…' : '儲值'}
           </button>
-          <button type="button" className="btn btn--ghost" onClick={onRefresh}>
+          <button type="button" className="btn-crown-ghost profile-card__btn-full" onClick={onRefresh}>
             重新整理餘額
           </button>
-          <button type="button" className="btn btn--ghost" onClick={() => logout()}>
+          <button type="button" className="btn-crown-ghost profile-card__btn-full" onClick={() => logout()}>
             登出
           </button>
         </div>

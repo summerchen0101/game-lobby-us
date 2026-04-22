@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
+import { CrownLogo } from './CrownLogo'
 import './AppShell.css'
 
 type NavItem = { to: string; label: string; end?: boolean }
@@ -23,14 +24,7 @@ export function AppShell() {
       <header className="app-header">
         <div className="app-header__inner page-container">
           <div className="app-brand">
-            <img
-              className="app-brand__logo"
-              src="/brand-logo.webp"
-              alt=""
-              width={40}
-              height={40}
-              decoding="async"
-            />
+            <CrownLogo className="app-brand__mark" width={40} aria-hidden />
             <span className="app-brand__title">Wynoco</span>
           </div>
           <div className="app-header__end">
@@ -43,11 +37,7 @@ export function AppShell() {
                       {formatHeaderBalance(user.balance, user.currency)}
                     </span>
                   ) : null}
-                  <button
-                    type="button"
-                    className="app-header__logout"
-                    onClick={() => logout()}
-                  >
+                  <button type="button" className="app-header__logout" onClick={() => logout()}>
                     登出
                   </button>
                 </>
@@ -74,7 +64,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <main className="app-main page-container">
+      <main className="app-main">
         <Outlet />
       </main>
 

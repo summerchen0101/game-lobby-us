@@ -1,0 +1,102 @@
+/* Crown-style tokens & button utilities (sample crowncoinscasino.com palette) */
+:root {
+  --crown-gold: #ffc600;
+  --crown-gold-hover: #ffcf33;
+  --crown-gold-shadow: #c99400;
+  --crown-mint: #01db80;
+  --crown-mint-shadow: #01995c;
+  --crown-purple: #8b5cf6;
+  --crown-purple-deep: #6d28d9;
+  --crown-purple-shadow: #5b21b6;
+  --crown-surface-dark: #191919;
+  --crown-card-radius: 12px;
+  --crown-btn-radius: 999px;
+  --crown-btn-shadow-h: 2.5px;
+}
+
+a.btn-crown-primary,
+a.btn-crown-secondary {
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.btn-crown-primary,
+.btn-crown-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--min-tap);
+  padding: 0.55rem 1.5rem;
+  border: none;
+  border-radius: var(--crown-btn-radius);
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition:
+    transform 0.08s ease,
+    filter 0.15s ease;
+  box-shadow:
+    0 var(--crown-btn-shadow-h) 0 0 var(--crown-gold-shadow),
+    inset 0 -1px 0 rgb(255 255 255 / 18%);
+}
+
+.btn-crown-primary {
+  background: linear-gradient(180deg, var(--crown-gold-hover) 0%, var(--crown-gold) 55%, #e6ac00 100%);
+  color: #1a1000;
+}
+
+.btn-crown-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.btn-crown-primary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow:
+    0 calc(var(--crown-btn-shadow-h) - 1px) 0 0 var(--crown-gold-shadow),
+    inset 0 -1px 0 rgb(255 255 255 / 12%);
+}
+
+.btn-crown-secondary {
+  background: linear-gradient(180deg, #9f7aea 0%, var(--crown-purple) 45%, var(--crown-purple-deep) 100%);
+  color: #fff;
+  box-shadow:
+    0 var(--crown-btn-shadow-h) 0 0 var(--crown-purple-shadow),
+    inset 0 -1px 0 rgb(255 255 255 / 15%);
+}
+
+.btn-crown-secondary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-crown-secondary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow:
+    0 calc(var(--crown-btn-shadow-h) - 1px) 0 0 var(--crown-purple-shadow),
+    inset 0 -1px 0 rgb(255 255 255 / 10%);
+}
+
+.btn-crown-primary:disabled,
+.btn-crown-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-crown-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background: rgb(255 255 255 / 6%);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+
+.btn-crown-ghost:hover {
+  background: rgb(255 255 255 / 10%);
+}

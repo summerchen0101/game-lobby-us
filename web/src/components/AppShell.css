@@ -5,14 +5,27 @@
   min-height: 100dvh;
   min-height: 100svh;
   padding-top: var(--safe-top);
+  position: relative;
+}
+
+.app-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -15%, rgb(255 198 0 / 10%), transparent 50%),
+    radial-gradient(ellipse 50% 35% at 90% 30%, rgb(1 219 128 / 7%), transparent 45%),
+    #000;
+  pointer-events: none;
 }
 
 .app-header {
   flex-shrink: 0;
   min-height: var(--header-h);
-  border-bottom: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
-  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  background: rgb(0 0 0 / 88%);
+  backdrop-filter: blur(14px);
 }
 
 .app-header__inner {
@@ -24,6 +37,13 @@
   padding-block: var(--space-2);
   flex-wrap: wrap;
   row-gap: var(--space-2);
+}
+
+@media (min-width: 48rem) {
+  .app-header__inner {
+    padding-inline: clamp(var(--space-4), 4vw, 4.375rem);
+    flex-wrap: nowrap;
+  }
 }
 
 .app-header__end {
@@ -60,24 +80,25 @@
 }
 
 .app-header__balance {
-  font-weight: 600;
-  color: var(--color-accent);
+  font-weight: 700;
+  color: var(--crown-gold);
 }
 
 .app-header__logout {
   min-height: 2rem;
-  padding: 0 var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  background: var(--color-elevated);
+  padding: 0 var(--space-3);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: var(--crown-btn-radius);
+  background: rgb(255 255 255 / 6%);
   color: var(--color-text);
   font: inherit;
   font-size: var(--text-small);
+  font-weight: 600;
   cursor: pointer;
 }
 
 .app-header__logout:hover {
-  background: var(--color-surface);
+  background: rgb(255 255 255 / 10%);
 }
 
 .app-brand {
@@ -87,21 +108,17 @@
   min-width: 0;
 }
 
-.app-brand__logo {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
-  object-fit: cover;
+.app-brand__mark {
   flex-shrink: 0;
 }
 
 .app-brand__title {
-  font-weight: 600;
-  font-size: var(--text-hero);
-  letter-spacing: 0.02em;
+  font-weight: 800;
+  font-size: 1.125rem;
+  letter-spacing: 0.03em;
+  color: #fff;
 }
 
-/* 平板以上：頂部橫向導覽 */
 .app-nav--desktop {
   display: none;
 }
@@ -123,7 +140,7 @@
 .app-nav__list {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -134,22 +151,22 @@
   align-items: center;
   min-height: var(--min-tap);
   padding: var(--space-2) var(--space-4);
-  border-radius: 0.5rem;
+  border-radius: var(--crown-btn-radius);
   color: var(--color-text-muted);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: var(--text-small);
 }
 
 .app-nav__link:hover {
-  color: var(--color-text);
-  background: var(--color-elevated);
+  color: #fff;
+  background: rgb(255 255 255 / 8%);
 }
 
 .app-nav__link.is-active {
-  color: var(--color-text);
-  background: var(--color-elevated);
+  color: #1a1000;
+  background: linear-gradient(180deg, var(--crown-gold-hover) 0%, var(--crown-gold) 100%);
 }
 
-/* 主內容：留出底部導航高度 */
 .app-main {
   flex: 1 1 auto;
   width: 100%;
@@ -158,7 +175,6 @@
   padding-bottom: var(--nav-bottom-h);
 }
 
-/* 小螢幕底部導航 */
 .app-tabbar {
   position: fixed;
   left: 0;
@@ -166,9 +182,9 @@
   bottom: 0;
   z-index: 100;
   padding-bottom: var(--safe-bottom);
-  background: color-mix(in srgb, var(--color-surface) 95%, black);
-  border-top: 1px solid var(--color-border);
-  backdrop-filter: blur(10px);
+  background: rgb(0 0 0 / 94%);
+  border-top: 1px solid rgb(255 255 255 / 10%);
+  backdrop-filter: blur(14px);
 }
 
 @media (min-width: 48rem) {
@@ -201,16 +217,16 @@
   min-height: var(--min-tap);
   max-width: 8rem;
   padding: var(--space-2) var(--space-3);
-  border-radius: 0.5rem;
+  border-radius: var(--crown-btn-radius);
   color: var(--color-text-muted);
   font-size: var(--text-small);
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
 }
 
 .app-tabbar__link.is-active {
-  color: var(--color-accent);
-  background: var(--color-elevated);
+  color: #1a1000;
+  background: linear-gradient(180deg, var(--crown-gold-hover) 0%, var(--crown-gold) 100%);
 }
 
 .app-tabbar__link:active {

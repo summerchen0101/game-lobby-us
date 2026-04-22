@@ -11,3 +11,13 @@ export function getApiBase(): string {
   const raw = (import.meta.env.VITE_API_BASE ?? '').trim()
   return raw.replace(/\/$/, '')
 }
+
+export function trustpilotBusinessUnitId(): string | undefined {
+  const v = import.meta.env.VITE_TRUSTPILOT_BUSINESS_UNIT_ID?.trim()
+  return v || undefined
+}
+
+export function floatingCtaPath(): string {
+  const v = import.meta.env.VITE_FLOATING_CTA_PATH?.trim()
+  return v || '/profile'
+}
