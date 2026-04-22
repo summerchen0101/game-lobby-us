@@ -19,5 +19,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // 在 effect 內觸發載入中／ready 是常見的資料取得模式
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

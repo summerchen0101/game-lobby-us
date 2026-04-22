@@ -1,0 +1,23 @@
+.game-overlay__close {
+  position: absolute;
+  top: var(--space-5);
+  left: var(--space-5);
+  z-index: 10000;
+  padding: var(--space-2) var(--space-4);
+  min-height: var(--min-tap);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-elevated);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.game-overlay__close:hover {
+  background: var(--color-surface);
+}
+
+.game-overlay__close-text {
+  pointer-events: none;
+}

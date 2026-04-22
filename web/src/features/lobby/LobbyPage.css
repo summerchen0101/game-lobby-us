@@ -21,9 +21,20 @@
 }
 
 .lobby-hero__lede {
-  margin: 0 0 var(--space-5);
+  margin: 0 0 var(--space-3);
   color: var(--color-text-muted);
   max-width: 42em;
+}
+
+.lobby-hero__balance {
+  margin: 0 0 var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--text-small);
+}
+
+.lobby-hero__balance strong {
+  color: var(--color-text);
+  font-weight: 600;
 }
 
 .lobby-hero__actions {
@@ -74,6 +85,18 @@
   margin: 0 0 var(--space-4);
   font-size: 1.125rem;
   font-weight: 600;
+}
+
+.lobby-games__error {
+  color: #f87171;
+  font-size: var(--text-small);
+  margin: 0 0 var(--space-3);
+}
+
+.lobby-games__hint {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-small);
 }
 
 /* 自適應遊戲格：行動欄少、寬螢欄多 */
