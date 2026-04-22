@@ -153,59 +153,140 @@
       // ── PWA 安裝提示 ───────────────────────────────────────────────────────
     </script>
   <script>
-    // 把原本 jslib 的內容包成一個全域函式
-    window.ShowGameCenteredFromHtml = function(url, widthPercent, heightPercent, isPayment) {
-      // 1. 暫停 Unity (注意：這裡直接檢查 window.unityInstance)
-      if (window.unityInstance && window.unityInstance.Module.pauseMainLoop) {
-        window.unityInstance.Module.pauseMainLoop();
+    (function () {
+      // 產品/營運可在載入前設為 true，強制以新分頁開遊戲（例如不允許 iframe 內嵌的廠商）
+      if (typeof window.OPEN_GAMES_IN_NEW_WINDOW_DEFAULT === 'undefined') {
+        window.OPEN_GAMES_IN_NEW_WINDOW_DEFAULT = false;
+      }
+      // 在網址加 ?openGameTab=1 可測試新分頁模式（不加則不影響一般使用者）
+      try {
+        if (new URLSearchParams(window.location.search).get('openGameTab') === '1') {
+          window.OPEN_GAMES_IN_NEW_WINDOW_DEFAULT = true;
+        }
+      } catch (e) {}
+
+      function isIOSorStandalonePWA() {
+        var isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        var standalone = window.navigator.standalone === true
+          || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+          || (window.matchMedia && window.matchMedia('(display-mode: minimal-ui)').matches);
+        return isIos || standalone;
       }
 
-      var canvas = document.getElementById('unity-canvas');
-      if (canvas) canvas.style.visibility = 'hidden';
+      function runPauseMainLoop() {
+        if (window.unityInstance && window.unityInstance.Module && window.unityInstance.Module.pauseMainLoop) {
+          window.unityInstance.Module.pauseMainLoop();
+        }
+      }
 
-      // 2. 建立或取得容器
-      var container = document.getElementById('game-container');
-      if (!container) {
-        container = document.createElement('div');
-        container.id = 'game-container';
-        container.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:1000;";
+      function runResumeMainLoop() {
+        if (window.unityInstance && window.unityInstance.Module && window.unityInstance.Module.resumeMainLoop) {
+          window.unityInstance.Module.resumeMainLoop();
+        }
+      }
 
-        // 3. 建立 Iframe
-        var iframe = document.createElement('iframe');
-        iframe.id = 'game-iframe';
-        iframe.style.cssText = "position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border:3px solid white; box-shadow:0 0 20px rgba(0,0,0,0.5);";
-        container.appendChild(iframe);
-
-        // 4. 建立關閉按鈕
-        var closeBtn = document.createElement('div');
-        closeBtn.id = 'game-full-close-btn';
-        closeBtn.innerHTML = '<img src="TemplateData/close.png" style="width: 118px; height: 56px; display: block;">';
-        closeBtn.style.cssText = "position:absolute; top:20px; left:20px; cursor:pointer; z-index:10000;";
-
-        closeBtn.onclick = function() {
-          var container = document.getElementById('game-container');
-          if (container) container.style.display = 'none'; // 建議用隱藏的，或是移除
-
-          if (window.unityInstance && window.unityInstance.Module.resumeMainLoop) {
-            window.unityInstance.Module.resumeMainLoop();
-          }
-          var canvas = document.getElementById('unity-canvas');
-          if (canvas) {
-            canvas.style.visibility = 'visible';
+      function sendWebViewHide() {
+        if (window.unityInstance && window.unityInstance.SendMessage) {
+          try {
             window.unityInstance.SendMessage("WebMessageReceiver", "OnWebViewHide", "");
+          } catch (err) {
+            console.warn("[ShowGame] SendMessage OnWebViewHide failed:", err);
           }
-        };
-        container.appendChild(closeBtn);
-        document.body.appendChild(container);
+        }
       }
 
-      // 5. 更新內容與顯示
-      var finalIframe = document.getElementById('game-iframe');
-      finalIframe.style.width = widthPercent + '%';
-      finalIframe.style.height = heightPercent + '%';
-      finalIframe.src = url;
-      container.style.display = 'block';
-    };
+      window.closeGameOverlay = function () {
+        var c = document.getElementById('game-container');
+        if (c) c.style.display = 'none';
+        runResumeMainLoop();
+        var cv = document.getElementById('unity-canvas');
+        if (cv) cv.style.visibility = 'visible';
+        sendWebViewHide();
+      };
+
+      function ensureGameIframeIn(container) {
+        var iframe = document.getElementById('game-iframe');
+        if (iframe) return iframe;
+        iframe = document.createElement('iframe');
+        iframe.id = 'game-iframe';
+        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        iframe.style.cssText = "position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border:3px solid white; box-shadow:0 0 20px rgba(0,0,0,0.5);";
+        var closeBtn = document.getElementById('game-full-close-btn');
+        if (closeBtn && closeBtn.parentNode === container) {
+          container.insertBefore(iframe, closeBtn);
+        } else {
+          container.appendChild(iframe);
+        }
+        return iframe;
+      }
+
+      // 原 jslib 行為，供 Unity 呼叫：url, 寬高%, 是否金流頁, 可選第 5 參「強制新分頁」
+      window.ShowGameCenteredFromHtml = function (url, widthPercent, heightPercent, isPayment, openInNewWindow) {
+        if (!url) {
+          console.warn("[ShowGame] empty url");
+          return;
+        }
+
+        var useNewWindow = !!openInNewWindow || window.OPEN_GAMES_IN_NEW_WINDOW_DEFAULT === true;
+        if (useNewWindow) {
+          var w = window.open(url, "_blank", "noopener,noreferrer");
+          if (!w) {
+            console.warn("[ShowGame] window.open blocked; user may need to allow popups.");
+          }
+          return;
+        }
+
+        var canvas = document.getElementById('unity-canvas');
+        if (canvas) canvas.style.visibility = 'hidden';
+
+        var deferPause = isIOSorStandalonePWA();
+        if (!deferPause) {
+          runPauseMainLoop();
+        }
+
+        var container = document.getElementById('game-container');
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'game-container';
+          container.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:1000;";
+
+          var closeBtn = document.createElement('div');
+          closeBtn.id = 'game-full-close-btn';
+          closeBtn.innerHTML = '<img src="TemplateData/close.png" style="width: 118px; height: 56px; display: block;" alt="">';
+          closeBtn.style.cssText = "position:absolute; top:20px; left:20px; cursor:pointer; z-index:10000;";
+          closeBtn.onclick = function () { window.closeGameOverlay(); };
+          container.appendChild(closeBtn);
+          document.body.appendChild(container);
+        } else {
+          var existingClose = document.getElementById('game-full-close-btn');
+          if (existingClose && !existingClose.onclick) {
+            existingClose.onclick = function () { window.closeGameOverlay(); };
+          }
+        }
+
+        var finalIframe = ensureGameIframeIn(container);
+        if (isPayment) {
+          finalIframe.setAttribute('allow', 'payment *; fullscreen *; screen-wake-lock *; clipboard-read *; clipboard-write *');
+        } else {
+          finalIframe.setAttribute('allow', 'fullscreen *; screen-wake-lock *');
+        }
+
+        finalIframe.onerror = function (ev) {
+          console.error("[ShowGame] iframe error", ev);
+        };
+        finalIframe.addEventListener('load', function onIframeLoad() {
+          if (deferPause) {
+            runPauseMainLoop();
+          }
+        }, { once: true });
+
+        finalIframe.style.width = widthPercent + '%';
+        finalIframe.style.height = heightPercent + '%';
+        finalIframe.title = "third-party game";
+        finalIframe.src = url;
+        container.style.display = 'block';
+      };
+    })();
   </script>
   <script>
     (function() {
@@ -242,8 +323,16 @@
   </script>
 <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=8ae6ad77-c856-45b8-ad94-7fb287b7796e"> </script>
 <script>
-  // 確保 zE 函數已經存在，然後立刻呼叫 hide
-  zE('webWidget', 'hide');
+  (function () {
+    function hideWidget() {
+      if (typeof window.zE === 'function') {
+        try { window.zE('webWidget', 'hide'); } catch (e) { console.warn('[zE] hide', e); }
+      }
+    }
+    var s = document.getElementById('ze-snippet');
+    if (s) s.addEventListener('load', hideWidget);
+    hideWidget();
+  })();
 </script>
   </body>
 </html>

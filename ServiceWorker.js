@@ -8,6 +8,20 @@ const CACHE_CONTENT = [
 
 ];
 
+function isCrossOriginToSW(url) {
+    return url.origin !== new URL(self.registration.scope).origin;
+}
+
+/** 只對大廳 app shell 做快取，不含同源遊戲代理或其他動態路徑，避免 Cache API 爆量。 */
+function isAppShellPath(pathname) {
+    if (pathname.startsWith("/Build/")) return true;
+    if (pathname.startsWith("/TemplateData/")) return true;
+    if (pathname === "/" || pathname === "/index.html") return true;
+    if (/\/manifest\.json$/i.test(pathname)) return true;
+    if (/ServiceWorker(Setup)?\.js$/i.test(pathname)) return true;
+    return false;
+}
+
 // ── Install ───────────────────────────────────────────────────────────────────
 // 預快取所有資源
 // skipWaiting 不在此處呼叫，控制權交給頁面端，確保在 Unity 啟動前完成版本切換
@@ -51,7 +65,7 @@ self.addEventListener("message", (event) => {
 });
 
 // ── Fetch ─────────────────────────────────────────────────────────────────────
-// 策略：Cache First，network fallback
+// 策略：僅白名單路徑 Cache First；.unity3d 維持版本快取；其餘僅走網路
 // .res 不攔截：Unity streaming asset，避免大型檔案佔滿 cache
 self.addEventListener("fetch", (event) => {
     if (event.request.method !== "GET") return;
@@ -59,10 +73,15 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
     if (url.pathname.endsWith(".res")) return;
 
-    event.respondWith((async function () {
-        const cache = await caches.open(CACHE_NAME);
+    if (isCrossOriginToSW(url)) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
 
-        if (url.pathname.endsWith(".unity3d")) {
+    if (url.pathname.endsWith(".unity3d")) {
+        event.respondWith((async function () {
+            const cache = await caches.open(CACHE_NAME);
+
             const cachedKey = url.pathname.replace(/^\/[^/]+\//, "");
             const requestVer = url.searchParams.get("v");
 
@@ -93,15 +112,30 @@ self.addEventListener("fetch", (event) => {
             console.log(`[SW] AssetBundle version cached, cacheKey: ${cachedKey}, cachedVer: ${requestVer}`);
             cache.put(cachedKey, repackaged.clone());
             return repackaged;
-        }
+        })());
+        return;
+    }
+
+    if (!isAppShellPath(url.pathname)) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
+
+    event.respondWith((async function () {
+        const cache = await caches.open(CACHE_NAME);
 
         let response = await caches.match(event.request);
-        console.log(`[SW] Fetching resource: ${event.request.url}`);
+        console.log(`[SW] Fetching resource (app shell): ${event.request.url}`);
         if (response) { return response; }
 
         response = await fetch(event.request);
-        console.log(`[SW] Caching new resource: ${event.request.url}`);
-        cache.put(event.request, response.clone());
+        if (response && response.ok) {
+            try {
+                await cache.put(event.request, response.clone());
+            } catch (e) {
+                console.warn("[SW] cache put skipped:", e);
+            }
+        }
         return response;
     })());
 });
