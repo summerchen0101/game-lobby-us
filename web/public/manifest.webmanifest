@@ -1,0 +1,17 @@
+{
+  "name": "Wynoco",
+  "short_name": "Wynoco",
+  "description": "遊戲大廳",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000200",
+  "theme_color": "#000200",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
