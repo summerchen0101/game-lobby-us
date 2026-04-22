@@ -1,4 +1,4 @@
-import { Route, BrowserRouter, Navigate, Routes } from 'react-router-dom'
+import { Navigate, Route, BrowserRouter, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { RequireAuth } from './auth/RequireAuth'
 import { AppShell } from './components/AppShell'
@@ -6,33 +6,35 @@ import { GameShellProvider } from './components/GameShellProvider'
 import { IosInstallGuide } from './components/IosInstallGuide'
 import { PwaInstallBanner } from './components/PwaInstallBanner'
 import { ZendeskLoader } from './components/ZendeskLoader'
-import { LoginPage } from './features/auth/LoginPage'
-import { RegisterPage } from './features/auth/RegisterPage'
+import { AuthModalsProvider } from './features/auth/AuthModalsProvider'
+import { LoginRedirect, RegisterRedirect } from './features/auth/AuthRedirects'
 import { EventsPage } from './features/lobby/EventsPage'
-import { LobbyPage } from './features/lobby/LobbyPage'
+import { LandingPage } from './features/lobby/LandingPage'
 import { ProfilePage } from './features/lobby/ProfilePage'
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <GameShellProvider>
-          <ZendeskLoader />
-          <PwaInstallBanner />
-          <IosInstallGuide />
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route element={<RequireAuth />}>
-              <Route element={<AppShell />}>
-                <Route path="/" element={<LobbyPage />} />
-                <Route path="/events" element={<EventsPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
+        <AuthModalsProvider>
+          <GameShellProvider>
+            <ZendeskLoader />
+            <PwaInstallBanner />
+            <IosInstallGuide />
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginRedirect />} />
+              <Route path="/register" element={<RegisterRedirect />} />
+              <Route element={<RequireAuth />}>
+                <Route element={<AppShell />}>
+                  <Route path="/events" element={<EventsPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                </Route>
               </Route>
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </GameShellProvider>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </GameShellProvider>
+        </AuthModalsProvider>
       </AuthProvider>
     </BrowserRouter>
   )

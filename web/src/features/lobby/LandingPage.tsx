@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
+import { LandingHeader } from '../../components/LandingHeader'
 import { SiteFooter } from '../../components/SiteFooter'
 import { TrustpilotSection } from '../../components/TrustpilotSection'
 import { useGameShell } from '../../components/useGameShell'
+import { useAuthModals } from '../auth/authModalsContext'
+import { LoginModal } from '../auth/LoginModal'
+import { RegisterModal } from '../auth/RegisterModal'
+import { TermsGateModal } from '../auth/TermsGateModal'
 import {
   floatingCtaPath,
   openGamesInNewWindowDefault,
@@ -15,6 +20,7 @@ import type { Game } from '../../lib/api/types'
 import {
   BENEFITS,
   FLOATING_CTA_IMAGE,
+  GUEST_DEMO_GAMES,
   PROVIDERS_ROW_A,
   PROVIDERS_ROW_B,
   getLobbyHeroImage,
@@ -30,18 +36,61 @@ function formatBalance(n: number | undefined, currency?: string) {
   return currency ? `${u} ${currency}` : u
 }
 
-export function LobbyPage() {
+export function LandingPage() {
   const { token, user, refreshUser } = useAuth()
   const { open: openShell } = useGameShell()
-  const [items, setItems] = useState<Game[]>([])
-  const [loading, setLoading] = useState(true)
+  const {
+    termsOpen,
+    loginOpen,
+    registerOpen,
+    openTermsThen,
+    openLoginDirect,
+    openRegisterDirect,
+    closeTerms,
+    closeLogin,
+    closeRegister,
+    onTermsAccepted,
+  } = useAuthModals()
+
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [apiItems, setApiItems] = useState<Game[]>([])
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [registerEmailForm, setRegisterEmailForm] = useState(false)
+
   const tpId = trustpilotBusinessUnitId()
   const heroSrc = getLobbyHeroImage()
   const floatPath = floatingCtaPath()
 
+  const displayGames = useMemo(
+    () => (token ? apiItems : GUEST_DEMO_GAMES),
+    [token, apiItems],
+  )
+
+  useEffect(() => {
+    if (!registerOpen) setRegisterEmailForm(false)
+  }, [registerOpen])
+
+  useEffect(() => {
+    const auth = searchParams.get('auth')
+    if (auth === 'login') {
+      openTermsThen('login')
+      const next = new URLSearchParams(searchParams)
+      next.delete('auth')
+      setSearchParams(next, { replace: true })
+    } else if (auth === 'register') {
+      openTermsThen('register')
+      const next = new URLSearchParams(searchParams)
+      next.delete('auth')
+      setSearchParams(next, { replace: true })
+    }
+  }, [searchParams, setSearchParams, openTermsThen])
+
   useEffect(() => {
     if (!token) {
+      setApiItems([])
+      setLoading(false)
+      setError(null)
       return
     }
     let cancelled = false
@@ -51,14 +100,14 @@ export function LobbyPage() {
       try {
         const res = await fetchGames(token)
         if (cancelled) return
-        setItems(res.items ?? [])
+        setApiItems(res.items ?? [])
         await refreshUser()
       } catch (e) {
         if (cancelled) return
         const msg =
           e instanceof ApiError ? e.message : e instanceof Error ? e.message : '無法載入遊戲列表'
         setError(msg)
-        setItems([])
+        setApiItems([])
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -74,19 +123,24 @@ export function LobbyPage() {
     setLoading(true)
     try {
       const res = await fetchGames(token)
-      setItems(res.items ?? [])
+      setApiItems(res.items ?? [])
       await refreshUser()
     } catch (e) {
       const msg =
         e instanceof ApiError ? e.message : e instanceof Error ? e.message : '無法載入遊戲列表'
       setError(msg)
-      setItems([])
+      setApiItems([])
     } finally {
       setLoading(false)
     }
   }
 
   function onPlayGame(g: Game) {
+    if (!token) {
+      openTermsThen('login')
+      return
+    }
+    if (!g.launchUrl) return
     openShell({
       url: g.launchUrl,
       widthPercent: g.embedWidthPercent,
@@ -96,8 +150,17 @@ export function LobbyPage() {
     })
   }
 
+  function onGuestGateAction() {
+    openTermsThen('login')
+  }
+
   return (
     <div className="lobby-landing">
+      <LandingHeader
+        onJoinUs={() => openTermsThen('register')}
+        onLogin={() => openTermsThen('login')}
+      />
+
       <main className="lobby-landing__main">
         <section className="lobby-hero-banner" aria-label="促銷主視覺">
           <div className="lobby-hero-banner__content page-container">
@@ -113,41 +176,53 @@ export function LobbyPage() {
         </section>
 
         <div className="lobby-claim-wrap page-container">
-          <p className="lobby-welcome">
-            歡迎回來{user?.displayName ? `，${user.displayName}` : ''} · 餘額{' '}
-            <strong>{formatBalance(user?.balance, user?.currency)}</strong>
-          </p>
+          {user ? (
+            <p className="lobby-welcome">
+              歡迎回來{user.displayName ? `，${user.displayName}` : ''} · 餘額{' '}
+              <strong>{formatBalance(user.balance, user.currency)}</strong>
+            </p>
+          ) : null}
           <div className="lobby-claim-actions">
-            <button type="button" className="btn-crown-primary" onClick={load} disabled={loading}>
-              {loading ? '更新中…' : '重新整理列表'}
-            </button>
-            <Link to="/profile" className="btn-crown-secondary lobby-claim-link">
-              領取獎勵／儲值
-            </Link>
+            {token ? (
+              <>
+                <button type="button" className="btn-crown-primary" onClick={load} disabled={loading}>
+                  {loading ? '更新中…' : '重新整理列表'}
+                </button>
+                <Link to="/profile" className="lobby-claim-btn-welcome btn-crown-welcome">
+                  CLAIM WELCOME BONUS
+                </Link>
+              </>
+            ) : (
+              <>
+                <button type="button" className="lobby-claim-btn-welcome btn-crown-welcome" onClick={onGuestGateAction}>
+                  CLAIM WELCOME BONUS
+                </button>
+              </>
+            )}
           </div>
           <p className="lobby-hint">內嵌與 {defaultOpenLabel} 可由後端或環境變數調整。</p>
         </div>
 
         <section className="lobby-games-section page-container" aria-labelledby="lobby-games-heading">
           <h2 id="lobby-games-heading" className="lobby-section-title">
-            精選遊戲
+            Our Top Games
           </h2>
           {error ? <p className="lobby-games-error">{error}</p> : null}
-          {loading && items.length === 0 && !error ? (
+          {token && loading && displayGames.length === 0 && !error ? (
             <p className="lobby-games-hint">載入中…</p>
           ) : null}
-          {!loading && !error && items.length === 0 ? (
+          {token && !loading && !error && displayGames.length === 0 ? (
             <p className="lobby-games-hint">尚無可玩遊戲。</p>
           ) : null}
           <div className="lobby-games-scroller">
             <ul className="lobby-games-track" role="list">
-              {items.map((g) => (
+              {displayGames.map((g) => (
                 <li key={g.id}>
                   <button
                     type="button"
                     className="lobby-game-card"
                     onClick={() => onPlayGame(g)}
-                    disabled={!g.launchUrl}
+                    disabled={!!token && !g.launchUrl}
                   >
                     <div
                       className="lobby-game-card__thumb"
@@ -214,10 +289,44 @@ export function LobbyPage() {
           height={120}
           decoding="async"
         />
-        <Link to={floatPath} className="btn-crown-primary lobby-floating-cta__btn">
-          領取獎勵
-        </Link>
+        {token ? (
+          <Link to={floatPath} className="btn-crown-primary lobby-floating-cta__btn">
+            CLAIM YOUR BONUS
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="btn-crown-primary lobby-floating-cta__btn"
+            onClick={onGuestGateAction}
+          >
+            CLAIM YOUR BONUS
+          </button>
+        )}
       </div>
+
+      <TermsGateModal open={termsOpen} onClose={closeTerms} onAccept={onTermsAccepted} />
+      <LoginModal
+        open={loginOpen}
+        onClose={closeLogin}
+        onSwitchRegister={() => {
+          closeLogin()
+          openRegisterDirect()
+        }}
+      />
+      <RegisterModal
+        open={registerOpen}
+        onClose={() => {
+          closeRegister()
+          setRegisterEmailForm(false)
+        }}
+        onSwitchLogin={() => {
+          closeRegister()
+          openLoginDirect()
+        }}
+        showEmailForm={registerEmailForm}
+        onShowEmailForm={() => setRegisterEmailForm(true)}
+        onBackFromEmail={() => setRegisterEmailForm(false)}
+      />
     </div>
   )
 }

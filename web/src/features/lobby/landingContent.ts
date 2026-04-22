@@ -1,3 +1,59 @@
+import type { Game } from '../../lib/api/types'
+
+const G = 'https://static.crowncoinscasino.com/production/assets/games'
+
+/** 未登入首頁展示的靜態遊戲列（與精選遊戲版位相同）。 */
+export const GUEST_DEMO_GAMES: Game[] = [
+  {
+    id: 'guest-1',
+    title: 'Olympia',
+    launchUrl: '',
+    thumbnailUrl: `${G}/crownslots/olympics-alternate-all-KXkAo.webp`,
+  },
+  {
+    id: 'guest-2',
+    title: 'Coin Strike',
+    launchUrl: '',
+    thumbnailUrl: `${G}/playson-infin/pls_coin_strike_xxl-cutThumbnailHr-bUafU.webp`,
+  },
+  {
+    id: 'guest-3',
+    title: 'Booming',
+    launchUrl: '',
+    thumbnailUrl: `${G}/booming/68b705d3800528273b1057c8-cutThumbnailShortHr-rBBMl.webp`,
+  },
+  {
+    id: 'guest-4',
+    title: 'Koala',
+    launchUrl: '',
+    thumbnailUrl: `${G}/koala/kg_5009-cutThumbnailShortHr-FAQcd.webp`,
+  },
+  {
+    id: 'guest-5',
+    title: 'Penguin King',
+    launchUrl: '',
+    thumbnailUrl: `${G}/penguin-king/103094-cutThumbnailHr-mQKpF.webp`,
+  },
+  {
+    id: 'guest-6',
+    title: 'Onseo',
+    launchUrl: '',
+    thumbnailUrl: `${G}/onseo/1032-cutThumbnailShortHr-hmaJN.webp`,
+  },
+  {
+    id: 'guest-7',
+    title: 'Wolf Drums',
+    launchUrl: '',
+    thumbnailUrl: `${G}/3-oaks-via-infin/oa_4_wolf_drums-alternate-all-ZKaxJ.webp`,
+  },
+  {
+    id: 'guest-8',
+    title: 'Nova Blast',
+    launchUrl: '',
+    thumbnailUrl: `${G}/micro-gaming/SMG_novaBlastUltraVF-main-all-OBQtF.webp`,
+  },
+]
+
 /** Static marketing assets (URLs from Crown sample; replace for production). */
 export const DEFAULT_HERO_IMAGE =
   'https://crowncoinscasino.com/assets/direct_reg_carousel_1-DSLgz1KV.webp'

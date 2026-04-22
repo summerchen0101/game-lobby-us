@@ -108,6 +108,11 @@
   min-width: 0;
 }
 
+.app-brand--link {
+  text-decoration: none;
+  color: inherit;
+}
+
 .app-brand__mark {
   flex-shrink: 0;
 }

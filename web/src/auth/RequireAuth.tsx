@@ -14,10 +14,11 @@ export function RequireAuth() {
   }
 
   if (!token || !user) {
-    const redirect = location.pathname + location.search
-    const search =
-      redirect && redirect !== '/login' ? `?${new URLSearchParams({ redirect })}` : ''
-    return <Navigate to={`/login${search}`} replace />
+    const path = location.pathname + location.search
+    const q = new URLSearchParams()
+    q.set('redirect', path || '/profile')
+    q.set('auth', 'login')
+    return <Navigate to={`/?${q.toString()}`} replace />
   }
 
   return <Outlet />

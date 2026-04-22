@@ -23,10 +23,10 @@ export function AppShell() {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header__inner page-container">
-          <div className="app-brand">
+          <NavLink to="/" className="app-brand app-brand--link">
             <CrownLogo className="app-brand__mark" width={40} aria-hidden />
             <span className="app-brand__title">Wynoco</span>
-          </div>
+          </NavLink>
           <div className="app-header__end">
             <div className="app-header__user" aria-label="帳戶">
               {user ? (
@@ -43,23 +43,6 @@ export function AppShell() {
                 </>
               ) : null}
             </div>
-            <nav className="app-nav app-nav--desktop" aria-label="主要導覽">
-              <ul className="app-nav__list">
-                {nav.map(({ to, label, end }) => (
-                  <li key={to}>
-                    <NavLink
-                      to={to}
-                      end={end}
-                      className={({ isActive }) =>
-                        'app-nav__link' + (isActive ? ' is-active' : '')
-                      }
-                    >
-                      {label}
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </nav>
           </div>
         </div>
       </header>
