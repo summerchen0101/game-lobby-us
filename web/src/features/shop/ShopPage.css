@@ -47,12 +47,10 @@
   flex-direction: column;
   align-items: stretch;
   padding: var(--space-4) var(--space-3);
-  border-radius: 1rem;
-  background: linear-gradient(165deg, #22263a 0%, #1a1e2e 100%);
-  border: 1px solid rgb(93 139 244 / 28%);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 6%) inset,
-    0 8px 24px rgb(0 0 0 / 35%);
+  border-radius: var(--crown-surface-card-radius);
+  background: var(--crown-surface-card-bg);
+  border: 1px solid var(--crown-surface-card-border);
+  box-shadow: var(--crown-surface-card-shadow);
 }
 
 .shop-page__card-top {

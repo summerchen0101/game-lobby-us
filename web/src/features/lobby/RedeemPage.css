@@ -56,11 +56,11 @@
 }
 
 .redeem-page__card {
-  border-radius: 0.9rem;
-  background: #1e2235;
-  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: var(--crown-surface-card-radius);
+  background: var(--crown-surface-card-bg);
+  border: 1px solid var(--crown-surface-card-border);
   padding: var(--space-4) var(--space-4) var(--space-5);
-  box-shadow: 0 8px 32px rgb(0 0 0 / 0.25);
+  box-shadow: var(--crown-surface-card-shadow);
 }
 
 .redeem-page__row {

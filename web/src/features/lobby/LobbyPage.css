@@ -325,7 +325,7 @@ a.lobby-claim-btn-welcome {
   gap: var(--space-3);
   padding: var(--space-4) var(--space-2);
   background: var(--crown-benefit-card-bg);
-  border-radius: var(--crown-card-radius);
+  border-radius: var(--crown-surface-card-radius);
   border: 1px solid var(--crown-benefit-card-border);
   box-shadow: 0 4px 16px color-mix(in srgb, var(--crown-purple-deep) 15%, transparent);
 }

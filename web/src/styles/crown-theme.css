@@ -9,14 +9,25 @@
   --crown-purple-deep: #6d28d9;
   --crown-purple-shadow: #5b21b6;
   --crown-surface-dark: #191919;
-  /* Homepage “platform benefits” cards — brand purple tint vs flat #191919 */
-  --crown-benefit-card-bg: linear-gradient(
+  /* Session / in-app content cards — shared with Landing benefit tiles (aliases below) */
+  --crown-surface-card-bg: linear-gradient(
     165deg,
     #2a1f3a 0%,
     #1a1226 50%,
     #120c1a 100%
   );
-  --crown-benefit-card-border: color-mix(in srgb, var(--crown-purple) 30%, transparent);
+  --crown-surface-card-border: color-mix(
+    in srgb,
+    color-mix(in srgb, #4f3385 50%, #9d9aa8) 44%,
+    transparent
+  );
+  --crown-surface-card-shadow:
+    0 14px 44px rgb(0 0 0 / 0.38),
+    inset 0 1px 0 color-mix(in srgb, var(--crown-purple) 12%, transparent);
+  --crown-surface-card-radius: 1rem;
+  /* Homepage “platform benefits” — same surface as session cards */
+  --crown-benefit-card-bg: var(--crown-surface-card-bg);
+  --crown-benefit-card-border: var(--crown-surface-card-border);
   --crown-card-radius: 12px;
   --crown-btn-radius: 999px;
   --crown-btn-shadow-h: 2.5px;

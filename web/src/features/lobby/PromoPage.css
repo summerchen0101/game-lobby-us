@@ -28,10 +28,10 @@
   align-items: stretch;
   min-height: 7.5rem;
   padding: var(--space-3);
-  border-radius: 1rem;
-  background: linear-gradient(145deg, #2a1f45 0%, #1a1228 50%, #12101c 100%);
-  border: 1px solid rgb(234 179 8 / 20%);
-  box-shadow: 0 8px 28px rgb(0 0 0 / 0.35);
+  border-radius: var(--crown-surface-card-radius);
+  background: var(--crown-surface-card-bg);
+  border: 1px solid var(--crown-surface-card-border);
+  box-shadow: var(--crown-surface-card-shadow);
 }
 
 @media (max-width: 30rem) {
