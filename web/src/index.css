@@ -1,9 +1,12 @@
 /* 設計 token：斷點、間距、安全區、可視高 — mobile-first（Crown 風格基底） */
 :root {
-  --color-bg: #000000;
-  --color-surface: #0d0d0d;
-  --color-elevated: #191919;
-  --color-border: #2a2a2a;
+  /* 深藍主色：同色相階、加深並降飽和（偏午夜藍靛） */
+  --color-bg: #101028;
+  --color-surface: #08081a;
+  --color-elevated: #18182e;
+  --color-border: #2a283d;
+  --session-chrome-surface: #050514;
+  --session-fab-surface: #080818;
   --color-text: #f5f5f5;
   --color-text-muted: #a3a3a3;
   --color-accent: var(--crown-gold, #ffc600);
@@ -58,7 +61,8 @@ body {
   margin: 0;
   min-height: 100%;
   min-height: 100dvh;
-  background: var(--color-bg);
+  /* 完整底圖層（tile + 霧面）在 site-background.css */
+  background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: var(--text-body);

@@ -11,7 +11,7 @@
   background:
     radial-gradient(ellipse 75% 50% at 50% -20%, rgb(255 198 0 / 12%), transparent 55%),
     radial-gradient(ellipse 55% 40% at 100% 40%, rgb(1 219 128 / 8%), transparent 45%),
-    #000;
+    transparent;
   pointer-events: none;
 }
 

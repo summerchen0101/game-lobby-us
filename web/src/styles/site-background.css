@@ -1,0 +1,11 @@
+/* Sitewide: deep blue-violet base + line-art tile (aligns with lobby grain, single source for body) */
+body {
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -15%, rgb(90 100 200 / 6%), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 100% 35%, rgb(70 65 150 / 8%), transparent 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath fill='%23ffffff' fill-opacity='0.04' d='M60 8l4 12h12l-10 8 4 12-10-8-10 8 4-12-10-8h12zM20 70h8v8h-8zM95 85h6v6h-6zM75 55c3 0 5 2 5 5s-2 5-5 5-5-2-5-5 2-5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-size: auto, auto, 120px 120px;
+  background-attachment: fixed, fixed, scroll;
+}

@@ -4,20 +4,16 @@
   padding-bottom: var(--space-4);
 }
 
+/* 大廳專屬氣氛霧面；底紋格點由全站 body（site-background.css）提供，避免重複鋪圖 */
 .lobby-landing::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-color: #2a1538;
+  background-color: transparent;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(0 209 110 / 14%), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 40%, rgb(124 58 237 / 12%), transparent 45%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath fill='%23ffffff' fill-opacity='0.04' d='M60 8l4 12h12l-10 8 4 12-10-8-10 8 4-12-10-8h12zM20 70h8v8h-8zM95 85h6v6h-6zM75 55c3 0 5 2 5 5s-2 5-5 5-5-2-5-5 2-5 5-5z'/%3E%3C/svg%3E");
-  background-size:
-    auto,
-    auto,
-    120px 120px;
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(90 100 200 / 8%), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 40%, rgb(70 65 150 / 10%), transparent 45%);
   pointer-events: none;
 }
 

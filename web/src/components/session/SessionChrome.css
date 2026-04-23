@@ -5,7 +5,7 @@
   min-height: 100dvh;
   min-height: 100svh;
   padding-top: var(--safe-top);
-  background: #000;
+  background: transparent;
 }
 
 .session-layout__main {
@@ -148,9 +148,7 @@
   border-radius: 50%;
   background: var(--hdr-pill-plus-bg);
   color: var(--hdr-pill-plus-fg);
-  font-size: 1.35rem;
-  font-weight: 300;
-  line-height: 1;
+  line-height: 0;
   text-decoration: none;
   flex-shrink: 0;
   min-width: 1.85rem;
@@ -161,6 +159,11 @@
 
 .session-header__pill-plus:hover {
   filter: brightness(1.08);
+}
+
+.session-header__pill-plus-icon {
+  display: block;
+  flex-shrink: 0;
 }
 
 .session-header__right {
@@ -244,7 +247,7 @@
   bottom: 0;
   z-index: 200;
   padding-bottom: var(--safe-bottom);
-  background: #000;
+  background: var(--session-chrome-surface);
   border-top: 2px solid #eab308;
   box-shadow: 0 -4px 24px rgb(0 0 0 / 45%);
 }
@@ -309,7 +312,7 @@
   justify-content: center;
   border: 2px solid rgb(234 179 8 / 40%);
   border-radius: 50%;
-  background: #0a0a0a;
+  background: var(--session-fab-surface);
   color: #fff;
   cursor: pointer;
   box-shadow: 0 6px 20px rgb(0 0 0 / 4%);

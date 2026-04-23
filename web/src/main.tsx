@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import '@fontsource-variable/outfit/wght.css'
 import './styles/crown-theme.css'
 import './index.css'
+import './styles/site-background.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

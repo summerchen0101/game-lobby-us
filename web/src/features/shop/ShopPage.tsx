@@ -1,3 +1,4 @@
+import { Coins, Sparkles } from 'lucide-react'
 import './ShopPage.css'
 import '../lobby/SessionPageDecor.css'
 
@@ -18,26 +19,37 @@ const PACKS: Pack[] = [
 export function ShopPage() {
   return (
     <div className="shop-page page-container session-page session-page--pattern">
-      <h1 className="shop-page__title">STORE</h1>
-      <p className="shop-page__subtitle">CHOOSE YOUR COINS PACKAGE</p>
-      <ul className="shop-page__grid">
-        {PACKS.map((p) => (
-          <li key={p.id} className="shop-page__card">
-            <div className="shop-page__card-top">
-              <span className="shop-page__gc">{p.gcLabel}</span>
-              <span className="shop-page__coin" aria-hidden>
-                GC
-              </span>
-            </div>
-            <div className="shop-page__card-art" aria-hidden />
-            <p className="shop-page__bonus">{p.bonus}</p>
-            <button type="button" className="shop-page__price">
-              {p.price}
-            </button>
-          </li>
-        ))}
-      </ul>
-      <p className="shop-page__hint">僅介面示意，實際購買流程請接後端金流。</p>
+      <div className="shop-page__inner">
+        <h1 className="shop-page__title">STORE</h1>
+        <p className="shop-page__subtitle">CHOOSE YOUR COINS PACKAGE</p>
+        <ul className="shop-page__grid">
+          {PACKS.map((p) => (
+            <li key={p.id} className="shop-page__card">
+              <div className="shop-page__card-top">
+                <span className="shop-page__gc-row">
+                  <Coins className="shop-page__gc-icon" size={18} strokeWidth={2.25} aria-hidden />
+                  <span className="shop-page__gc">{p.gcLabel}</span>
+                </span>
+                <span className="shop-page__coin" aria-hidden>
+                  GC
+                </span>
+              </div>
+              <div className="shop-page__card-art" aria-hidden>
+                <Coins className="shop-page__card-art-icon shop-page__card-art-icon--a" size={40} strokeWidth={1.5} />
+                <Coins className="shop-page__card-art-icon shop-page__card-art-icon--b" size={28} strokeWidth={1.5} />
+              </div>
+              <p className="shop-page__bonus">
+                <Sparkles className="shop-page__bonus-icon" size={14} strokeWidth={2.25} aria-hidden />
+                {p.bonus}
+              </p>
+              <button type="button" className="shop-page__price">
+                {p.price}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p className="shop-page__hint">僅介面示意，實際購買流程請接後端金流。</p>
+      </div>
     </div>
   )
 }

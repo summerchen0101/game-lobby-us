@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { getWalletDisplay } from '../../wallet/formatWalletAmount'
@@ -44,7 +45,7 @@ export function SessionHeader() {
             <span className="session-header__pill-label">{label}</span>
             <span className="session-header__pill-amount">{amount}</span>
             <Link to="/shop" className="session-header__pill-plus" aria-label="開啟商店加值">
-              +
+              <Plus className="session-header__pill-plus-icon" size={20} strokeWidth={2.5} aria-hidden />
             </Link>
           </div>
         </div>
