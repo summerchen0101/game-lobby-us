@@ -1,20 +1,33 @@
-import { Coins, Sparkles } from 'lucide-react'
-import './ShopPage.css'
-import '../lobby/SessionPageDecor.css'
+import "./ShopPage.css";
+import "../lobby/SessionPageDecor.css";
 
-type Pack = { id: string; gcLabel: string; bonus: string; price: string }
+const PANEL = "/imgs/panel/Panel_Shop";
+
+type Pack = {
+  id: string;
+  /** Shown after GC chip, e.g. 600K, 12M */
+  gcLabel: string;
+  bonusSc: number;
+  price: string;
+  /** 1..5 → icon_coinPileN.png */
+  coinPile: 1 | 2 | 3 | 4 | 5;
+};
 
 const PACKS: Pack[] = [
-  { id: '1', gcLabel: '600K', bonus: '+FREE SC 2', price: '$1.99' },
-  { id: '2', gcLabel: '1.5M', bonus: '+FREE SC 5', price: '$4.99' },
-  { id: '3', gcLabel: '3M', bonus: '+FREE SC 8', price: '$9.99' },
-  { id: '4', gcLabel: '6M', bonus: '+FREE SC 15', price: '$19.99' },
-  { id: '5', gcLabel: '12M', bonus: '+FREE SC 30', price: '$39.99' },
-  { id: '6', gcLabel: '25M', bonus: '+FREE SC 60', price: '$79.99' },
-  { id: '7', gcLabel: '50M', bonus: '+FREE SC 100', price: '$89.99' },
-  { id: '8', gcLabel: '100M', bonus: '+FREE SC 200', price: '$99.99' },
-  { id: '9', gcLabel: '200M', bonus: '+FREE SC 500', price: '$199.99' },
-]
+  { id: "1", gcLabel: "600K", bonusSc: 2, price: "$1.99", coinPile: 1 },
+  { id: "2", gcLabel: "1500K", bonusSc: 5, price: "$4.99", coinPile: 1 },
+  { id: "3", gcLabel: "3M", bonusSc: 10, price: "$9.99", coinPile: 2 },
+  { id: "4", gcLabel: "6M", bonusSc: 20, price: "$19.99", coinPile: 2 },
+  { id: "5", gcLabel: "12M", bonusSc: 40, price: "$39.99", coinPile: 3 },
+  { id: "6", gcLabel: "15M", bonusSc: 50, price: "$49.99", coinPile: 3 },
+  { id: "7", gcLabel: "18M", bonusSc: 60, price: "$59.99", coinPile: 4 },
+  { id: "8", gcLabel: "24M", bonusSc: 80, price: "$79.99", coinPile: 4 },
+  { id: "9", gcLabel: "30M", bonusSc: 100, price: "$99.99", coinPile: 5 },
+];
+
+function coinPileSrc(n: 1 | 2 | 3 | 4 | 5) {
+  return `${PANEL}/icon_coinPile${n}.png`;
+}
 
 export function ShopPage() {
   return (
@@ -27,31 +40,35 @@ export function ShopPage() {
             <li key={p.id} className="shop-page__card">
               <div className="shop-page__card-top">
                 <span className="shop-page__gc-row">
-                  <Coins className="shop-page__gc-icon" size={18} strokeWidth={2.25} aria-hidden />
-                  <span className="shop-page__gc">{p.gcLabel}</span>
-                </span>
-                <span className="shop-page__coin" aria-hidden>
-                  GC
+                  <span className="shop-page__chip shop-page__chip--gc">
+                    GC
+                  </span>
+                  <span className="shop-page__gc-amount">{p.gcLabel}</span>
                 </span>
               </div>
-              <div className="shop-page__card-art" aria-hidden>
-                <Coins className="shop-page__card-art-icon shop-page__card-art-icon--a" size={40} strokeWidth={1.5} />
-                <Coins className="shop-page__card-art-icon shop-page__card-art-icon--b" size={28} strokeWidth={1.5} />
+              <div className="shop-page__card-art" data-pile={p.coinPile}>
+                <img
+                  src={coinPileSrc(p.coinPile)}
+                  alt=""
+                  className="shop-page__card-art-img"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
-              <p className="shop-page__bonus">
-                <Sparkles className="shop-page__bonus-icon" size={14} strokeWidth={2.25} aria-hidden />
-                {p.bonus}
+              <p
+                className="shop-page__bonus"
+                aria-label={`Plus free SC ${p.bonusSc}`}>
+                <span className="shop-page__bonus-free">+FREE</span>
+                <span className="shop-page__chip shop-page__chip--sc">SC</span>
+                <span className="shop-page__bonus-amt">{p.bonusSc}</span>
               </p>
-              <button type="button" className="shop-page__price btn-crown-secondary">
+              <button type="button" className="shop-page__price-btn">
                 {p.price}
               </button>
             </li>
           ))}
         </ul>
-        <p className="shop-page__hint">
-          UI preview only—wire real purchases to your payment backend.
-        </p>
       </div>
     </div>
-  )
+  );
 }
