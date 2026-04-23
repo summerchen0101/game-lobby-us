@@ -131,9 +131,15 @@ export function ProfilePage() {
         <div className="profile-page__hero">
           <div className="profile-page__avatar" aria-hidden>
             {initial}
-            <span className="profile-page__edit" title="Edit (preview)">
+            <button
+              type="button"
+              className="profile-page__edit"
+              title="Edit (preview)"
+              aria-label="Edit (preview)"
+              tabIndex={-1}
+            >
               ✎
-            </span>
+            </button>
           </div>
           <div className="profile-page__uid-block">
             <p className="profile-page__uid-label">UID</p>
@@ -244,7 +250,11 @@ export function ProfilePage() {
           Funds history
         </h2>
         <p className="profile-page__dialog-text">Transaction history will appear here when connected to the backend.</p>
-        <button type="button" className="profile-page__dialog-close" onClick={closeFunds}>
+        <button
+          type="button"
+          className="btn-crown-primary profile-page__dialog-close"
+          onClick={closeFunds}
+        >
           OK
         </button>
       </dialog>

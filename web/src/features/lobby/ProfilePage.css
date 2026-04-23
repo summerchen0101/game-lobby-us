@@ -1,4 +1,22 @@
+/* Scoped tokens — align with crown-theme / Session chrome */
 .profile-page {
+  --profile-surface-bleed: #120c1a;
+  --profile-card-bg: var(--crown-benefit-card-bg);
+  --profile-card-border: color-mix(in srgb, var(--crown-gold) 22%, transparent);
+  --profile-card-shadow:
+    0 14px 44px rgb(0 0 0 / 0.38),
+    inset 0 1px 0 color-mix(in srgb, var(--crown-purple) 12%, transparent);
+  --profile-hairline: color-mix(in srgb, var(--crown-gold) 9%, rgb(255 255 255 / 8%));
+  --profile-hairline-soft: color-mix(in srgb, var(--crown-gold) 4%, rgb(255 255 255 / 5%));
+  --profile-rank-bg: color-mix(in srgb, rgb(0 0 0) 40%, var(--crown-purple-deep) 12%);
+  --profile-bar-track: color-mix(in srgb, #0a0a0a 75%, var(--crown-purple-deep) 16%);
+  --profile-btn-dark-bg: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--crown-purple) 22%, #1c1526) 0%,
+    color-mix(in srgb, var(--crown-purple-deep) 12%, #120e18) 100%
+  );
+  --profile-btn-dark-border: color-mix(in srgb, var(--crown-purple) 32%, transparent);
+  --profile-switch-off: color-mix(in srgb, #0a0a0a 88%, var(--crown-purple-deep) 12%);
   padding-top: var(--space-4);
   padding-bottom: var(--space-8);
   max-width: 28rem;
@@ -16,10 +34,10 @@
 
 .profile-page__card {
   border-radius: 1rem;
-  background: #1e2235;
-  border: 1px solid rgb(255 255 255 / 8%);
+  background: var(--profile-card-bg);
+  border: 1px solid var(--profile-card-border);
   padding: var(--space-5) var(--space-4) var(--space-4);
-  box-shadow: 0 12px 40px rgb(0 0 0 / 0.3);
+  box-shadow: var(--profile-card-shadow);
 }
 
 .profile-page__hero {
@@ -35,8 +53,8 @@
   height: 4.5rem;
   border-radius: 50%;
   background: linear-gradient(145deg, #3a2a4a 0%, #1a1220 100%);
-  border: 2px solid rgb(234 179 8 / 55%);
-  color: #fde68a;
+  border: 2px solid color-mix(in srgb, var(--crown-gold) 55%, transparent);
+  color: var(--crown-gold-hover, #ffcf33);
   font-size: 1.75rem;
   font-weight: 900;
   display: flex;
@@ -47,18 +65,23 @@
 
 .profile-page__edit {
   position: absolute;
-  right: -0.2rem;
-  bottom: -0.2rem;
+  right: 0.1rem;
+  bottom: 0.1rem;
   width: 1.4rem;
   height: 1.4rem;
   border: none;
   border-radius: 50%;
-  background: #374151;
+  background: color-mix(in srgb, #374151 88%, var(--crown-purple) 12%);
   color: #fff;
   font-size: 0.7rem;
   line-height: 1;
   cursor: default;
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px var(--profile-surface-bleed);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .profile-page__uid-block {
@@ -70,7 +93,7 @@
   margin: 0 0 0.15rem;
   font-size: 0.7rem;
   font-weight: 700;
-  color: rgb(255 255 255 / 55%);
+  color: color-mix(in srgb, var(--crown-gold) 5%, rgb(255 255 255 / 52%));
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -79,7 +102,7 @@
   margin: 0 0 var(--space-2);
   font-size: 0.75rem;
   font-weight: 700;
-  color: #4ade80;
+  color: var(--crown-mint, #01db80);
 }
 
 .profile-page__uid-row {
@@ -99,10 +122,10 @@
 .profile-page__copy {
   flex-shrink: 0;
   padding: 0.35rem 0.6rem;
-  border: 1px solid rgb(234 179 8 / 45%);
-  border-radius: 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--crown-gold) 45%, transparent);
+  border-radius: var(--crown-btn-radius, 999px);
   background: transparent;
-  color: #eab308;
+  color: var(--crown-gold);
   font: inherit;
   font-size: 0.7rem;
   font-weight: 800;
@@ -112,14 +135,15 @@
 }
 
 .profile-page__copy:hover {
-  background: rgb(234 179 8 / 12%);
+  background: color-mix(in srgb, var(--crown-gold) 12%, transparent);
 }
 
 .profile-page__rank {
   margin-bottom: var(--space-4);
   padding: var(--space-3);
   border-radius: 0.5rem;
-  background: rgb(0 0 0 / 20%);
+  background: var(--profile-rank-bg);
+  border: 1px solid var(--profile-hairline-soft);
 }
 
 .profile-page__rank-top {
@@ -140,13 +164,13 @@
   margin: 0;
   font-size: 0.75rem;
   font-weight: 800;
-  color: #eab308;
+  color: var(--crown-gold);
 }
 
 .profile-page__bar {
   height: 0.45rem;
   border-radius: 999px;
-  background: #0f1118;
+  background: var(--profile-bar-track);
   overflow: hidden;
 }
 
@@ -154,7 +178,7 @@
   height: 100%;
   width: 0%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #eab308, #f59e0b);
+  background: linear-gradient(90deg, var(--crown-gold) 0%, var(--crown-gold-hover) 100%);
 }
 
 .profile-page__sound {
@@ -163,46 +187,63 @@
   justify-content: space-between;
   margin-bottom: var(--space-4);
   padding: var(--space-2) 0;
-  border-top: 1px solid rgb(255 255 255 / 8%);
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  border-top: 1px solid var(--profile-hairline);
+  border-bottom: 1px solid var(--profile-hairline);
 }
 
 .profile-page__sound-label {
   font-size: 0.9rem;
   font-weight: 800;
   color: #fff;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.55rem;
 }
 
 .profile-page__switch {
+  --sw-w: 2.9rem;
+  --sw-h: 1.42rem;
+  /* Padding + thumb — compact track, thumb still centered via translateY(-50%) */
+  --sw-pad: 0.09rem;
+  --sw-thumb: 1.06rem;
+  --sw-slide: calc(var(--sw-w) - 2 * var(--sw-pad) - var(--sw-thumb));
+
   position: relative;
-  width: 2.9rem;
-  height: 1.55rem;
+  box-sizing: border-box;
+  width: var(--sw-w);
+  height: var(--sw-h);
   border: none;
   border-radius: 999px;
-  background: #0a0a0a;
-  padding: 0.15rem;
+  background: var(--profile-switch-off);
+  padding: var(--sw-pad);
   cursor: pointer;
+  flex-shrink: 0;
+  align-self: center;
   -webkit-tap-highlight-color: transparent;
 }
 
 .profile-page__switch[aria-checked='true'] {
-  background: #22c55e;
+  background: var(--crown-mint, #01db80);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--crown-mint-shadow) 60%, transparent);
 }
 
 .profile-page__switch-thumb {
   position: absolute;
-  top: 0.15rem;
-  left: 0.15rem;
-  width: 1.15rem;
-  height: 1.15rem;
+  top: 50%;
+  left: var(--sw-pad, 0.09rem);
+  width: var(--sw-thumb, 1.06rem);
+  height: var(--sw-thumb, 1.06rem);
   border-radius: 50%;
   background: #fff;
+  transform: translateY(-50%);
   transition: transform 0.2s ease;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.28);
+  pointer-events: none;
 }
 
 .profile-page__switch[aria-checked='true'] .profile-page__switch-thumb {
-  transform: translateX(1.2rem);
+  transform: translateY(-50%) translateX(var(--sw-slide));
 }
 
 .profile-page__btns {
@@ -216,7 +257,7 @@
   min-height: 2.75rem;
   width: 100%;
   border: 2px solid rgb(255 255 255 / 12%);
-  border-radius: 0.5rem;
+  border-radius: var(--crown-btn-radius, 999px);
   background: #f5f5f5;
   color: #111;
   font: inherit;
@@ -238,9 +279,14 @@
 }
 
 .profile-page__btn-pill--dark {
-  background: #2a3048;
+  background: var(--profile-btn-dark-bg);
   color: #fff;
-  border-color: rgb(255 255 255 / 8%);
+  border-color: var(--profile-btn-dark-border);
+}
+
+.profile-page__btn-pill--dark:hover {
+  filter: brightness(1.05);
+  border-color: color-mix(in srgb, var(--crown-purple) 45%, transparent);
 }
 
 .profile-page__wallet {
@@ -249,7 +295,7 @@
   gap: var(--space-2);
   margin-top: var(--space-2);
   padding-top: var(--space-3);
-  border-top: 1px solid rgb(255 255 255 / 6%);
+  border-top: 1px solid var(--profile-hairline-soft);
 }
 
 .profile-page__wallet-title {
@@ -257,7 +303,7 @@
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: rgb(255 255 255 / 45%);
+  color: color-mix(in srgb, var(--crown-gold) 4%, rgb(255 255 255 / 42%));
   text-transform: uppercase;
 }
 
@@ -295,11 +341,11 @@
   max-width: 20rem;
   margin: 0;
   padding: var(--space-4);
-  border: 1px solid rgb(255 255 255 / 15%);
+  border: 1px solid var(--profile-card-border);
   border-radius: 0.75rem;
-  background: #1a1d2e;
+  background: var(--profile-card-bg);
   color: #fff;
-  box-shadow: 0 16px 48px rgb(0 0 0 / 0.4);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.45);
 }
 
 .profile-page__dialog::backdrop {
@@ -320,13 +366,7 @@
 }
 
 .profile-page__dialog-close {
-  min-height: 2.4rem;
   width: 100%;
-  border: none;
-  border-radius: 0.5rem;
-  background: #5d8bf4;
-  color: #fff;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
+  min-height: 2.4rem;
+  box-sizing: border-box;
 }
