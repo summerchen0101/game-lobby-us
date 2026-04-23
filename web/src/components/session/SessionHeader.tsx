@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { getWalletDisplay } from '../../wallet/formatWalletAmount'
@@ -16,34 +15,23 @@ function SpadeMark() {
   )
 }
 
-function pad2(n: number) {
-  return n < 10 ? `0${n}` : String(n)
-}
-
-function formatTimeClock(d: Date) {
-  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
-}
-
 export function SessionHeader() {
   const { user } = useAuth()
   const { activeWallet, setActiveWallet } = useWallet()
   const { label, amount } = getWalletDisplay(user ?? undefined, activeWallet)
-  const [now, setNow] = useState(() => new Date())
 
   const initial =
     (user?.displayName?.trim()?.[0] ?? user?.id?.[0] ?? '?').toUpperCase()
-
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 1000)
-    return () => window.clearInterval(id)
-  }, [])
 
   function toggleWallet() {
     setActiveWallet(activeWallet === 'GC' ? 'SC' : 'GC')
   }
 
   return (
-    <header className="session-header">
+    <header
+      className="session-header"
+      data-active-wallet={activeWallet}
+    >
       <div className="session-header__inner">
         <div className="session-header__left">
           <SpadeMark />
@@ -61,13 +49,6 @@ export function SessionHeader() {
           </div>
         </div>
         <div className="session-header__right">
-          <time
-            className="session-header__clock"
-            dateTime={now.toISOString()}
-            aria-label="目前時間"
-          >
-            Time: {formatTimeClock(now)}
-          </time>
           <button
             type="button"
             className="session-header__wallet-track"

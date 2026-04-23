@@ -15,14 +15,46 @@
   padding-bottom: var(--session-footer-h, calc(4.25rem + var(--safe-bottom)));
 }
 
-/* —— Header —— */
+/* —— Header —— (GC / SC themes via data-active-wallet) */
 .session-header {
+  /* 線寬以藥丸為準，三處共用 */
+  --hdr-stroke: 2px;
+  /* 頂 25% 黑、底全透，整塊覆蓋 */
+  --hdr-bg: linear-gradient(180deg, rgb(0 0 0 / 0.25) 0%, transparent 100%);
+
+  /* GC (default) */
+  --hdr-avatar-border: var(--hdr-stroke) solid rgb(34 197 94 / 55%);
+  --hdr-pill-glow: 0 0 12px rgb(234 179 8 / 15%);
+  --hdr-pill-border: var(--hdr-stroke) solid #eab308;
+  --hdr-pill-plus-bg: #eab308;
+  --hdr-pill-plus-fg: #0a0a0a;
+  --hdr-track-border: var(--hdr-stroke) solid rgb(234 179 8 / 55%);
+  --hdr-track-bg: #141018;
+  --hdr-focus: #eab308;
+  --hdr-spade-color: #0a0a0a;
+  --hdr-spade-filter: none;
+
   position: sticky;
   top: 0;
   z-index: 150;
   flex-shrink: 0;
-  background: rgb(0 0 0 / 96%);
-  border-bottom: 1px solid rgb(234 179 8 / 25%);
+  background: var(--hdr-bg);
+  backdrop-filter: blur(10px);
+}
+
+.session-header[data-active-wallet='SC'] {
+  /* Sweepstakes: 與 GC 同底漸層，僅 chrome 色 */
+  --hdr-avatar-border: var(--hdr-stroke) solid rgb(245 158 11 / 65%);
+  --hdr-pill-glow: 0 0 16px rgb(34 197 94 / 28%);
+  --hdr-pill-border: var(--hdr-stroke) solid #4ade80;
+  --hdr-pill-plus-bg: #22c55e;
+  --hdr-pill-plus-fg: #fff;
+  --hdr-track-border: var(--hdr-stroke) solid rgb(34 197 94 / 60%);
+  --hdr-track-bg: #0c1810;
+  --hdr-focus: #4ade80;
+  --hdr-spade-color: #0a0a0a;
+  --hdr-spade-filter: none;
+
   backdrop-filter: blur(10px);
 }
 
@@ -49,8 +81,8 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  color: #eab308;
-  filter: drop-shadow(0 0 6px rgb(234 179 8 / 35%));
+  color: var(--hdr-spade-color);
+  filter: var(--hdr-spade-filter);
 }
 
 .session-header__avatar {
@@ -58,7 +90,7 @@
   height: 2.25rem;
   border-radius: 50%;
   background: linear-gradient(145deg, #3a2a4a 0%, #1a1220 100%);
-  border: 2px solid rgb(234 179 8 / 45%);
+  border: var(--hdr-avatar-border);
   color: #fde68a;
   font-weight: 800;
   font-size: 0.85rem;
@@ -85,8 +117,8 @@
   padding: 0.2rem 0.35rem 0.2rem 0.65rem;
   border-radius: 999px;
   background: #0a0a0a;
-  border: 2px solid #eab308;
-  box-shadow: 0 0 12px rgb(234 179 8 / 15%);
+  border: var(--hdr-pill-border);
+  box-shadow: var(--hdr-pill-glow);
 }
 
 .session-header__pill-label {
@@ -114,13 +146,17 @@
   height: 1.85rem;
   margin-left: 0.15rem;
   border-radius: 50%;
-  background: #eab308;
-  color: #0a0a0a;
+  background: var(--hdr-pill-plus-bg);
+  color: var(--hdr-pill-plus-fg);
   font-size: 1.35rem;
   font-weight: 300;
   line-height: 1;
   text-decoration: none;
   flex-shrink: 0;
+  min-width: 1.85rem;
+  min-height: 1.85rem;
+  position: relative;
+  z-index: 1;
 }
 
 .session-header__pill-plus:hover {
@@ -133,47 +169,44 @@
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 0.2rem;
   min-width: 0;
-}
-
-.session-header__clock {
-  display: block;
-  font-size: 0.58rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  color: rgb(255 255 255 / 88%);
-  white-space: nowrap;
-  line-height: 1.1;
 }
 
 /* Sliding wallet switch: pill track + circular thumb (GC / SC) */
 .session-header__wallet-track {
+  --wallet-thumb: 1.5rem;
+  /* inner edge inset = same as pill padding (visual single ring, no "double" gold) */
+  --wallet-inset: 0.2rem;
+  /* travel = track width − paddings − borders − thumb (matches --hdr-stroke 2px) */
+  --wallet-slide: calc(4.4rem - 2 * var(--wallet-inset) - 2 * var(--hdr-stroke) - var(--wallet-thumb));
+
   position: relative;
+  display: block;
   width: 4.4rem;
   height: 1.85rem;
-  padding: 0.2rem;
+  padding: 0;
   box-sizing: border-box;
-  border: 1px solid rgb(234 179 8 / 55%);
+  border: var(--hdr-track-border);
   border-radius: 999px;
-  background: #141018;
+  background: var(--hdr-track-bg);
   cursor: pointer;
   flex-shrink: 0;
+  overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
 
 .session-header__wallet-track:focus-visible {
-  outline: 2px solid #eab308;
+  outline: var(--hdr-stroke) solid var(--hdr-focus);
   outline-offset: 2px;
 }
 
 .session-header__wallet-thumb {
   position: absolute;
-  top: 0.2rem;
-  left: 0.2rem;
-  width: 1.5rem;
-  height: 1.5rem;
+  top: 50%;
+  left: var(--wallet-inset);
+  width: var(--wallet-thumb);
+  height: var(--wallet-thumb);
+  margin: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -181,29 +214,26 @@
   font-size: 0.6rem;
   font-weight: 900;
   letter-spacing: 0.04em;
-  color: #0a0a0a;
+  color: #fff;
   line-height: 1;
   transition:
     transform 0.28s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
+    background 0.2s ease;
   will-change: transform;
 }
 
 /* GC: thumb left, gold */
 .session-header__wallet-thumb.is-gc {
-  transform: translateX(0);
+  transform: translate(0, -50%);
   background: #eab308;
-  box-shadow: 0 0 10px rgb(234 179 8 / 50%);
+  color: #fff;
 }
 
-/* SC: thumb right, green */
-/* 4.4rem track - horizontal padding 0.4rem - 1.5rem thumb */
+/* SC: thumb right, green — slide = inner width − thumb, vertically centered */
 .session-header__wallet-thumb.is-sc {
-  transform: translateX(2.5rem);
+  transform: translate(var(--wallet-slide), -50%);
   background: #22c55e;
-  box-shadow: 0 0 10px rgb(34 197 94 / 45%);
-  color: #0a0a0a;
+  color: #fff;
 }
 
 /* —— Footer —— */
