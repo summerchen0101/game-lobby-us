@@ -137,53 +137,15 @@
   opacity: 0.95;
 }
 
-.shop-page__price {
+.shop-page__price.btn-crown-secondary {
   width: 100%;
-  min-height: 2.5rem;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 999px;
-  background: linear-gradient(
-    185deg,
-    #8cb4ff 0%,
-    #5d8bf4 38%,
-    #3d6fd0 72%,
-    #2a5599 100%
-  );
-  color: #fff;
-  font: inherit;
+  box-sizing: border-box;
+  min-height: 2rem;
+  padding: 0.3rem 0.5rem;
   font-weight: 900;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  text-transform: none;
   cursor: pointer;
-  text-shadow: 0 1px 0 rgb(0 30 90 / 35%);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 32%) inset,
-    0 -1px 0 rgb(0 35 90 / 35%) inset,
-    0 2px 0 rgb(45 100 200 / 55%),
-    0 6px 16px rgb(10 25 70 / 55%);
-  transition:
-    filter 0.15s ease,
-    transform 0.12s ease,
-    box-shadow 0.12s ease;
-}
-
-.shop-page__price:hover {
-  filter: brightness(1.07);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 36%) inset,
-    0 -1px 0 rgb(0 35 90 / 30%) inset,
-    0 2px 0 rgb(55 115 220 / 65%),
-    0 8px 20px rgb(10 30 90 / 50%);
-}
-
-.shop-page__price:active {
-  filter: brightness(0.97);
-  transform: translateY(1px);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 22%) inset,
-    0 2px 3px rgb(0 20 60 / 45%) inset,
-    0 1px 0 rgb(40 90 180 / 40%),
-    0 3px 10px rgb(10 25 70 / 45%);
 }
 
 .shop-page__hint {

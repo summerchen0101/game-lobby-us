@@ -42,7 +42,7 @@ export function ShopPage() {
                 <Sparkles className="shop-page__bonus-icon" size={14} strokeWidth={2.25} aria-hidden />
                 {p.bonus}
               </p>
-              <button type="button" className="shop-page__price">
+              <button type="button" className="shop-page__price btn-crown-secondary">
                 {p.price}
               </button>
             </li>
