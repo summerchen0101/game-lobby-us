@@ -1,34 +1,36 @@
-import { useCallback, useEffect, useState } from 'react'
-import './IosInstallGuide.css'
+import { useCallback, useEffect, useState } from "react";
+import "./IosInstallGuide.css";
 
 function isIOS(): boolean {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !('MSStream' in window)
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window)
+  );
 }
 
 function isStandalonePWA(): boolean {
   if ((navigator as Navigator & { standalone?: boolean }).standalone)
-    return true
-  if (typeof matchMedia === 'function') {
-    if (matchMedia('(display-mode: standalone)').matches) return true
-    if (matchMedia('(display-mode: minimal-ui)').matches) return true
+    return true;
+  if (typeof matchMedia === "function") {
+    if (matchMedia("(display-mode: standalone)").matches) return true;
+    if (matchMedia("(display-mode: minimal-ui)").matches) return true;
   }
-  return false
+  return false;
 }
 
-const SHOW_DELAY_MS = 10_000
+const SHOW_DELAY_MS = 10_000;
 
 export function IosInstallGuide() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!isIOS() || isStandalonePWA()) return
-    const t = window.setTimeout(() => setOpen(true), SHOW_DELAY_MS)
-    return () => clearTimeout(t)
-  }, [])
+    if (!isIOS() || isStandalonePWA()) return;
+    const t = window.setTimeout(() => setOpen(true), SHOW_DELAY_MS);
+    return () => clearTimeout(t);
+  }, []);
 
-  const close = useCallback(() => setOpen(false), [])
+  const close = useCallback(() => setOpen(false), []);
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div
@@ -37,16 +39,15 @@ export function IosInstallGuide() {
       aria-modal="true"
       aria-labelledby="ios-guide-title"
       onClick={(e) => {
-        if (e.target === e.currentTarget) close()
-      }}
-    >
+        if (e.target === e.currentTarget) close();
+      }}>
       <div className="ios-guide__card">
         <h2 id="ios-guide-title" className="ios-guide__title">
           Add to Home Screen (iOS)
         </h2>
         <img
           className="ios-guide__icon"
-          src="/brand-logo.webp"
+          src="/imgs/pwa_icon.png"
           alt=""
           width={80}
           height={80}
@@ -73,5 +74,5 @@ export function IosInstallGuide() {
         </button>
       </div>
     </div>
-  )
+  );
 }
