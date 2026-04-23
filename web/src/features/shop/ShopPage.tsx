@@ -1,17 +1,10 @@
+import { useState } from "react";
 import "./ShopPage.css";
 import "../lobby/SessionPageDecor.css";
+import { ShopCheckoutOverlay } from "./ShopCheckoutOverlay";
+import type { Pack } from "./types";
 
 const PANEL = "/imgs/panel/Panel_Shop";
-
-type Pack = {
-  id: string;
-  /** Shown after GC chip, e.g. 600K, 12M */
-  gcLabel: string;
-  bonusSc: number;
-  price: string;
-  /** 1..5 → icon_coinPileN.png */
-  coinPile: 1 | 2 | 3 | 4 | 5;
-};
 
 const PACKS: Pack[] = [
   { id: "1", gcLabel: "600K", bonusSc: 2, price: "$1.99", coinPile: 1 },
@@ -29,7 +22,22 @@ function coinPileSrc(n: 1 | 2 | 3 | 4 | 5) {
   return `${PANEL}/icon_coinPile${n}.png`;
 }
 
+type CheckoutStep = "summary" | "card";
+
 export function ShopPage() {
+  const [checkoutPack, setCheckoutPack] = useState<Pack | null>(null);
+  const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("summary");
+
+  const openCheckout = (p: Pack) => {
+    setCheckoutStep("summary");
+    setCheckoutPack(p);
+  };
+
+  const closeCheckout = () => {
+    setCheckoutPack(null);
+    setCheckoutStep("summary");
+  };
+
   return (
     <div className="shop-page page-container session-page session-page--pattern">
       <div className="shop-page__inner">
@@ -62,13 +70,26 @@ export function ShopPage() {
                 <span className="shop-page__chip shop-page__chip--sc">SC</span>
                 <span className="shop-page__bonus-amt">{p.bonusSc}</span>
               </p>
-              <button type="button" className="shop-page__price-btn">
+              <button
+                type="button"
+                className="shop-page__price-btn"
+                onClick={() => openCheckout(p)}
+              >
                 {p.price}
               </button>
             </li>
           ))}
         </ul>
       </div>
+      {checkoutPack ? (
+        <ShopCheckoutOverlay
+          open
+          pack={checkoutPack}
+          step={checkoutStep}
+          onClose={closeCheckout}
+          onStepChange={setCheckoutStep}
+        />
+      ) : null}
     </div>
   );
 }
