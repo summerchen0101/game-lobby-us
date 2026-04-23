@@ -123,6 +123,46 @@ a.lobby-claim-btn-welcome {
   padding-bottom: var(--space-6);
 }
 
+.lobby-game-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: calc(-0.5 * var(--space-3)) 0 var(--space-3);
+  padding: var(--space-2) var(--page-pad);
+  margin-inline: calc(-1 * var(--page-pad));
+  max-width: calc(100% + 2 * var(--page-pad));
+  background: rgb(0 0 0 / 35%);
+  border-radius: 0.5rem;
+  border: 1px solid rgb(234 179 8 / 20%);
+}
+
+.lobby-game-filter__tab {
+  min-height: 2.25rem;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lobby-game-filter__tab:hover {
+  color: #fde68a;
+}
+
+.lobby-game-filter__tab.is-active {
+  border-color: #eab308;
+  color: #eab308;
+  box-shadow: 0 0 0 1px rgb(234 179 8 / 25%);
+}
+
 .lobby-games-error {
   color: #f87171;
   font-size: var(--text-small);

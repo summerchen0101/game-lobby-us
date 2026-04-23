@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { getWalletDisplay } from '../../wallet/formatWalletAmount'
-import { useWallet, type ActiveWallet } from '../../wallet/walletContext'
+import { useWallet } from '../../wallet/walletContext'
 import './SessionChrome.css'
 
 function SpadeMark() {
@@ -15,16 +16,30 @@ function SpadeMark() {
   )
 }
 
+function pad2(n: number) {
+  return n < 10 ? `0${n}` : String(n)
+}
+
+function formatTimeClock(d: Date) {
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
+}
+
 export function SessionHeader() {
   const { user } = useAuth()
   const { activeWallet, setActiveWallet } = useWallet()
   const { label, amount } = getWalletDisplay(user ?? undefined, activeWallet)
+  const [now, setNow] = useState(() => new Date())
 
   const initial =
     (user?.displayName?.trim()?.[0] ?? user?.id?.[0] ?? '?').toUpperCase()
 
-  function setWallet(w: ActiveWallet) {
-    setActiveWallet(w)
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  function toggleWallet() {
+    setActiveWallet(activeWallet === 'GC' ? 'SC' : 'GC')
   }
 
   return (
@@ -45,26 +60,30 @@ export function SessionHeader() {
             </Link>
           </div>
         </div>
-        <div className="session-header__wallet-toggle" role="group" aria-label="錢包切換">
+        <div className="session-header__right">
+          <time
+            className="session-header__clock"
+            dateTime={now.toISOString()}
+            aria-label="目前時間"
+          >
+            Time: {formatTimeClock(now)}
+          </time>
           <button
             type="button"
-            className={
-              'session-header__wallet-btn' + (activeWallet === 'GC' ? ' is-active' : '')
-            }
-            data-wallet="GC"
-            onClick={() => setWallet('GC')}
+            className="session-header__wallet-track"
+            role="switch"
+            aria-checked={activeWallet === 'SC'}
+            aria-label="切換顯示金幣或兌獎幣"
+            onClick={toggleWallet}
           >
-            GC
-          </button>
-          <button
-            type="button"
-            className={
-              'session-header__wallet-btn' + (activeWallet === 'SC' ? ' is-active' : '')
-            }
-            data-wallet="SC"
-            onClick={() => setWallet('SC')}
-          >
-            SC
+            <span
+              className={
+                'session-header__wallet-thumb' +
+                (activeWallet === 'SC' ? ' is-sc' : ' is-gc')
+              }
+            >
+              {activeWallet}
+            </span>
           </button>
         </div>
       </div>

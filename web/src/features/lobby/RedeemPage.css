@@ -1,0 +1,221 @@
+.redeem-page {
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-8);
+}
+
+.redeem-page__title {
+  margin: 0 0 var(--space-1);
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.25rem);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-align: center;
+  color: #fff;
+}
+
+.redeem-page__ticker-outer {
+  margin: 0 0 var(--space-2);
+  overflow: hidden;
+  background: #141b2e;
+  border-radius: 0.35rem;
+  border: 1px solid rgb(93 139 244 / 35%);
+}
+
+.redeem-page__ticker-track {
+  display: flex;
+  width: max-content;
+  gap: 3.5rem;
+  padding: 0.4rem 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #5d8bf4;
+  white-space: nowrap;
+  animation: redeem-ticker 22s linear infinite;
+}
+
+.redeem-page__ticker-track span {
+  flex-shrink: 0;
+}
+
+@keyframes redeem-ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.redeem-page__sub {
+  margin: 0 0 var(--space-5);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.redeem-page__card {
+  border-radius: 0.9rem;
+  background: #1e2235;
+  border: 1px solid rgb(255 255 255 / 8%);
+  padding: var(--space-4) var(--space-4) var(--space-5);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.25);
+}
+
+.redeem-page__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.redeem-page__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: rgb(0 0 0 / 25%);
+  color: #5d8bf4;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.redeem-page__row-title {
+  flex: 1;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.redeem-page__info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  padding: 0;
+  border-radius: 50%;
+  background: #eab308;
+  color: #0a0a0a;
+  font-size: 0.85rem;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+  cursor: help;
+}
+
+.redeem-page__info-panel {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 85%);
+  background: rgb(0 0 0 / 25%);
+  border-radius: 0.5rem;
+}
+
+.redeem-page__balance-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.redeem-page__sc-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #0a0a0a;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgb(34 197 94 / 35%);
+}
+
+.redeem-page__amount {
+  margin: 0;
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+  font-weight: 900;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.redeem-page__panel {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-radius: 0.75rem;
+  background: #161a2a;
+  border: 1px solid rgb(93 139 244 / 22%);
+}
+
+.redeem-page__panel--warn .redeem-page__panel-title {
+  color: #fff;
+}
+
+.redeem-page__panel-title {
+  margin: 0 0 var(--space-2);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.redeem-page__panel-text {
+  margin: 0 0 var(--space-2);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 75%);
+}
+
+.redeem-page__accent {
+  margin: 0 0 var(--space-3);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #eab308;
+}
+
+.redeem-page__to-lobby {
+  display: block;
+  width: 100%;
+  max-width: 20rem;
+  margin-inline: auto;
+  padding: 0.9rem 1.25rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #6b9cf5 0%, #5d8bf4 100%);
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgb(93 139 244 / 25%);
+}
+
+.redeem-page__to-lobby:hover {
+  filter: brightness(1.08);
+}
+
+.redeem-page__ok {
+  margin: var(--space-3) 0 0;
+  font-size: 0.8rem;
+  text-align: center;
+  color: #22c55e;
+  font-weight: 700;
+}

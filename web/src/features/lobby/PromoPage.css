@@ -1,0 +1,114 @@
+.promo-page {
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-8);
+}
+
+.promo-page__title {
+  margin: 0 0 var(--space-5);
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.25rem);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-align: center;
+  color: #fff;
+}
+
+.promo-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.promo-page__card {
+  display: grid;
+  grid-template-columns: minmax(7rem, 9rem) 1fr;
+  gap: var(--space-3);
+  align-items: stretch;
+  min-height: 7.5rem;
+  padding: var(--space-3);
+  border-radius: 1rem;
+  background: linear-gradient(145deg, #2a1f45 0%, #1a1228 50%, #12101c 100%);
+  border: 1px solid rgb(234 179 8 / 20%);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.35);
+}
+
+@media (max-width: 30rem) {
+  .promo-page__card {
+    grid-template-columns: 1fr;
+  }
+}
+
+.promo-page__art {
+  border-radius: 0.75rem;
+  min-height: 5.5rem;
+  background: linear-gradient(160deg, rgb(88 50 150 / 45%) 0%, rgb(234 179 8 / 15%) 45%, rgb(34 197 94 / 12%) 100%);
+  border: 1px solid rgb(255 255 255 / 6%);
+}
+
+.promo-page__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.promo-page__h {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.promo-page__desc {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 75%);
+}
+
+.promo-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.promo-page__btn {
+  min-height: 2.4rem;
+  padding: 0 1rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #7b5cc9 0%, #5b3da8 100%);
+  color: #fff;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.promo-page__btn:hover {
+  filter: brightness(1.08);
+}
+
+.promo-page__btn--gold {
+  background: linear-gradient(180deg, #f0d24a 0%, #c9a31a 100%);
+  color: #1a0f08;
+}
+
+.promo-page__btn--sc {
+  background: linear-gradient(180deg, #34d85c 0%, #1ea045 100%);
+  color: #0a0a0a;
+}
+
+.promo-page__hint {
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-small);
+  text-align: center;
+  color: var(--color-text-muted);
+}

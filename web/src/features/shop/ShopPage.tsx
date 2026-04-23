@@ -1,4 +1,5 @@
 import './ShopPage.css'
+import '../lobby/SessionPageDecor.css'
 
 type Pack = { id: string; gcLabel: string; bonus: string; price: string }
 
@@ -9,11 +10,14 @@ const PACKS: Pack[] = [
   { id: '4', gcLabel: '6M', bonus: '+FREE SC 15', price: '$19.99' },
   { id: '5', gcLabel: '12M', bonus: '+FREE SC 30', price: '$39.99' },
   { id: '6', gcLabel: '25M', bonus: '+FREE SC 60', price: '$79.99' },
+  { id: '7', gcLabel: '50M', bonus: '+FREE SC 100', price: '$89.99' },
+  { id: '8', gcLabel: '100M', bonus: '+FREE SC 200', price: '$99.99' },
+  { id: '9', gcLabel: '200M', bonus: '+FREE SC 500', price: '$199.99' },
 ]
 
 export function ShopPage() {
   return (
-    <div className="shop-page page-container">
+    <div className="shop-page page-container session-page session-page--pattern">
       <h1 className="shop-page__title">STORE</h1>
       <p className="shop-page__subtitle">CHOOSE YOUR COINS PACKAGE</p>
       <ul className="shop-page__grid">

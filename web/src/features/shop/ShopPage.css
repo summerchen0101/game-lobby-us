@@ -40,8 +40,9 @@
   align-items: stretch;
   padding: var(--space-3);
   border-radius: 1rem;
-  background: #141414;
-  border: 1px solid rgb(234 179 8 / 22%);
+  background: #1e2235;
+  border: 1px solid rgb(93 139 244 / 22%);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 0.2);
 }
 
 .shop-page__card-top {
@@ -84,12 +85,13 @@
   min-height: 2.5rem;
   border: none;
   border-radius: 0.65rem;
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(180deg, #6b9cf5 0%, #5d8bf4 100%);
   color: #fff;
   font: inherit;
   font-weight: 900;
   font-size: 0.9rem;
   cursor: pointer;
+  box-shadow: 0 2px 12px rgb(93 139 244 / 22%);
 }
 
 .shop-page__price:hover {

@@ -31,6 +31,8 @@ import './LobbyPage.css'
 
 const defaultOpenLabel = openGamesInNewWindowDefault() ? '預設新分頁' : '預設內嵌'
 
+type LobbyFilterTab = 'all' | 'hot' | 'providers' | 'slots'
+
 export function LandingPage() {
   const { token, user, refreshUser } = useAuth()
   const { open: openShell } = useGameShell()
@@ -52,6 +54,7 @@ export function LandingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [registerEmailForm, setRegisterEmailForm] = useState(false)
+  const [lobbyFilter, setLobbyFilter] = useState<LobbyFilterTab>('all')
 
   const tpId = trustpilotBusinessUnitId()
   const heroSrc = getLobbyHeroImage()
@@ -61,6 +64,23 @@ export function LandingPage() {
     () => (token ? apiItems : GUEST_DEMO_GAMES),
     [token, apiItems],
   )
+
+  /** Category filter stub: wiring to API/tags can replace this. */
+  const filteredLobbyGames = useMemo(() => {
+    if (lobbyFilter === 'all') {
+      return displayGames
+    }
+    if (lobbyFilter === 'hot') {
+      const h = displayGames.filter((g) =>
+        /hot|jackpot|fire/i.test(`${g.title} ${g.subtitle ?? ''} ${g.id}`),
+      )
+      return h.length > 0 ? h : displayGames
+    }
+    if (lobbyFilter === 'providers' || lobbyFilter === 'slots') {
+      return displayGames
+    }
+    return displayGames
+  }, [displayGames, lobbyFilter])
 
   useEffect(() => {
     if (!registerOpen) setRegisterEmailForm(false)
@@ -196,6 +216,29 @@ export function LandingPage() {
           <h2 id="lobby-games-heading" className="lobby-section-title">
             Our Top Games
           </h2>
+          {token ? (
+            <div className="lobby-game-filter" role="tablist" aria-label="遊戲分類（示範）">
+              {(
+                [
+                  { id: 'all' as const, label: 'ALL' },
+                  { id: 'hot' as const, label: 'HOT' },
+                  { id: 'providers' as const, label: 'PROVIDERS' },
+                  { id: 'slots' as const, label: 'SLOTS' },
+                ] as const
+              ).map(({ id, label }) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={'lobby-game-filter__tab' + (lobbyFilter === id ? ' is-active' : '')}
+                  role="tab"
+                  aria-selected={lobbyFilter === id}
+                  onClick={() => setLobbyFilter(id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : null}
           {error ? <p className="lobby-games-error">{error}</p> : null}
           {token && loading && displayGames.length === 0 && !error ? (
             <p className="lobby-games-hint">載入中…</p>
@@ -205,7 +248,7 @@ export function LandingPage() {
           ) : null}
           <div className="lobby-games-scroller">
             <ul className="lobby-games-track" role="list">
-              {displayGames.map((g) => (
+              {filteredLobbyGames.map((g) => (
                 <li key={g.id}>
                   <button
                     type="button"
