@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { LandingHeader } from '../../components/LandingHeader'
@@ -29,9 +29,34 @@ import {
 import { ProviderMarquee } from './ProviderMarquee'
 import './LobbyPage.css'
 
-const defaultOpenLabel = openGamesInNewWindowDefault() ? '預設新分頁' : '預設內嵌'
+const defaultOpenLabel = openGamesInNewWindowDefault() ? 'new tab by default' : 'inline by default'
 
 type LobbyFilterTab = 'all' | 'hot' | 'providers' | 'slots'
+
+const LOBBY_FILTER_TABS: { id: LobbyFilterTab; label: string }[] = [
+  { id: 'all', label: 'ALL' },
+  { id: 'hot', label: 'HOT' },
+  { id: 'providers', label: 'PROVIDERS' },
+  { id: 'slots', label: 'SLOTS' },
+]
+
+const LOBBY_FILTER_ORDER: LobbyFilterTab[] = LOBBY_FILTER_TABS.map((t) => t.id)
+
+function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
+  if (f === 'all') {
+    return displayGames
+  }
+  if (f === 'hot') {
+    const h = displayGames.filter((g) =>
+      /hot|jackpot|fire/i.test(`${g.title} ${g.subtitle ?? ''} ${g.id}`),
+    )
+    return h.length > 0 ? h : displayGames
+  }
+  if (f === 'providers' || f === 'slots') {
+    return displayGames
+  }
+  return displayGames
+}
 
 export function LandingPage() {
   const { token, user, refreshUser } = useAuth()
@@ -55,6 +80,10 @@ export function LandingPage() {
   const [error, setError] = useState<string | null>(null)
   const [registerEmailForm, setRegisterEmailForm] = useState(false)
   const [lobbyFilter, setLobbyFilter] = useState<LobbyFilterTab>('all')
+  const lobbyFilterRef = useRef(lobbyFilter)
+  const panelsRef = useRef<HTMLDivElement | null>(null)
+  const programmaticPanelScrollRef = useRef(false)
+  const scrollRafRef = useRef<number | null>(null)
 
   const tpId = trustpilotBusinessUnitId()
   const heroSrc = getLobbyHeroImage()
@@ -65,22 +94,98 @@ export function LandingPage() {
     [token, apiItems],
   )
 
-  /** Category filter stub: wiring to API/tags can replace this. */
-  const filteredLobbyGames = useMemo(() => {
-    if (lobbyFilter === 'all') {
-      return displayGames
+  /** 各分類一份列表（已登入分頁用） */
+  const gamesByFilter = useMemo(() => {
+    const out = {} as Record<LobbyFilterTab, Game[]>
+    for (const f of LOBBY_FILTER_ORDER) {
+      out[f] = gamesForFilter(displayGames, f)
     }
-    if (lobbyFilter === 'hot') {
-      const h = displayGames.filter((g) =>
-        /hot|jackpot|fire/i.test(`${g.title} ${g.subtitle ?? ''} ${g.id}`),
-      )
-      return h.length > 0 ? h : displayGames
+    return out
+  }, [displayGames])
+
+  const scrollPanelsToIndex = useCallback(
+    (index: number, behavior: ScrollBehavior = 'smooth') => {
+      const el = panelsRef.current
+      if (!el) return
+      const w = el.clientWidth
+      if (w === 0) return
+      programmaticPanelScrollRef.current = behavior === 'smooth'
+      const clamped = Math.max(0, Math.min(LOBBY_FILTER_ORDER.length - 1, index))
+      el.scrollTo({ left: clamped * w, behavior })
+      if (behavior === 'auto') {
+        programmaticPanelScrollRef.current = false
+      } else {
+        window.setTimeout(() => {
+          programmaticPanelScrollRef.current = false
+        }, 450)
+      }
+    },
+    [],
+  )
+
+  const onTabClick = useCallback(
+    (id: LobbyFilterTab) => {
+      const index = LOBBY_FILTER_ORDER.indexOf(id)
+      if (index < 0) return
+      setLobbyFilter(id)
+      scrollPanelsToIndex(index, 'smooth')
+    },
+    [scrollPanelsToIndex],
+  )
+
+  const onPanelsScroll = useCallback(() => {
+    if (programmaticPanelScrollRef.current) return
+    if (scrollRafRef.current !== null) {
+      cancelAnimationFrame(scrollRafRef.current)
     }
-    if (lobbyFilter === 'providers' || lobbyFilter === 'slots') {
-      return displayGames
+    scrollRafRef.current = requestAnimationFrame(() => {
+      scrollRafRef.current = null
+      const el = panelsRef.current
+      if (!el) return
+      const w = el.clientWidth
+      if (w === 0) return
+      const i = Math.round(el.scrollLeft / w)
+      const id = LOBBY_FILTER_ORDER[Math.max(0, Math.min(LOBBY_FILTER_ORDER.length - 1, i))]
+      if (id) {
+        setLobbyFilter((prev) => (id !== prev ? id : prev))
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!token) return
+    const el = panelsRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => {
+      const i = LOBBY_FILTER_ORDER.indexOf(lobbyFilterRef.current)
+      if (i < 0) return
+      programmaticPanelScrollRef.current = true
+      el.scrollLeft = i * el.clientWidth
+      programmaticPanelScrollRef.current = false
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [token])
+
+  useEffect(() => {
+    if (!token) return
+    const el = document.getElementById(`lobby-tab-${lobbyFilter}`)
+    el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  }, [token, lobbyFilter])
+
+  useEffect(() => {
+    const el = panelsRef.current
+    if (!el) return
+    const onEnd = () => {
+      programmaticPanelScrollRef.current = false
     }
-    return displayGames
-  }, [displayGames, lobbyFilter])
+    el.addEventListener('scrollend', onEnd)
+    return () => el.removeEventListener('scrollend', onEnd)
+  }, [token])
+
+  useEffect(() => {
+    lobbyFilterRef.current = lobbyFilter
+  }, [lobbyFilter])
 
   useEffect(() => {
     if (!registerOpen) setRegisterEmailForm(false)
@@ -120,7 +225,7 @@ export function LandingPage() {
       } catch (e) {
         if (cancelled) return
         const msg =
-          e instanceof ApiError ? e.message : e instanceof Error ? e.message : '無法載入遊戲列表'
+          e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Could not load games'
         setError(msg)
         setApiItems([])
       } finally {
@@ -142,7 +247,7 @@ export function LandingPage() {
       await refreshUser()
     } catch (e) {
       const msg =
-        e instanceof ApiError ? e.message : e instanceof Error ? e.message : '無法載入遊戲列表'
+        e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Could not load games'
       setError(msg)
       setApiItems([])
     } finally {
@@ -169,10 +274,42 @@ export function LandingPage() {
     openTermsThen('login')
   }
 
+  function renderGameTrack(games: Game[]) {
+    return (
+      <div className="lobby-games-scroller">
+        <ul className="lobby-games-track" role="list">
+          {games.map((g) => (
+            <li key={g.id}>
+              <button
+                type="button"
+                className="lobby-game-card"
+                onClick={() => onPlayGame(g)}
+                disabled={!!token && !g.launchUrl}
+              >
+                <div
+                  className="lobby-game-card__thumb"
+                  style={
+                    g.thumbnailUrl ? { backgroundImage: `url("${g.thumbnailUrl}")` } : undefined
+                  }
+                >
+                  {!g.thumbnailUrl ? (
+                    <span className="lobby-game-card__fallback">{g.title}</span>
+                  ) : null}
+                </div>
+                <span className="lobby-game-card__title">{g.title}</span>
+                {g.subtitle ? <span className="lobby-game-card__sub">{g.subtitle}</span> : null}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
   const landingMain = (
     <>
       <main className="lobby-landing__main">
-        <section className="lobby-hero-banner" aria-label="促銷主視覺">
+        <section className="lobby-hero-banner" aria-label="Promotional banner">
           <div className="lobby-hero-banner__content page-container">
             <img
               className="lobby-hero-banner__img"
@@ -188,14 +325,14 @@ export function LandingPage() {
         <div className="lobby-claim-wrap page-container">
           {user ? (
             <p className="lobby-welcome">
-              歡迎回來{user.displayName ? `，${user.displayName}` : ''}
+              Welcome back{user.displayName ? `, ${user.displayName}` : ''}
             </p>
           ) : null}
           <div className="lobby-claim-actions">
             {token ? (
               <>
                 <button type="button" className="btn-crown-primary" onClick={load} disabled={loading}>
-                  {loading ? '更新中…' : '重新整理列表'}
+                  {loading ? 'Updating…' : 'Refresh list'}
                 </button>
                 <Link to="/profile" className="lobby-claim-btn-welcome btn-crown-welcome">
                   CLAIM WELCOME BONUS
@@ -209,7 +346,9 @@ export function LandingPage() {
               </>
             )}
           </div>
-          <p className="lobby-hint">內嵌與 {defaultOpenLabel} 可由後端或環境變數調整。</p>
+          <p className="lobby-hint">
+            Inline vs {defaultOpenLabel} can be set by the API or environment variables.
+          </p>
         </div>
 
         <section className="lobby-games-section page-container" aria-labelledby="lobby-games-heading">
@@ -217,22 +356,18 @@ export function LandingPage() {
             Our Top Games
           </h2>
           {token ? (
-            <div className="lobby-game-filter" role="tablist" aria-label="遊戲分類（示範）">
-              {(
-                [
-                  { id: 'all' as const, label: 'ALL' },
-                  { id: 'hot' as const, label: 'HOT' },
-                  { id: 'providers' as const, label: 'PROVIDERS' },
-                  { id: 'slots' as const, label: 'SLOTS' },
-                ] as const
-              ).map(({ id, label }) => (
+            <div className="lobby-game-filter" role="tablist" aria-label="Game categories (demo)">
+              {LOBBY_FILTER_TABS.map(({ id, label }) => (
                 <button
                   key={id}
+                  id={`lobby-tab-${id}`}
                   type="button"
                   className={'lobby-game-filter__tab' + (lobbyFilter === id ? ' is-active' : '')}
                   role="tab"
                   aria-selected={lobbyFilter === id}
-                  onClick={() => setLobbyFilter(id)}
+                  aria-controls={`lobby-panel-${id}`}
+                  tabIndex={lobbyFilter === id ? 0 : -1}
+                  onClick={() => onTabClick(id)}
                 >
                   {label}
                 </button>
@@ -241,49 +376,40 @@ export function LandingPage() {
           ) : null}
           {error ? <p className="lobby-games-error">{error}</p> : null}
           {token && loading && displayGames.length === 0 && !error ? (
-            <p className="lobby-games-hint">載入中…</p>
+            <p className="lobby-games-hint">Loading…</p>
           ) : null}
           {token && !loading && !error && displayGames.length === 0 ? (
-            <p className="lobby-games-hint">尚無可玩遊戲。</p>
+            <p className="lobby-games-hint">No games available yet.</p>
           ) : null}
-          <div className="lobby-games-scroller">
-            <ul className="lobby-games-track" role="list">
-              {filteredLobbyGames.map((g) => (
-                <li key={g.id}>
-                  <button
-                    type="button"
-                    className="lobby-game-card"
-                    onClick={() => onPlayGame(g)}
-                    disabled={!!token && !g.launchUrl}
-                  >
-                    <div
-                      className="lobby-game-card__thumb"
-                      style={
-                        g.thumbnailUrl
-                          ? { backgroundImage: `url("${g.thumbnailUrl}")` }
-                          : undefined
-                      }
-                    >
-                      {!g.thumbnailUrl ? (
-                        <span className="lobby-game-card__fallback">{g.title}</span>
-                      ) : null}
-                    </div>
-                    <span className="lobby-game-card__title">{g.title}</span>
-                    {g.subtitle ? (
-                      <span className="lobby-game-card__sub">{g.subtitle}</span>
-                    ) : null}
-                  </button>
-                </li>
+          {token ? (
+            <div
+              ref={panelsRef}
+              className="lobby-games-panels"
+              onScroll={onPanelsScroll}
+            >
+              {LOBBY_FILTER_ORDER.map((panelId) => (
+                <div
+                  key={panelId}
+                  id={`lobby-panel-${panelId}`}
+                  className="lobby-games-panel"
+                  role="tabpanel"
+                  aria-labelledby={`lobby-tab-${panelId}`}
+                  aria-hidden={lobbyFilter !== panelId}
+                >
+                  {renderGameTrack(gamesByFilter[panelId])}
+                </div>
               ))}
-            </ul>
-          </div>
+            </div>
+          ) : (
+            renderGameTrack(displayGames)
+          )}
         </section>
 
         {tpId ? <TrustpilotSection businessUnitId={tpId} /> : null}
 
         <section className="lobby-benefits page-container" aria-labelledby="benefits-heading">
           <h2 id="benefits-heading" className="lobby-section-title">
-            平台優勢
+            Why play with us
           </h2>
           <div className="lobby-benefits__grid">
             {BENEFITS.map((b) => (
@@ -305,7 +431,7 @@ export function LandingPage() {
         </section>
 
         <div className="page-container">
-          <ProviderMarquee title="遊戲供應商" rowA={PROVIDERS_ROW_A} rowB={PROVIDERS_ROW_B} />
+          <ProviderMarquee title="Game providers" rowA={PROVIDERS_ROW_A} rowB={PROVIDERS_ROW_B} />
         </div>
 
         <SiteFooter />

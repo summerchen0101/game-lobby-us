@@ -2,10 +2,10 @@ import { CrownLogo } from './CrownLogo'
 import './SiteFooter.css'
 
 const FOOTER_LINKS: { href: string; label: string }[] = [
-  { href: '#terms', label: '服務條款' },
-  { href: '#privacy', label: '隱私權' },
-  { href: '#responsible', label: '理性遊戲' },
-  { href: '#help', label: '客服中心' },
+  { href: '#terms', label: 'Terms of Service' },
+  { href: '#privacy', label: 'Privacy' },
+  { href: '#responsible', label: 'Responsible gaming' },
+  { href: '#help', label: 'Help center' },
 ]
 
 export function SiteFooter() {
@@ -20,15 +20,18 @@ export function SiteFooter() {
         <div className="site-footer__top">
           <div className="site-footer__top-texts">
             <p className="site-footer__top-text">
-              我們重視理性娛樂與使用者安全。請適度遊戲，並詳閱相關說明。
+              We care about safe, responsible play. Please game in moderation and read our
+              policies.
             </p>
-            <p className="site-footer__top-text">更多資訊請見理性遊戲與幫助中心。</p>
+            <p className="site-footer__top-text">
+              For more, see responsible gaming and the help center.
+            </p>
           </div>
           <div className="site-footer__top-actions">
             <a href="#responsible" className="btn-crown-secondary">
-              理性遊戲
+              Responsible gaming
             </a>
-            <span className="site-footer__age" aria-label="年齡限制">
+            <span className="site-footer__age" aria-label="Age restriction">
               18+
             </span>
           </div>
@@ -36,9 +39,10 @@ export function SiteFooter() {
 
         <div className="site-footer__grid">
           <p className="site-footer__para">
-            本平台展示之促銷與內容僅供示意。實際規則以官方公告為準。未經授權請勿轉載。
+            Promotions and content shown here are for demonstration. Official rules always apply. Do
+            not republish without permission.
           </p>
-          <nav className="site-footer__nav" aria-label="頁尾連結">
+          <nav className="site-footer__nav" aria-label="Footer links">
             {FOOTER_LINKS.map(({ href, label }) => (
               <a key={href} className="site-footer__link" href={href}>
                 {label}
@@ -46,7 +50,8 @@ export function SiteFooter() {
             ))}
           </nav>
           <p className="site-footer__para">
-            Wynoco 大廳為遊戲入口整合介面。金流與遊戲內容由各合作方依其條款提供。
+            The Wynoco lobby is a game entry point. Purchases and game content are provided by
+            partners under their own terms.
           </p>
         </div>
       </div>

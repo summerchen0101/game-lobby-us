@@ -63,7 +63,7 @@
   align-items: center;
   gap: var(--space-2);
   min-height: 3.35rem;
-  padding: var(--space-2) var(--page-pad);
+  padding: var(--space-2) var(--page-pad-inline);
   max-width: var(--content-max);
   margin-inline: auto;
 }
@@ -302,7 +302,7 @@
 /* —— Support FAB —— */
 .session-support-fab {
   position: fixed;
-  right: max(var(--page-pad), var(--safe-right));
+  right: max(var(--page-pad-inline), var(--safe-right));
   bottom: calc(var(--session-footer-h, 4.25rem) + var(--safe-bottom) + var(--space-3));
   z-index: 180;
   width: 3rem;

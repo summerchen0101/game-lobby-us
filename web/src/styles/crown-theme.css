@@ -9,6 +9,14 @@
   --crown-purple-deep: #6d28d9;
   --crown-purple-shadow: #5b21b6;
   --crown-surface-dark: #191919;
+  /* Homepage “platform benefits” cards — brand purple tint vs flat #191919 */
+  --crown-benefit-card-bg: linear-gradient(
+    165deg,
+    #2a1f3a 0%,
+    #1a1226 50%,
+    #120c1a 100%
+  );
+  --crown-benefit-card-border: color-mix(in srgb, var(--crown-purple) 30%, transparent);
   --crown-card-radius: 12px;
   --crown-btn-radius: 999px;
   --crown-btn-shadow-h: 2.5px;

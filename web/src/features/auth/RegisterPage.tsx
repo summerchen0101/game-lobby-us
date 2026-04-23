@@ -33,7 +33,7 @@ export function RegisterPage() {
       navigate('/', { replace: true })
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : err instanceof Error ? err.message : '註冊失敗'
+        err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Registration failed'
       setError(msg)
     } finally {
       setSubmitting(false)
@@ -42,14 +42,14 @@ export function RegisterPage() {
 
   return (
     <div className="auth-layout">
-      <MarketingTopBar primary={{ to: '/login', label: '登入' }} />
+      <MarketingTopBar primary={{ to: '/login', label: 'Log in' }} />
       <div className="page-container auth-page">
-        <h1 className="auth-page__title">註冊</h1>
-        <p className="auth-page__lede">建立帳號後即可使用大廳與遊戲服務。</p>
+        <h1 className="auth-page__title">Register</h1>
+        <p className="auth-page__lede">Create an account to use the lobby and games.</p>
         <form className="auth-form auth-form--card" onSubmit={onSubmit} noValidate>
           <div className="auth-form__field">
             <label className="auth-form__label" htmlFor="reg-account">
-              帳號
+              Account
             </label>
             <input
               id="reg-account"
@@ -63,7 +63,7 @@ export function RegisterPage() {
           </div>
           <div className="auth-form__field">
             <label className="auth-form__label" htmlFor="reg-password">
-              密碼
+              Password
             </label>
             <input
               id="reg-password"
@@ -79,7 +79,7 @@ export function RegisterPage() {
           </div>
           <div className="auth-form__field">
             <label className="auth-form__label" htmlFor="reg-nick">
-              顯示名稱（選填）
+              Display name (optional)
             </label>
             <input
               id="reg-nick"
@@ -93,12 +93,12 @@ export function RegisterPage() {
           {error ? <p className="auth-form__error">{error}</p> : null}
           <div className="auth-form__actions">
             <button type="submit" className="btn-crown-primary auth-form__submit" disabled={submitting}>
-              {submitting ? '送出中…' : '註冊'}
+              {submitting ? 'Submitting…' : 'Register'}
             </button>
           </div>
         </form>
         <p className="auth-page__link">
-          已有帳號？ <Link to="/login">登入</Link>
+          Already have an account? <Link to="/login">Log in</Link>
         </p>
       </div>
     </div>

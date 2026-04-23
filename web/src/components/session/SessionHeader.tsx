@@ -44,7 +44,7 @@ export function SessionHeader() {
           <div className="session-header__pill" title="Wallet balance">
             <span className="session-header__pill-label">{label}</span>
             <span className="session-header__pill-amount">{amount}</span>
-            <Link to="/shop" className="session-header__pill-plus" aria-label="開啟商店加值">
+            <Link to="/shop" className="session-header__pill-plus" aria-label="Open shop to add coins">
               <Plus className="session-header__pill-plus-icon" size={20} strokeWidth={2.5} aria-hidden />
             </Link>
           </div>
@@ -55,7 +55,7 @@ export function SessionHeader() {
             className="session-header__wallet-track"
             role="switch"
             aria-checked={activeWallet === 'SC'}
-            aria-label="切換顯示金幣或兌獎幣"
+            aria-label="Switch between gold coins and sweepstakes coins"
             onClick={toggleWallet}
           >
             <span

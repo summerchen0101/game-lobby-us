@@ -5,7 +5,7 @@
   /* 行動版避開底部導航列；桌機用較大 bottom + safe */
   bottom: max(1.25rem, var(--safe-bottom));
   transform: translateX(-50%);
-  width: min(26rem, calc(100vw - var(--page-pad) * 2));
+  width: min(26rem, calc(100vw - var(--page-pad-inline) * 2));
   padding: var(--space-4);
   border-radius: var(--crown-card-radius);
   background: var(--crown-surface-dark);

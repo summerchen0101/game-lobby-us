@@ -60,7 +60,7 @@ export function TrustpilotSection({ businessUnitId }: Props) {
         <div
           ref={ref}
           className="trustpilot-widget"
-          data-locale="zh-TW"
+          data-locale="en-US"
           data-template-id="53aa8912dec7e10d38f59f36"
           data-businessunit-id={businessUnitId}
           data-style-height="140px"

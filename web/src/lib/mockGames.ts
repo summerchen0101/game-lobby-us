@@ -6,10 +6,10 @@ export type GameCard = {
 }
 
 export const MOCK_GAMES: GameCard[] = [
-  { id: '1', title: '範例遊戲 A', subtitle: '即將推出' },
-  { id: '2', title: '範例遊戲 B', subtitle: '維護中' },
-  { id: '3', title: '範例遊戲 C' },
-  { id: '4', title: '範例遊戲 D', subtitle: '熱門' },
-  { id: '5', title: '範例遊戲 E' },
-  { id: '6', title: '範例遊戲 F' },
+  { id: '1', title: 'Sample game A', subtitle: 'Coming soon' },
+  { id: '2', title: 'Sample game B', subtitle: 'Maintenance' },
+  { id: '3', title: 'Sample game C' },
+  { id: '4', title: 'Sample game D', subtitle: 'Hot' },
+  { id: '5', title: 'Sample game E' },
+  { id: '6', title: 'Sample game F' },
 ]

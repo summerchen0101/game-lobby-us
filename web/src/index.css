@@ -43,6 +43,8 @@
   --bp-wide: 64rem;     /* 1024 */
 
   --page-pad: clamp(var(--space-3), 2.5vw, var(--space-6));
+  /* 內容區左右：在 page-pad 上再加一層，與 /shop 一致、全站共用 */
+  --page-pad-inline: calc(var(--page-pad) + clamp(0.5rem, 3vw, 1.25rem));
   --content-max: 75rem;
 }
 
@@ -99,7 +101,7 @@ button {
   width: 100%;
   max-width: var(--content-max);
   margin-inline: auto;
-  padding-inline: var(--page-pad);
+  padding-inline: var(--page-pad-inline);
 }
 
 @media (min-width: 64rem) {

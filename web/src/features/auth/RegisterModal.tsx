@@ -61,7 +61,7 @@ export function RegisterModal({
       navigate('/', { replace: true })
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : err instanceof Error ? err.message : '註冊失敗'
+        err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Registration failed'
       setError(msg)
     } finally {
       setSubmitting(false)
@@ -69,7 +69,7 @@ export function RegisterModal({
   }
 
   function stubSocial(label: string) {
-    setStubMsg(`${label} 註冊尚未開放`)
+    setStubMsg(`${label} sign-up is not available yet`)
   }
 
   if (!open) return null
@@ -84,7 +84,7 @@ export function RegisterModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="auth-modal__header">
-          <button type="button" className="auth-modal__close" onClick={onClose} aria-label="關閉">
+          <button type="button" className="auth-modal__close" onClick={onClose} aria-label="Close">
             ×
           </button>
           <h2 id="register-modal-title" className="auth-modal__title">
@@ -130,7 +130,7 @@ export function RegisterModal({
           ) : (
             <form onSubmit={onSubmit} noValidate>
               <label className="auth-modal__field-label" htmlFor="modal-reg-account">
-                帳號
+                Account
               </label>
               <input
                 id="modal-reg-account"
@@ -142,7 +142,7 @@ export function RegisterModal({
                 required
               />
               <label className="auth-modal__field-label" htmlFor="modal-reg-password">
-                密碼
+                Password
               </label>
               <input
                 id="modal-reg-password"
@@ -156,7 +156,7 @@ export function RegisterModal({
                 minLength={6}
               />
               <label className="auth-modal__field-label" htmlFor="modal-reg-nick">
-                顯示名稱（選填）
+                Display name (optional)
               </label>
               <input
                 id="modal-reg-nick"
@@ -172,7 +172,7 @@ export function RegisterModal({
               </button>
               <p className="auth-modal__footer">
                 <button type="button" className="auth-modal__footer-link" onClick={onBackFromEmail}>
-                  ← 其他註冊方式
+                  ← Other sign-up options
                 </button>
               </p>
             </form>

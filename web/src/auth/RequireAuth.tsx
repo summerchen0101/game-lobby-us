@@ -8,7 +8,7 @@ export function RequireAuth() {
   if (!ready) {
     return (
       <div className="page-container auth-gate" style={{ paddingBlock: '2rem' }}>
-        <p className="auth-gate__text">載入中…</p>
+        <p className="auth-gate__text">Loading…</p>
       </div>
     )
   }

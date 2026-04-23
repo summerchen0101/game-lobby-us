@@ -50,7 +50,7 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
       }
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : err instanceof Error ? err.message : '登入失敗'
+        err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Sign-in failed'
       setError(msg)
     } finally {
       setSubmitting(false)
@@ -58,7 +58,7 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
   }
 
   function stubSocial(label: string) {
-    setStubMsg(`${label} 登入尚未開放`)
+    setStubMsg(`${label} sign-in is not available yet`)
   }
 
   if (!open) return null
@@ -73,7 +73,7 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="auth-modal__header">
-          <button type="button" className="auth-modal__close" onClick={onClose} aria-label="關閉">
+          <button type="button" className="auth-modal__close" onClick={onClose} aria-label="Close">
             ×
           </button>
           <h2 id="login-modal-title" className="auth-modal__title">
@@ -145,7 +145,7 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
             <button
               type="button"
               className="auth-modal__footer-link"
-              onClick={() => setStubMsg('重設密碼功能尚未開放')}
+              onClick={() => setStubMsg('Password reset is not available yet')}
             >
               CLICK HERE
             </button>

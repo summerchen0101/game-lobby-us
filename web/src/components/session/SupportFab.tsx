@@ -6,7 +6,7 @@ export function SupportFab() {
     <button
       type="button"
       className="session-support-fab"
-      aria-label="客服"
+      aria-label="Support"
       onClick={() => {
         /* placeholder */
       }}

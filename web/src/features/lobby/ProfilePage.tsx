@@ -12,7 +12,7 @@ const SOUND_KEY = 'wynoco_profile_sound_on'
 
 function formatBalance(n: number | undefined, currency?: string) {
   if (n === undefined) return '—'
-  const u = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 2 }).format(n)
+  const u = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n)
   return currency ? `${u} ${currency}` : u
 }
 
@@ -32,7 +32,7 @@ export function ProfilePage() {
       await refreshUser()
     } catch (e) {
       const msg =
-        e instanceof ApiError ? e.message : e instanceof Error ? e.message : '無法重新整理'
+        e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Could not refresh'
       setError(msg)
     }
   }, [refreshUser])
@@ -77,7 +77,7 @@ export function ProfilePage() {
       }
     } catch (e) {
       const msg =
-        e instanceof ApiError ? e.message : e instanceof Error ? e.message : '無法取得儲值頁'
+        e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Could not open add funds'
       setError(msg)
     } finally {
       setDepositing(false)
@@ -89,9 +89,9 @@ export function ProfilePage() {
     setCopyMsg(null)
     try {
       await navigator.clipboard.writeText(user.id)
-      setCopyMsg('已複製')
+      setCopyMsg('Copied')
     } catch {
-      setCopyMsg('無法複製，請手動選取')
+      setCopyMsg('Could not copy—select the ID manually')
     }
     window.setTimeout(() => setCopyMsg(null), 2500)
   }
@@ -216,20 +216,21 @@ export function ProfilePage() {
               onClick={() => onDeposit()}
               disabled={depositing}
             >
-              {depositing ? '準備中…' : '儲值'}
+              {depositing ? 'Preparing…' : 'Add funds'}
             </button>
             <button
               type="button"
               className="btn-crown-ghost profile-page__btn-block"
               onClick={onRefresh}
             >
-              重新整理餘額
+              Refresh balance
             </button>
           </div>
         </div>
 
         <p className="profile-page__hint">
-          從金流或外部頁面返回此分頁時，會嘗試自動重新整理餘額；若數字未更新請手動按「重新整理餘額」。
+          When you return from checkout or another page, we try to refresh your balance. If the
+          amount looks stale, tap &quot;Refresh balance&quot; manually.
         </p>
       </div>
 

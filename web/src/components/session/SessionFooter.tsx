@@ -22,7 +22,7 @@ const iconByName: Record<Item['icon'], LucideIcon> = {
 
 export function SessionFooter() {
   return (
-    <nav className="session-footer" aria-label="主要導覽">
+    <nav className="session-footer" aria-label="Main navigation">
       <ul className="session-footer__list">
         {items.map(({ to, label, end, icon }) => {
           const Icon = iconByName[icon]

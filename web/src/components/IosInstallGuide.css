@@ -5,9 +5,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--page-pad);
   padding-top: max(var(--page-pad), var(--safe-top));
   padding-bottom: max(var(--page-pad), var(--safe-bottom));
+  padding-left: var(--page-pad-inline);
+  padding-right: var(--page-pad-inline);
   background: rgba(0, 0, 0, 0.6);
 }
 

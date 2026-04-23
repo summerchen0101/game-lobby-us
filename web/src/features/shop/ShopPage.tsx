@@ -48,7 +48,9 @@ export function ShopPage() {
             </li>
           ))}
         </ul>
-        <p className="shop-page__hint">僅介面示意，實際購買流程請接後端金流。</p>
+        <p className="shop-page__hint">
+          UI preview only—wire real purchases to your payment backend.
+        </p>
       </div>
     </div>
   )

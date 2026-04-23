@@ -34,9 +34,9 @@ export function GameOverlay({
         type="button"
         className="game-overlay__close"
         onClick={onClose}
-        aria-label="關閉"
+        aria-label="Close"
       >
-        <span className="game-overlay__close-text">關閉</span>
+        <span className="game-overlay__close-text">Close</span>
       </button>
       <iframe
         className="game-overlay__frame"

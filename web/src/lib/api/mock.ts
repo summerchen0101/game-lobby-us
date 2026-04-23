@@ -23,7 +23,7 @@ const MOCK_THUMBS = [
 
 const mockUser: User = {
   id: 'mock-user-1',
-  displayName: '測試玩家',
+  displayName: 'Test player',
   balance: 89800,
   currency: 'GC',
   sweepstakesBalance: 507780,

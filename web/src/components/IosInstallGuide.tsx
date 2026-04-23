@@ -42,7 +42,7 @@ export function IosInstallGuide() {
     >
       <div className="ios-guide__card">
         <h2 id="ios-guide-title" className="ios-guide__title">
-          iOS 主畫面安裝方式
+          Add to Home Screen (iOS)
         </h2>
         <img
           className="ios-guide__icon"
@@ -54,7 +54,7 @@ export function IosInstallGuide() {
         />
         <div className="ios-guide__steps">
           <p>
-            1. 點瀏覽器網址列旁的<b> 分享</b>圖示
+            1. Tap the <b>Share</b> button in the browser bar
             <img
               className="ios-guide__share"
               src="/share-hint.png"
@@ -62,14 +62,14 @@ export function IosInstallGuide() {
               height={18}
               alt=""
             />
-            。
+            .
           </p>
           <p>
-            2. 向下滑找到並點選<b>「加入主畫面」</b>。
+            2. Scroll down and tap <b>Add to Home Screen</b>.
           </p>
         </div>
         <button type="button" className="ios-guide__dismiss" onClick={close}>
-          我先用瀏覽器觀看即可
+          Continue in the browser
         </button>
       </div>
     </div>

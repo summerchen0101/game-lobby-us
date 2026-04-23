@@ -32,21 +32,21 @@ export function PwaInstallBanner() {
     <div
       className="pwa-banner"
       role="dialog"
-      aria-label="安裝應用程式"
+      aria-label="Install app"
     >
         <p className="pwa-banner__text">
-        安裝 Wynoco 到主畫面，體驗更順暢。
+        Install Wynoco to your home screen for a smoother experience.
         </p>
         <div className="pwa-banner__actions">
         <button type="button" className="pwa-banner__btn pwa-banner__btn--primary" onClick={onInstall}>
-            立即安裝
+            Install
           </button>
         <button
           type="button"
           className="pwa-banner__btn pwa-banner__btn--secondary"
           onClick={() => setDismissed(true)}
         >
-            稍後
+            Not now
           </button>
         </div>
     </div>

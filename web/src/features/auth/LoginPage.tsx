@@ -30,7 +30,7 @@ export function LoginPage() {
       navigate(redirectTo, { replace: true })
     } catch (err) {
       const msg =
-        err instanceof ApiError ? err.message : err instanceof Error ? err.message : '登入失敗'
+        err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Sign-in failed'
       setError(msg)
     } finally {
       setSubmitting(false)
@@ -40,16 +40,16 @@ export function LoginPage() {
   return (
     <div className="auth-layout">
       <MarketingTopBar
-        primary={{ to: '/register', label: '註冊' }}
-        secondary={{ to: '/login', label: '登入' }}
+        primary={{ to: '/register', label: 'Register' }}
+        secondary={{ to: '/login', label: 'Log in' }}
       />
       <div className="page-container auth-page">
-        <h1 className="auth-page__title">登入</h1>
-        <p className="auth-page__lede">輸入帳號與密碼以進入大廳。</p>
+        <h1 className="auth-page__title">Log in</h1>
+        <p className="auth-page__lede">Enter your account and password to open the lobby.</p>
         <form className="auth-form auth-form--card" onSubmit={onSubmit} noValidate>
           <div className="auth-form__field">
             <label className="auth-form__label" htmlFor="login-account">
-              帳號
+              Account
             </label>
             <input
               id="login-account"
@@ -63,7 +63,7 @@ export function LoginPage() {
           </div>
           <div className="auth-form__field">
             <label className="auth-form__label" htmlFor="login-password">
-              密碼
+              Password
             </label>
             <input
               id="login-password"
@@ -79,12 +79,12 @@ export function LoginPage() {
           {error ? <p className="auth-form__error">{error}</p> : null}
           <div className="auth-form__actions">
             <button type="submit" className="btn-crown-primary auth-form__submit" disabled={submitting}>
-              {submitting ? '登入中…' : '登入'}
+              {submitting ? 'Signing in…' : 'Log in'}
             </button>
           </div>
         </form>
         <p className="auth-page__link">
-          還沒有帳號？ <Link to="/register">註冊</Link>
+          No account yet? <Link to="/register">Register</Link>
         </p>
       </div>
     </div>

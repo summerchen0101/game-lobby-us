@@ -1,7 +1,7 @@
 {
   "name": "Wynoco",
   "short_name": "Wynoco",
-  "description": "遊戲大廳",
+  "description": "Wynoco game lobby",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000200",

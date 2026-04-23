@@ -30,7 +30,7 @@ export function TermsGateModal({ open, onClose, onAccept }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="auth-modal__header">
-          <button type="button" className="auth-modal__close" onClick={onClose} aria-label="關閉">
+          <button type="button" className="auth-modal__close" onClick={onClose} aria-label="Close">
             ×
           </button>
           <h2 id="terms-gate-title" className="auth-modal__title">

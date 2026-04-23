@@ -5,7 +5,7 @@ import './LandingHeader.css'
 
 function formatHeaderBalance(n: number | undefined, currency?: string) {
   if (n === undefined) return null
-  const u = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 }).format(n)
+  const u = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n)
   return currency ? `${u} ${currency}` : u
 }
 
@@ -28,16 +28,16 @@ export function LandingHeader({ onJoinUs, onLogin }: Props) {
           {user ? (
             <div className="landing-header__user">
               {formatHeaderBalance(user.balance, user.currency) ? (
-                <span className="landing-header__balance" title="餘額">
+                <span className="landing-header__balance" title="Balance">
                   {formatHeaderBalance(user.balance, user.currency)}
                 </span>
               ) : null}
               <span className="landing-header__nick">{user.displayName ?? user.id}</span>
               <Link to="/profile" className="landing-header__link-profile">
-                我的
+                Profile
               </Link>
               <button type="button" className="landing-header__logout" onClick={() => logout()}>
-                登出
+                Log out
               </button>
             </div>
           ) : (
