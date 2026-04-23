@@ -2,14 +2,29 @@ import type { Game } from '../../lib/api/types'
 
 const G = 'https://static.crowncoinscasino.com/production/assets/games'
 
+const DEFAULT_UNITY_DEMO_URL =
+  'https://unityweb-alpha.ffglobaltech.com/0000/Single1/index.html'
+
+function unityDemoGameUrl(): string {
+  return import.meta.env.VITE_UNITY_DEMO_URL?.trim() || DEFAULT_UNITY_DEMO_URL
+}
+
+/**
+ * 「Our Top Games」內用於 Unity WebGL iframe 試玩之遊戲卡（與訪客首列 Olympia 為同一筆體感）。
+ * 已登入時會再插入 API 回傳列表前方，方便同區塊測試。
+ */
+export const UNITY_DEMO_LOBBY_GAME: Game = {
+  id: 'ffgt-unity-webgl-demo',
+  title: 'Olympia',
+  subtitle: 'WebGL (Alpha)',
+  launchUrl: unityDemoGameUrl(),
+  openInNewWindow: false,
+  thumbnailUrl: `${G}/crownslots/olympics-alternate-all-KXkAo.webp`,
+}
+
 /** 未登入首頁展示的靜態遊戲列（與精選遊戲版位相同）。 */
 export const GUEST_DEMO_GAMES: Game[] = [
-  {
-    id: 'guest-1',
-    title: 'Olympia',
-    launchUrl: '',
-    thumbnailUrl: `${G}/crownslots/olympics-alternate-all-KXkAo.webp`,
-  },
+  { ...UNITY_DEMO_LOBBY_GAME },
   {
     id: 'guest-2',
     title: 'Coin Strike',

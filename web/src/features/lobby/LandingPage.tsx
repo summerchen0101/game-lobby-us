@@ -25,6 +25,7 @@ import {
   PROVIDERS_ROW_A,
   PROVIDERS_ROW_B,
   getLobbyHeroImage,
+  UNITY_DEMO_LOBBY_GAME,
 } from './landingContent'
 import { ProviderMarquee } from './ProviderMarquee'
 import './LobbyPage.css'
@@ -90,7 +91,7 @@ export function LandingPage() {
   const floatPath = floatingCtaPath()
 
   const displayGames = useMemo(
-    () => (token ? apiItems : GUEST_DEMO_GAMES),
+    () => (token ? [UNITY_DEMO_LOBBY_GAME, ...apiItems] : GUEST_DEMO_GAMES),
     [token, apiItems],
   )
 
@@ -256,18 +257,20 @@ export function LandingPage() {
   }
 
   function onPlayGame(g: Game) {
+    if (g.launchUrl) {
+      openShell({
+        url: g.launchUrl,
+        widthPercent: g.embedWidthPercent,
+        heightPercent: g.embedHeightPercent,
+        isPayment: false,
+        openInNewWindow: g.openInNewWindow,
+      })
+      return
+    }
     if (!token) {
       openTermsThen('login')
       return
     }
-    if (!g.launchUrl) return
-    openShell({
-      url: g.launchUrl,
-      widthPercent: g.embedWidthPercent,
-      heightPercent: g.embedHeightPercent,
-      isPayment: false,
-      openInNewWindow: g.openInNewWindow,
-    })
   }
 
   function onGuestGateAction() {
