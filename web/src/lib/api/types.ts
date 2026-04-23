@@ -3,6 +3,8 @@ export type User = {
   displayName?: string
   balance?: number
   currency?: string
+  /** Sweepstakes / SC coin balance（可選，API 未回傳時前端可顯示 0） */
+  sweepstakesBalance?: number
 }
 
 export type AuthResponse = {

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { LandingHeader } from '../../components/LandingHeader'
+import { SessionChromeShell } from '../../components/session/SessionChromeShell'
 import { SiteFooter } from '../../components/SiteFooter'
 import { TrustpilotSection } from '../../components/TrustpilotSection'
 import { useGameShell } from '../../components/useGameShell'
@@ -29,12 +30,6 @@ import { ProviderMarquee } from './ProviderMarquee'
 import './LobbyPage.css'
 
 const defaultOpenLabel = openGamesInNewWindowDefault() ? '預設新分頁' : '預設內嵌'
-
-function formatBalance(n: number | undefined, currency?: string) {
-  if (n === undefined) return '—'
-  const u = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 2 }).format(n)
-  return currency ? `${u} ${currency}` : u
-}
 
 export function LandingPage() {
   const { token, user, refreshUser } = useAuth()
@@ -154,13 +149,8 @@ export function LandingPage() {
     openTermsThen('login')
   }
 
-  return (
-    <div className="lobby-landing">
-      <LandingHeader
-        onJoinUs={() => openTermsThen('register')}
-        onLogin={() => openTermsThen('login')}
-      />
-
+  const landingMain = (
+    <>
       <main className="lobby-landing__main">
         <section className="lobby-hero-banner" aria-label="促銷主視覺">
           <div className="lobby-hero-banner__content page-container">
@@ -178,8 +168,7 @@ export function LandingPage() {
         <div className="lobby-claim-wrap page-container">
           {user ? (
             <p className="lobby-welcome">
-              歡迎回來{user.displayName ? `，${user.displayName}` : ''} · 餘額{' '}
-              <strong>{formatBalance(user.balance, user.currency)}</strong>
+              歡迎回來{user.displayName ? `，${user.displayName}` : ''}
             </p>
           ) : null}
           <div className="lobby-claim-actions">
@@ -303,6 +292,18 @@ export function LandingPage() {
           </button>
         )}
       </div>
+    </>
+  )
+
+  return (
+    <div className={'lobby-landing' + (user ? ' lobby-landing--session' : '')}>
+      {!user ? (
+        <LandingHeader
+          onJoinUs={() => openTermsThen('register')}
+          onLogin={() => openTermsThen('login')}
+        />
+      ) : null}
+      {user ? <SessionChromeShell>{landingMain}</SessionChromeShell> : landingMain}
 
       <TermsGateModal open={termsOpen} onClose={closeTerms} onAccept={onTermsAccepted} />
       <LoginModal

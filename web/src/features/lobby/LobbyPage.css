@@ -294,9 +294,18 @@ a.lobby-claim-btn-welcome {
   pointer-events: none;
 }
 
+/* 登入後五格 footer 較高，浮動 CTA 需避開 */
+.lobby-landing--session .lobby-floating-cta {
+  bottom: calc(var(--session-footer-h) + var(--space-4));
+}
+
 @media (min-width: 48rem) {
   .lobby-floating-cta {
     bottom: var(--space-6);
+  }
+
+  .lobby-landing--session .lobby-floating-cta {
+    bottom: calc(var(--session-footer-h) + var(--space-4));
   }
 }
 

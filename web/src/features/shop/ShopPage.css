@@ -1,0 +1,104 @@
+.shop-page {
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-8);
+}
+
+.shop-page__title {
+  margin: 0 0 var(--space-2);
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.25rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+
+.shop-page__subtitle {
+  margin: 0 0 var(--space-6);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #22c55e;
+}
+
+.shop-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 30rem) {
+  .shop-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.shop-page__card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: var(--space-3);
+  border-radius: 1rem;
+  background: #141414;
+  border: 1px solid rgb(234 179 8 / 22%);
+}
+
+.shop-page__card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.shop-page__gc {
+  font-weight: 900;
+  font-size: 1rem;
+  color: #eab308;
+}
+
+.shop-page__coin {
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #eab308;
+  opacity: 0.9;
+}
+
+.shop-page__card-art {
+  flex: 1;
+  min-height: 4rem;
+  margin-bottom: var(--space-2);
+  border-radius: 0.5rem;
+  background: linear-gradient(160deg, rgb(234 179 8 / 25%) 0%, rgb(34 197 94 / 15%) 100%);
+}
+
+.shop-page__bonus {
+  margin: 0 0 var(--space-2);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #22c55e;
+}
+
+.shop-page__price {
+  width: 100%;
+  min-height: 2.5rem;
+  border: none;
+  border-radius: 0.65rem;
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font: inherit;
+  font-weight: 900;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.shop-page__price:hover {
+  filter: brightness(1.06);
+}
+
+.shop-page__hint {
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-small);
+  color: var(--color-text-muted);
+  text-align: center;
+}
