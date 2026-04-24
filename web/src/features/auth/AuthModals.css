@@ -19,7 +19,7 @@
   max-height: min(90dvh, 640px);
   overflow-y: auto;
   border-radius: 1.35rem;
-  background: #4b1f5e;
+  background: #1b2631;
   color: #fff;
   box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 55%);
   border: 1px solid rgb(255 255 255 / 12%);
@@ -214,7 +214,7 @@
 }
 
 .auth-modal__input::placeholder {
-  color: rgb(180 160 200 / 85%);
+  color: rgb(156 170 162 / 85%);
 }
 
 .auth-modal__input:focus {

@@ -43,7 +43,7 @@
 .promo-page__art {
   border-radius: 0.75rem;
   min-height: 5.5rem;
-  background: linear-gradient(160deg, rgb(88 50 150 / 45%) 0%, rgb(234 179 8 / 15%) 45%, rgb(34 197 94 / 12%) 100%);
+  background: linear-gradient(160deg, rgb(74 222 128 / 22%) 0%, rgb(230 192 64 / 18%) 45%, rgb(22 163 74 / 12%) 100%);
   border: 1px solid rgb(255 255 255 / 6%);
 }
 
@@ -82,8 +82,8 @@
   padding: 0 1rem;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(180deg, #7b5cc9 0%, #5b3da8 100%);
-  color: #fff;
+  background: linear-gradient(180deg, #86efac 0%, #4ade80 42%, #16a34a 100%);
+  color: #0a1a0f;
   font: inherit;
   font-size: 0.72rem;
   font-weight: 900;

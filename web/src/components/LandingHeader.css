@@ -4,7 +4,7 @@
   z-index: 100;
   flex-shrink: 0;
   padding-top: var(--safe-top);
-  background: rgb(35 18 48 / 94%);
+  background: rgb(15 20 25 / 94%);
   border-bottom: 1px solid rgb(255 255 255 / 8%);
   backdrop-filter: blur(12px);
 }
@@ -78,9 +78,9 @@
 }
 
 .landing-header__join {
-  background: linear-gradient(180deg, #2ee59d 0%, #00c16e 55%, #00a35d 100%);
-  color: #0a1f16;
-  box-shadow: 0 3px 0 #007a47;
+  background: linear-gradient(180deg, #86efac 0%, #4ade80 45%, #16a34a 100%);
+  color: #0a1a0f;
+  box-shadow: 0 3px 0 #14532d;
 }
 
 .landing-header__join:hover {
@@ -88,9 +88,9 @@
 }
 
 .landing-header__login {
-  background: linear-gradient(180deg, #7c3acd 0%, #5b21a6 50%, #4a1890 100%);
-  color: #fff;
-  box-shadow: 0 3px 0 #3b0d6e;
+  background: linear-gradient(180deg, #f5d25a 0%, #e6c040 55%, #c9a06a 100%);
+  color: #1a1000;
+  box-shadow: 0 3px 0 #9a7030;
 }
 
 .landing-header__login:hover {

@@ -15,9 +15,9 @@
 .redeem-page__ticker-outer {
   margin: 0 0 var(--space-2);
   overflow: hidden;
-  background: #141b2e;
+  background: #1a222c;
   border-radius: 0.35rem;
-  border: 1px solid rgb(93 139 244 / 35%);
+  border: 1px solid rgb(74 222 128 / 28%);
 }
 
 .redeem-page__ticker-track {
@@ -27,7 +27,7 @@
   padding: 0.4rem 0;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #5d8bf4;
+  color: #4ade80;
   white-space: nowrap;
   animation: redeem-ticker 22s linear infinite;
 }
@@ -79,7 +79,7 @@
   border: none;
   border-radius: 0.4rem;
   background: rgb(0 0 0 / 25%);
-  color: #5d8bf4;
+  color: #4ade80;
   font-size: 1.1rem;
   cursor: pointer;
   text-decoration: none;
@@ -162,8 +162,8 @@
   margin-top: var(--space-4);
   padding: var(--space-4);
   border-radius: 0.75rem;
-  background: #161a2a;
-  border: 1px solid rgb(93 139 244 / 22%);
+  background: #1a222c;
+  border: 1px solid rgb(74 222 128 / 18%);
 }
 
 .redeem-page__panel--warn .redeem-page__panel-title {
@@ -199,8 +199,8 @@
   padding: 0.9rem 1.25rem;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(180deg, #6b9cf5 0%, #5d8bf4 100%);
-  color: #fff;
+  background: linear-gradient(180deg, #86efac 0%, #4ade80 42%, #16a34a 100%);
+  color: #0a1a0f;
   font: inherit;
   font-size: 0.85rem;
   font-weight: 900;
@@ -209,7 +209,7 @@
   text-decoration: none;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgb(93 139 244 / 25%);
+  box-shadow: 0 4px 16px rgb(22 163 74 / 28%);
 }
 
 .redeem-page__to-lobby:hover {

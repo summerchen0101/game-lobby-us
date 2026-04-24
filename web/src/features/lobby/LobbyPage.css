@@ -12,8 +12,8 @@
   z-index: -1;
   background-color: transparent;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(90 100 200 / 8%), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 40%, rgb(70 65 150 / 10%), transparent 45%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(74 222 128 / 7%), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 40%, rgb(230 192 64 / 8%), transparent 45%);
   pointer-events: none;
 }
 
@@ -91,9 +91,9 @@ a.lobby-claim-btn-welcome {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  color: #fff;
-  background: linear-gradient(180deg, #2ee59d 0%, #00c16e 45%, #00a35d 100%);
-  box-shadow: 0 5px 0 #007a47;
+  color: #0a1a0f;
+  background: linear-gradient(180deg, #86efac 0%, #4ade80 42%, #16a34a 100%);
+  box-shadow: 0 5px 0 #14532d;
   transition: filter 0.15s ease;
 }
 

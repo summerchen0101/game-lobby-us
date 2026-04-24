@@ -4,8 +4,8 @@
   "description": "Wynoco game lobby",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000200",
-  "theme_color": "#000200",
+  "background_color": "#141b22",
+  "theme_color": "#141b22",
   "icons": [
     {
       "src": "/imgs/pwa_icon.png",

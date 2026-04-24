@@ -212,7 +212,7 @@ export function ProfilePage() {
         <div className="profile-page__wallet">
           <p className="profile-page__wallet-title">Wallet</p>
           <p className="profile-page__uid" style={{ margin: 0, fontSize: '0.88rem' }}>
-            Balance: <strong style={{ color: 'var(--crown-gold, #ffc600)' }}>{formatBalance(user?.balance, user?.currency)}</strong>
+            Balance: <strong style={{ color: 'var(--crown-gold, #e6c040)' }}>{formatBalance(user?.balance, user?.currency)}</strong>
           </p>
           {error ? <p className="profile-page__error">{error}</p> : null}
           <div className="profile-page__wallet-row">
