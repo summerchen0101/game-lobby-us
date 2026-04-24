@@ -22,17 +22,18 @@
   /* 頂 25% 黑、底全透，整塊覆蓋 */
   --hdr-bg: linear-gradient(180deg, rgb(0 0 0 / 0.25) 0%, transparent 100%);
 
+  /* 金額藥丸內圓幣圖、加號鈕等直徑 */
+  --hdr-pill-circle: 1.85rem;
+  /* 與 .session-header__pill 上下 padding 0.2rem + 最大內層圓鈕一致 */
+  --hdr-pill-outer-h: calc(0.2rem + 0.2rem + var(--hdr-pill-circle));
+
   /* GC (default) */
   --hdr-avatar-border: var(--hdr-stroke) solid rgb(34 197 94 / 55%);
   --hdr-pill-glow: 0 0 12px rgb(234 179 8 / 15%);
   --hdr-pill-border: var(--hdr-stroke) solid #eab308;
   --hdr-pill-plus-bg: #eab308;
   --hdr-pill-plus-fg: #0a0a0a;
-  --hdr-track-border: var(--hdr-stroke) solid rgb(234 179 8 / 55%);
-  --hdr-track-bg: #141018;
   --hdr-focus: #eab308;
-  --hdr-spade-color: #0a0a0a;
-  --hdr-spade-filter: none;
 
   position: sticky;
   top: 0;
@@ -42,18 +43,14 @@
   backdrop-filter: blur(10px);
 }
 
-.session-header[data-active-wallet='SC'] {
+.session-header[data-active-wallet="SC"] {
   /* Sweepstakes: 與 GC 同底漸層，僅 chrome 色 */
   --hdr-avatar-border: var(--hdr-stroke) solid rgb(245 158 11 / 65%);
   --hdr-pill-glow: 0 0 16px rgb(34 197 94 / 28%);
   --hdr-pill-border: var(--hdr-stroke) solid #4ade80;
   --hdr-pill-plus-bg: #22c55e;
   --hdr-pill-plus-fg: #fff;
-  --hdr-track-border: var(--hdr-stroke) solid rgb(34 197 94 / 60%);
-  --hdr-track-bg: #0c1810;
   --hdr-focus: #4ade80;
-  --hdr-spade-color: #0a0a0a;
-  --hdr-spade-filter: none;
 
   backdrop-filter: blur(10px);
 }
@@ -75,14 +72,12 @@
   flex-shrink: 0;
 }
 
-.session-header__spade {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.session-header__logo {
+  display: block;
   width: 2rem;
   height: 2rem;
-  color: var(--hdr-spade-color);
-  filter: var(--hdr-spade-filter);
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .session-header__avatar {
@@ -114,7 +109,9 @@
   gap: 0.35rem;
   min-width: 0;
   max-width: 100%;
-  padding: 0.2rem 0.35rem 0.2rem 0.65rem;
+  min-height: var(--hdr-pill-outer-h);
+  box-sizing: border-box;
+  padding: 0.2rem 0.3rem 0.2rem 0.3rem;
   border-radius: 999px;
   background: #0a0a0a;
   border: var(--hdr-pill-border);
@@ -127,8 +124,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 1.05rem;
-  height: 1.05rem;
+  width: var(--hdr-pill-circle);
+  height: var(--hdr-pill-circle);
   line-height: 0;
 }
 
@@ -166,8 +163,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.85rem;
-  height: 1.85rem;
+  width: var(--hdr-pill-circle);
+  height: var(--hdr-pill-circle);
   margin-left: 0.15rem;
   border-radius: 50%;
   background: var(--hdr-pill-plus-bg);
@@ -175,8 +172,8 @@
   line-height: 0;
   text-decoration: none;
   flex-shrink: 0;
-  min-width: 1.85rem;
-  min-height: 1.85rem;
+  min-width: var(--hdr-pill-circle);
+  min-height: var(--hdr-pill-circle);
   position: relative;
   z-index: 1;
 }
@@ -199,23 +196,27 @@
   min-width: 0;
 }
 
-/* Sliding wallet switch: pill track + circular thumb (GC / SC) */
+/* Sliding wallet switch: pill track + circular thumb (GC / SC) — 外觀與中間金額藥丸對齊 */
 .session-header__wallet-track {
-  --wallet-thumb: 1.5rem;
+  --wallet-thumb: 1.75rem;
   /* inner edge inset = same as pill padding (visual single ring, no "double" gold) */
   --wallet-inset: 0.2rem;
   /* travel = track width − paddings − borders − thumb (matches --hdr-stroke 2px) */
-  --wallet-slide: calc(4.4rem - 2 * var(--wallet-inset) - 2 * var(--hdr-stroke) - var(--wallet-thumb));
+  --wallet-slide: calc(
+    4.4rem - 2 * var(--wallet-inset) - 2 * var(--hdr-stroke) -
+      var(--wallet-thumb)
+  );
 
   position: relative;
   display: block;
   width: 4.4rem;
-  height: 1.85rem;
+  height: var(--hdr-pill-outer-h);
   padding: 0;
   box-sizing: border-box;
-  border: var(--hdr-track-border);
+  border: var(--hdr-pill-border);
   border-radius: 999px;
-  background: var(--hdr-track-bg);
+  background: #0a0a0a;
+  box-shadow: var(--hdr-pill-glow);
   cursor: pointer;
   flex-shrink: 0;
   overflow: hidden;
@@ -326,7 +327,9 @@
 .session-support-fab {
   position: fixed;
   right: max(var(--page-pad-inline), var(--safe-right));
-  bottom: calc(var(--session-footer-h, 4.25rem) + var(--safe-bottom) + var(--space-3));
+  bottom: calc(
+    var(--session-footer-h, 4.25rem) + var(--safe-bottom) + var(--space-3)
+  );
   z-index: 180;
   width: 3rem;
   height: 3rem;

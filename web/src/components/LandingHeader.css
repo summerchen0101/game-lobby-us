@@ -35,6 +35,10 @@
 
 .landing-header__mark {
   flex-shrink: 0;
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  object-fit: contain;
 }
 
 .landing-header__title {

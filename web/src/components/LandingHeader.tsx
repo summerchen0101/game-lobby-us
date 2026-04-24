@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
-import { CrownLogo } from './CrownLogo'
 import './LandingHeader.css'
+
+const BRAND_LOGO = '/imgs/brand-logo.webp'
 
 function formatHeaderBalance(n: number | undefined, currency?: string) {
   if (n === undefined) return null
@@ -21,7 +22,14 @@ export function LandingHeader({ onJoinUs, onLogin }: Props) {
     <header className="landing-header">
       <div className="landing-header__inner page-container">
         <Link to="/" className="landing-header__brand">
-          <CrownLogo className="landing-header__mark" width={44} aria-hidden />
+          <img
+            src={BRAND_LOGO}
+            alt=""
+            className="landing-header__mark"
+            width={44}
+            height={44}
+            decoding="async"
+          />
           <span className="landing-header__title">Wynoco</span>
         </Link>
         <div className="landing-header__end">

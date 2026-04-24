@@ -23,6 +23,14 @@
   min-width: 0;
 }
 
+.marketing-top-bar__mark {
+  display: block;
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .marketing-top-bar__title {
   font-weight: 700;
   font-size: 1.125rem;

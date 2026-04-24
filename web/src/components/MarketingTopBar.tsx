@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { CrownLogo } from './CrownLogo'
 import './MarketingTopBar.css'
+
+const BRAND_LOGO = '/imgs/brand-logo.webp'
 
 type NavBtn = { to: string; label: string }
 
@@ -13,7 +14,14 @@ export function MarketingTopBar({ primary, secondary }: Props) {
   return (
     <header className="marketing-top-bar">
       <Link to="/login" className="marketing-top-bar__brand">
-        <CrownLogo width={40} aria-hidden />
+        <img
+          src={BRAND_LOGO}
+          alt=""
+          className="marketing-top-bar__mark"
+          width={40}
+          height={40}
+          decoding="async"
+        />
         <span className="marketing-top-bar__title">Wynoco</span>
       </Link>
       <div className="marketing-top-bar__actions">
