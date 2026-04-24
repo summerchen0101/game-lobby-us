@@ -95,6 +95,32 @@
   flex-shrink: 0;
 }
 
+.session-header__home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  color: var(--crown-gold, #e6c040);
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.session-header__home:hover {
+  background: rgb(255 255 255 / 6%);
+}
+
+.session-header__home:focus-visible {
+  outline: 2px solid var(--hdr-focus);
+  outline-offset: 2px;
+}
+
+.session-header__home-icon {
+  width: 1.65rem;
+  height: 1.65rem;
+}
+
 .session-header__center {
   flex: 1;
   min-width: 0;

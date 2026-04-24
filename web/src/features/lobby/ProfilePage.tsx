@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Crown, Info, Send, Volume2 } from "lucide-react";
 import { useAuth } from "../../auth/useAuth";
 import { useGameShell } from "../../components/useGameShell";
 import { ApiError } from "../../lib/api/client";
@@ -9,6 +10,10 @@ import "./ProfilePage.css";
 import "./SessionPageDecor.css";
 
 const SOUND_KEY = "wynoco_profile_sound_on";
+const LOCATION_KEY = "wynoco_profile_location_on";
+const RANK_MAX = 500;
+/** Placeholder until rank API exists */
+const RANK_PCT = 0;
 
 function formatBalance(n: number | undefined, currency?: string) {
   if (n === undefined) return "—";
@@ -25,8 +30,13 @@ export function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [copyMsg, setCopyMsg] = useState<string | null>(null);
   const [soundOn, setSoundOn] = useState(true);
+  const [locationOn, setLocationOn] = useState(false);
   const fundsRef = useRef<HTMLDialogElement>(null);
   const liveId = useId();
+  const locationLabelId = useId();
+  const soundLabelId = useId();
+
+  const rankCurrent = Math.round((RANK_PCT / 100) * RANK_MAX);
 
   const onRefresh = useCallback(async () => {
     setError(null);
@@ -51,6 +61,12 @@ export function ProfilePage() {
     } else if (v === "1") {
       setSoundOn(true);
     }
+    const loc = window.localStorage.getItem(LOCATION_KEY);
+    if (loc === "1") {
+      setLocationOn(true);
+    } else if (loc === "0") {
+      setLocationOn(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -68,6 +84,8 @@ export function ProfilePage() {
     user?.id?.[0] ??
     "?"
   ).toUpperCase();
+
+  const displayHandle = user?.displayName?.trim() || user?.id?.trim() || "—";
 
   async function onDeposit() {
     if (!token) return;
@@ -122,6 +140,29 @@ export function ProfilePage() {
     });
   }
 
+  function toggleLocation() {
+    setLocationOn((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem(LOCATION_KEY, next ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+      if (next && typeof navigator !== "undefined" && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            /* preference only; no UI yet */
+          },
+          () => {
+            /* denied — keep toggle state; user can turn off */
+          },
+          { maximumAge: 60_000, timeout: 10_000 },
+        );
+      }
+      return next;
+    });
+  }
+
   function onMyProfile() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -140,36 +181,58 @@ export function ProfilePage() {
   }
 
   return (
-    <section className="profile-page page-container session-page session-page--pattern">
-      <h1 className="profile-page__title">PROFILE</h1>
+    <section
+      className="profile-page page-container session-page session-page--pattern"
+      aria-labelledby="profile-heading">
+      <h1 id="profile-heading" className="profile-page__sr-only">
+        Profile
+      </h1>
       <div className="profile-page__card">
         <div className="profile-page__hero">
-          <div className="profile-page__avatar" aria-hidden>
-            {initial}
-            <button
-              type="button"
-              className="profile-page__edit"
-              title="Edit (preview)"
-              aria-label="Edit (preview)"
-              tabIndex={-1}>
-              ✎
-            </button>
-          </div>
-          <div className="profile-page__uid-block">
-            <p className="profile-page__uid-label">UID</p>
-            <div className="profile-page__uid-row">
-              <p className="profile-page__uid">{user?.id ?? "—"}</p>
+          <div className="profile-page__avatar-stack">
+            <Crown
+              className="profile-page__crown-above"
+              size={22}
+              strokeWidth={2}
+              aria-hidden
+            />
+            <div className="profile-page__avatar" aria-hidden>
+              {initial}
               <button
                 type="button"
-                className="profile-page__copy"
-                onClick={() => {
-                  void copyUid();
-                }}
-                disabled={!user?.id}>
-                Copy
+                className="profile-page__edit"
+                title="Edit (preview)"
+                aria-label="Edit (preview)"
+                tabIndex={-1}>
+                ✎
               </button>
             </div>
           </div>
+          <p className="profile-page__display-name">{displayHandle}</p>
+          <div className="profile-page__level-row">
+            <span className="profile-page__level-label">Entry level</span>
+            <button
+              type="button"
+              className="profile-page__info-btn"
+              title="Level details will be available when your account is connected to the loyalty system."
+              aria-label="Level info">
+              <Info size={18} strokeWidth={2.5} aria-hidden />
+            </button>
+          </div>
+          {/* <div className="profile-page__uid-inline">
+            <span className="profile-page__uid-muted">
+              UID {user?.id ?? "—"}
+            </span>
+            <button
+              type="button"
+              className="profile-page__copy profile-page__copy--compact"
+              onClick={() => {
+                void copyUid();
+              }}
+              disabled={!user?.id}>
+              Copy
+            </button>
+          </div> */}
         </div>
         {copyMsg ? (
           <p
@@ -181,29 +244,70 @@ export function ProfilePage() {
           </p>
         ) : null}
 
-        <div className="profile-page__rank">
-          <div className="profile-page__rank-top">
-            <h2 className="profile-page__rank-name">Formal</h2>
-            <p className="profile-page__rank-pct">0%</p>
-          </div>
-          <div className="profile-page__bar" aria-hidden>
-            <div className="profile-page__bar-fill" />
+        <div className="profile-page__progress">
+          <div className="profile-page__bar-row">
+            <div
+              className="profile-page__bar"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={RANK_MAX}
+              aria-valuenow={rankCurrent}
+              aria-label="Level progress">
+              <div
+                className="profile-page__bar-fill"
+                style={{ width: `${RANK_PCT}%` }}
+              />
+              <span className="profile-page__bar-label">
+                {rankCurrent}/{RANK_MAX}
+              </span>
+              <div className="profile-page__bar-cap" aria-hidden>
+                <Crown size={14} strokeWidth={2.5} />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="profile-page__sound">
-          <span className="profile-page__sound-label" id="sound-label">
-            Sound
-          </span>
-          <button
-            type="button"
-            className="profile-page__switch"
-            role="switch"
-            aria-checked={soundOn}
-            aria-labelledby="sound-label"
-            onClick={toggleSound}>
-            <span className="profile-page__switch-thumb" />
-          </button>
+        <div className="profile-page__settings">
+          <div className="profile-page__setting-row">
+            <span className="profile-page__setting-label" id={locationLabelId}>
+              <Send
+                className="profile-page__setting-icon"
+                size={18}
+                strokeWidth={2}
+                aria-hidden
+              />
+              Location
+            </span>
+            <button
+              type="button"
+              className="profile-page__switch"
+              role="switch"
+              aria-checked={locationOn}
+              aria-labelledby={locationLabelId}
+              onClick={toggleLocation}>
+              <span className="profile-page__switch-thumb" />
+            </button>
+          </div>
+          <div className="profile-page__setting-row">
+            <span className="profile-page__setting-label" id={soundLabelId}>
+              <Volume2
+                className="profile-page__setting-icon"
+                size={18}
+                strokeWidth={2}
+                aria-hidden
+              />
+              Sound
+            </span>
+            <button
+              type="button"
+              className="profile-page__switch"
+              role="switch"
+              aria-checked={soundOn}
+              aria-labelledby={soundLabelId}
+              onClick={toggleSound}>
+              <span className="profile-page__switch-thumb" />
+            </button>
+          </div>
         </div>
 
         <div className="profile-page__btns">
@@ -221,7 +325,7 @@ export function ProfilePage() {
           </button>
           <button
             type="button"
-            className="profile-page__btn-pill profile-page__btn-pill--dark"
+            className="profile-page__btn-pill"
             onClick={openFunds}>
             FUNDS HISTORY
           </button>
@@ -236,7 +340,7 @@ export function ProfilePage() {
         <div className="profile-page__wallet">
           <p className="profile-page__wallet-title">Wallet</p>
           <p
-            className="profile-page__uid"
+            className="profile-page__uid profile-page__wallet-balance"
             style={{ margin: 0, fontSize: "0.88rem" }}>
             Balance:{" "}
             <strong style={{ color: "var(--crown-gold, #e6c040)" }}>
@@ -260,6 +364,10 @@ export function ProfilePage() {
             </button>
           </div>
         </div>
+
+        <a className="profile-page__privacy" href="#privacy">
+          Privacy Policy
+        </a>
 
         <p className="profile-page__hint">
           When you return from checkout or another page, we try to refresh your

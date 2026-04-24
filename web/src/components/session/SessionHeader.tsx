@@ -1,5 +1,5 @@
-import { Plus } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Home, Plus } from 'lucide-react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { getCurrencyIconUrl } from '../../lib/currencyIcons'
 import { getWalletDisplay } from '../../wallet/formatWalletAmount'
@@ -9,9 +9,11 @@ import './SessionChrome.css'
 const BRAND_LOGO = '/imgs/brand-logo.webp'
 
 export function SessionHeader() {
+  const { pathname } = useLocation()
   const { user } = useAuth()
   const { activeWallet, setActiveWallet } = useWallet()
   const { label, amount } = getWalletDisplay(user ?? undefined, activeWallet)
+  const profileHome = pathname === '/profile'
 
   const initial =
     (user?.displayName?.trim()?.[0] ?? user?.id?.[0] ?? '?').toUpperCase()
@@ -27,17 +29,30 @@ export function SessionHeader() {
     >
       <div className="session-header__inner">
         <div className="session-header__left">
-          <img
-            src={BRAND_LOGO}
-            alt=""
-            className="session-header__logo"
-            width={32}
-            height={32}
-            decoding="async"
-          />
-          <div className="session-header__avatar" aria-hidden>
-            {initial}
-          </div>
+          {profileHome ? (
+            <NavLink
+              to="/"
+              end
+              className="session-header__home"
+              aria-label="Lobby home"
+            >
+              <Home className="session-header__home-icon" strokeWidth={2.25} aria-hidden />
+            </NavLink>
+          ) : (
+            <>
+              <img
+                src={BRAND_LOGO}
+                alt=""
+                className="session-header__logo"
+                width={32}
+                height={32}
+                decoding="async"
+              />
+              <div className="session-header__avatar" aria-hidden>
+                {initial}
+              </div>
+            </>
+          )}
         </div>
         <div className="session-header__center">
           <div className="session-header__pill" title="Wallet balance">
