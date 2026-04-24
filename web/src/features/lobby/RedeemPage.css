@@ -139,7 +139,8 @@
   overflow: hidden;
   line-height: 0;
   flex-shrink: 0;
-  box-shadow: 0 0 0 1px color-mix(in srgb, #15803d 35%, transparent),
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, #15803d 35%, transparent),
     0 0 12px rgb(34 197 94 / 22%);
 }
 

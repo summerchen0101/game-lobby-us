@@ -73,7 +73,9 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: filter 0.15s ease, transform 0.08s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.08s ease;
   white-space: nowrap;
 }
 

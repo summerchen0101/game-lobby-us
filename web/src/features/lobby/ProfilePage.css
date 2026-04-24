@@ -1,17 +1,41 @@
 /* Scoped tokens — align with crown-theme / Session chrome */
 .profile-page {
   --profile-surface-bleed: #12181f;
-  --profile-hairline: color-mix(in srgb, var(--crown-gold) 9%, rgb(255 255 255 / 8%));
-  --profile-hairline-soft: color-mix(in srgb, var(--crown-gold) 4%, rgb(255 255 255 / 5%));
-  --profile-rank-bg: color-mix(in srgb, rgb(0 0 0) 40%, var(--crown-purple-deep) 12%);
-  --profile-bar-track: color-mix(in srgb, #0a0a0a 75%, var(--crown-purple-deep) 16%);
+  --profile-hairline: color-mix(
+    in srgb,
+    var(--crown-gold) 9%,
+    rgb(255 255 255 / 8%)
+  );
+  --profile-hairline-soft: color-mix(
+    in srgb,
+    var(--crown-gold) 4%,
+    rgb(255 255 255 / 5%)
+  );
+  --profile-rank-bg: color-mix(
+    in srgb,
+    rgb(0 0 0) 40%,
+    var(--crown-purple-deep) 12%
+  );
+  --profile-bar-track: color-mix(
+    in srgb,
+    #0a0a0a 75%,
+    var(--crown-purple-deep) 16%
+  );
   --profile-btn-dark-bg: linear-gradient(
     180deg,
     color-mix(in srgb, var(--crown-purple) 22%, #1c1526) 0%,
     color-mix(in srgb, var(--crown-purple-deep) 12%, #120e18) 100%
   );
-  --profile-btn-dark-border: color-mix(in srgb, var(--crown-purple) 32%, transparent);
-  --profile-switch-off: color-mix(in srgb, #0a0a0a 88%, var(--crown-purple-deep) 12%);
+  --profile-btn-dark-border: color-mix(
+    in srgb,
+    var(--crown-purple) 32%,
+    transparent
+  );
+  --profile-switch-off: color-mix(
+    in srgb,
+    #0a0a0a 88%,
+    var(--crown-purple-deep) 12%
+  );
   padding-top: var(--space-4);
   padding-bottom: var(--space-8);
   max-width: 28rem;
@@ -173,7 +197,11 @@
   height: 100%;
   width: 0%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--crown-gold) 0%, var(--crown-gold-hover) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--crown-gold) 0%,
+    var(--crown-gold-hover) 100%
+  );
 }
 
 .profile-page__sound {
@@ -218,9 +246,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.profile-page__switch[aria-checked='true'] {
+.profile-page__switch[aria-checked="true"] {
   background: var(--crown-mint, #22c55e);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--crown-mint-shadow) 60%, transparent);
+  box-shadow: 0 0 0 1px
+    color-mix(in srgb, var(--crown-mint-shadow) 60%, transparent);
 }
 
 .profile-page__switch-thumb {
@@ -237,7 +266,7 @@
   pointer-events: none;
 }
 
-.profile-page__switch[aria-checked='true'] .profile-page__switch-thumb {
+.profile-page__switch[aria-checked="true"] .profile-page__switch-thumb {
   transform: translateY(-50%) translateX(var(--sw-slide));
 }
 

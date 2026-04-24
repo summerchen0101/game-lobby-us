@@ -1,9 +1,9 @@
 type Props = {
-  className?: string
-  width?: number
+  className?: string;
+  width?: number;
   /** Logo mark only (no extra wrapper) */
-  'aria-hidden'?: boolean
-}
+  "aria-hidden"?: boolean;
+};
 
 /** Simplified two-tone mark aligned with crown-theme (gold / mint). */
 export function CrownLogo({ className, width = 72, ...rest }: Props) {
@@ -13,8 +13,7 @@ export function CrownLogo({ className, width = 72, ...rest }: Props) {
       viewBox="0 0 90 64"
       width={width}
       xmlns="http://www.w3.org/2000/svg"
-      {...rest}
-    >
+      {...rest}>
       <path
         fill="#e6c040"
         fillRule="evenodd"
@@ -26,5 +25,5 @@ export function CrownLogo({ className, width = 72, ...rest }: Props) {
         d="M66.0643 63.9997C78.9642 63.9997 89.4216 53.5423 89.4216 40.6425C89.4216 27.7426 78.9642 17.2852 66.0643 17.2852C53.1645 17.2852 42.707 27.7426 42.707 40.6425C42.707 53.5423 53.1645 63.9997 66.0643 63.9997Z"
       />
     </svg>
-  )
+  );
 }

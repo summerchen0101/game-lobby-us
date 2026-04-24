@@ -1,34 +1,6 @@
-/* Crown-style tokens & button utilities（對齊 PWA：炭灰、暖金、螢光綠） */
+/* Crown 元件：半徑／陰影高度（非色票）；色票在 theme-palette.css */
 :root {
-  --crown-gold: #e6c040;
-  --crown-gold-hover: #f5d25a;
-  --crown-gold-shadow: #9a7030;
-  --crown-mint: #22c55e;
-  --crown-mint-shadow: #15803d;
-  /* 沿用原名：實際為螢光綠階（供 color-mix／次按鈕） */
-  --crown-purple: #4ade80;
-  --crown-purple-deep: #16a34a;
-  --crown-purple-shadow: #14532d;
-  --crown-surface-dark: #191919;
-  /* Session / in-app content cards — shared with Landing benefit tiles (aliases below) */
-  --crown-surface-card-bg: linear-gradient(
-    165deg,
-    #252d38 0%,
-    #1a222c 50%,
-    #12181f 100%
-  );
-  --crown-surface-card-border: color-mix(
-    in srgb,
-    color-mix(in srgb, #c9a06a 35%, #6b7280) 40%,
-    transparent
-  );
-  --crown-surface-card-shadow:
-    0 14px 44px rgb(0 0 0 / 0.38),
-    inset 0 1px 0 color-mix(in srgb, var(--crown-purple) 12%, transparent);
   --crown-surface-card-radius: 1rem;
-  /* Homepage “platform benefits” — same surface as session cards */
-  --crown-benefit-card-bg: var(--crown-surface-card-bg);
-  --crown-benefit-card-border: var(--crown-surface-card-border);
   --crown-card-radius: 12px;
   --crown-btn-radius: 999px;
   --crown-btn-shadow-h: 2.5px;
@@ -62,7 +34,12 @@ a.btn-crown-secondary {
 }
 
 .btn-crown-primary {
-  background: linear-gradient(180deg, var(--crown-gold-hover) 0%, var(--crown-gold) 55%, #c9a06a 100%);
+  background: linear-gradient(
+    180deg,
+    var(--crown-gold-hover) 0%,
+    var(--crown-gold) 55%,
+    var(--crown-primary-gradient-end) 100%
+  );
   color: #1a1000;
 }
 
@@ -80,7 +57,7 @@ a.btn-crown-secondary {
 .btn-crown-secondary {
   background: linear-gradient(
     180deg,
-    #86efac 0%,
+    var(--crown-secondary-gradient-top) 0%,
     var(--crown-purple) 42%,
     var(--crown-purple-deep) 100%
   );

@@ -1,0 +1,64 @@
+/**
+ * 全站配色與品牌色票（預設＝Logo：炭灰底、暖金、螢光綠）。
+ *
+ * 檔期換色：
+ * 1. 在 theme-seasonal.css 新增 [data-theme="檔名"] { … } 覆寫下方變數
+ * 2. 設環境變數 VITE_APP_THEME=檔名（見 .env.example），或執行時對 <html> 設 data-theme
+ *
+ * 亦可只改此檔 :root 數值作全域一次性調整。
+ */
+:root {
+  /* —— 頁面表面 —— */
+  --color-bg: #141b22;
+  --color-surface: #0f1419;
+  --color-elevated: #1b2631;
+  --color-border: #2d3a45;
+  --session-chrome-surface: #0c1014;
+  --session-fab-surface: #0f1419;
+  --color-text: #f5f5f5;
+  --color-text-muted: #a3a3a3;
+  --color-accent: var(--crown-gold);
+  --color-accent-hover: var(--crown-gold-hover);
+
+  /* —— 品牌（Crown／按鈕混色會引用） —— */
+  --crown-gold: #e6c040;
+  --crown-gold-hover: #f5d25a;
+  --crown-gold-shadow: #9a7030;
+  --crown-primary-gradient-end: #c9a06a;
+
+  --crown-mint: #22c55e;
+  --crown-mint-shadow: #15803d;
+
+  /* 沿用原名：實際為螢光綠階（color-mix、次按鈕） */
+  --crown-purple: #4ade80;
+  --crown-purple-deep: #16a34a;
+  --crown-purple-shadow: #14532d;
+  --crown-secondary-gradient-top: #86efac;
+
+  --crown-surface-dark: #191919;
+
+  /* —— 卡片表面（可整段替換成檔期漸層） —— */
+  --crown-surface-card-bg: linear-gradient(
+    165deg,
+    #252d38 0%,
+    #1a222c 50%,
+    #12181f 100%
+  );
+  --crown-surface-card-border: color-mix(
+    in srgb,
+    color-mix(in srgb, #c9a06a 35%, #6b7280) 40%,
+    transparent
+  );
+  --crown-surface-card-shadow:
+    0 14px 44px rgb(0 0 0 / 0.38),
+    inset 0 1px 0 color-mix(in srgb, var(--crown-purple) 12%, transparent);
+
+  --crown-benefit-card-bg: var(--crown-surface-card-bg);
+  --crown-benefit-card-border: var(--crown-surface-card-border);
+
+  /* —— 全站／大廳背景霧光（site-background、LobbyPage） —— */
+  --theme-radial-green-body: rgb(74 222 128 / 5%);
+  --theme-radial-gold-body: rgb(230 192 64 / 6%);
+  --theme-radial-green-lobby: rgb(74 222 128 / 7%);
+  --theme-radial-gold-lobby: rgb(230 192 64 / 8%);
+}

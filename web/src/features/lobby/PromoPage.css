@@ -43,7 +43,12 @@
 .promo-page__art {
   border-radius: 0.75rem;
   min-height: 5.5rem;
-  background: linear-gradient(160deg, rgb(74 222 128 / 22%) 0%, rgb(230 192 64 / 18%) 45%, rgb(22 163 74 / 12%) 100%);
+  background: linear-gradient(
+    160deg,
+    rgb(74 222 128 / 22%) 0%,
+    rgb(230 192 64 / 18%) 45%,
+    rgb(22 163 74 / 12%) 100%
+  );
   border: 1px solid rgb(255 255 255 / 6%);
 }
 

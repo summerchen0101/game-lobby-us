@@ -12,8 +12,8 @@
   z-index: -1;
   background-color: transparent;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(74 222 128 / 7%), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 40%, rgb(230 192 64 / 8%), transparent 45%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, var(--theme-radial-green-lobby), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 40%, var(--theme-radial-gold-lobby), transparent 45%);
   pointer-events: none;
 }
 

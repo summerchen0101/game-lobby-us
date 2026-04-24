@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  /** 檔期主題 id，寫入 <html data-theme>；對應 theme-seasonal.css */
+  readonly VITE_APP_THEME?: string
   readonly VITE_API_BASE: string
   /** 設為 "true" 時使用內建假 API，不發網路請求 */
   readonly VITE_API_USE_MOCK: string

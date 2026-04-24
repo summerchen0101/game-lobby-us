@@ -185,7 +185,7 @@
 
 .auth-modal__divider::before,
 .auth-modal__divider::after {
-  content: '';
+  content: "";
   flex: 1;
   height: 1px;
   background: rgb(255 255 255 / 25%);
