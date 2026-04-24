@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useState,
-  type FormEvent,
-} from "react";
+import { useCallback, useEffect, useId, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import "./ShopCheckout.css";
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
@@ -30,8 +24,7 @@ function BackIcon() {
       height="24"
       viewBox="0 0 24 24"
       fill="none"
-      aria-hidden
-    >
+      aria-hidden>
       <path
         d="M15 6l-6 6 6 6"
         stroke="currentColor"
@@ -61,8 +54,7 @@ function OrderSummaryView({
           type="button"
           className="shop-checkout__back"
           onClick={onClose}
-          aria-label="Close"
-        >
+          aria-label="Close">
           <BackIcon />
         </button>
         <h2 className="shop-checkout__title" id="shop-checkout-dialog-title">
@@ -74,7 +66,7 @@ function OrderSummaryView({
         <p className="shop-checkout__price">{pack.price}</p>
         <p className="shop-checkout__line">
           <span>Get</span>{" "}
-            <span className="shop-checkout__line-gc">
+          <span className="shop-checkout__line-gc">
             <span className="shop-page__chip shop-page__chip--gc">
               <img src={CURRENCY_ICON_GC} alt="" width={24} height={24} />
             </span>
@@ -98,8 +90,7 @@ function OrderSummaryView({
             <button
               type="button"
               className="shop-checkout__pay-btn"
-              onClick={onSelectCreditCard}
-            >
+              onClick={onSelectCreditCard}>
               <img
                 src={`${PANEL}/icon_card.png`}
                 alt=""
@@ -112,8 +103,7 @@ function OrderSummaryView({
             <button
               type="button"
               className="shop-checkout__pay-btn"
-              onClick={() => onSelectOther("skrill")}
-            >
+              onClick={() => onSelectOther("skrill")}>
               <span className="shop-checkout__pay-skrill" aria-hidden>
                 S
               </span>
@@ -124,8 +114,7 @@ function OrderSummaryView({
             <button
               type="button"
               className="shop-checkout__pay-btn"
-              onClick={() => onSelectOther("apple")}
-            >
+              onClick={() => onSelectOther("apple")}>
               <img
                 src={`${PANEL}/icon_apple.png`}
                 alt=""
@@ -174,8 +163,7 @@ function CardDetailsView({
           type="button"
           className="shop-checkout__back"
           onClick={onBack}
-          aria-label="Back to order summary"
-        >
+          aria-label="Back to order summary">
           <BackIcon />
         </button>
         <h2 className="shop-checkout__title" id="shop-checkout-dialog-title">
@@ -184,14 +172,16 @@ function CardDetailsView({
         <span className="shop-checkout__head-spacer" aria-hidden />
       </header>
       <hr className="shop-checkout__head-rule" />
-      <form className="shop-checkout__card-form" onSubmit={handleSubmit} noValidate>
+      <form
+        className="shop-checkout__card-form"
+        onSubmit={handleSubmit}
+        noValidate>
         <p className="shop-checkout__required-note">* Required Fields</p>
         <div className="shop-checkout__fields">
-          <label
-            className="shop-checkout__field"
-            htmlFor={`${idPrefix}-cc`}
-          >
-            <span className="shop-checkout__label-text">CREDIT CARD NUMBER*</span>
+          <label className="shop-checkout__field" htmlFor={`${idPrefix}-cc`}>
+            <span className="shop-checkout__label-text">
+              CREDIT CARD NUMBER*
+            </span>
             <input
               id={`${idPrefix}-cc`}
               className="shop-checkout__input"
@@ -204,10 +194,7 @@ function CardDetailsView({
               onChange={(e) => setCardNumber(e.target.value)}
             />
           </label>
-          <label
-            className="shop-checkout__field"
-            htmlFor={`${idPrefix}-name`}
-          >
+          <label className="shop-checkout__field" htmlFor={`${idPrefix}-name`}>
             <span className="shop-checkout__label-text">NAME ON CARD*</span>
             <input
               id={`${idPrefix}-name`}
@@ -221,10 +208,7 @@ function CardDetailsView({
             />
           </label>
           <div className="shop-checkout__row2">
-            <label
-              className="shop-checkout__field"
-              htmlFor={`${idPrefix}-exp`}
-            >
+            <label className="shop-checkout__field" htmlFor={`${idPrefix}-exp`}>
               <span className="shop-checkout__label-text">EXPIRY*</span>
               <input
                 id={`${idPrefix}-exp`}
@@ -238,10 +222,7 @@ function CardDetailsView({
                 onChange={(e) => setExpiry(e.target.value)}
               />
             </label>
-            <label
-              className="shop-checkout__field"
-              htmlFor={`${idPrefix}-cvv`}
-            >
+            <label className="shop-checkout__field" htmlFor={`${idPrefix}-cvv`}>
               <span className="shop-checkout__label-text">CVV*</span>
               <input
                 id={`${idPrefix}-cvv`}
@@ -270,13 +251,21 @@ function CardDetailsView({
           </span>
         </label>
         <div className="shop-checkout__logos" aria-label="Accepted cards">
-          <img src={`${PANEL}/logo_VISA2.png`} alt="Visa" className="shop-checkout__logo" />
+          <img
+            src={`${PANEL}/logo_VISA2.png`}
+            alt="Visa"
+            className="shop-checkout__logo"
+          />
           <img
             src={`${PANEL}/logo_masterCard2.png`}
             alt="Mastercard"
             className="shop-checkout__logo"
           />
-          <img src={`${PANEL}/logo_AMEX2.png`} alt="American Express" className="shop-checkout__logo" />
+          <img
+            src={`${PANEL}/logo_AMEX2.png`}
+            alt="American Express"
+            className="shop-checkout__logo"
+          />
         </div>
         <button type="submit" className="shop-checkout__submit">
           COMPLETE PURCHASE
@@ -313,12 +302,9 @@ export function ShopCheckoutOverlay({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, handleKeyDown]);
 
-  const onSelectOther = useCallback(
-    (id: "skrill" | "apple") => {
-      console.warn(`[shop checkout] ${id} not available yet`);
-    },
-    [],
-  );
+  const onSelectOther = useCallback((id: "skrill" | "apple") => {
+    console.warn(`[shop checkout] ${id} not available yet`);
+  }, []);
 
   if (!open) return null;
 
@@ -326,15 +312,13 @@ export function ShopCheckoutOverlay({
     <div
       className="shop-checkout-overlay"
       role="presentation"
-      onClick={handleBackdrop}
-    >
+      onClick={handleBackdrop}>
       <div
         className="shop-checkout"
         role="dialog"
         aria-modal="true"
         aria-labelledby="shop-checkout-dialog-title"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         {step === "summary" ? (
           <OrderSummaryView
             pack={pack}

@@ -1,4 +1,4 @@
-import { Gift, Home, ShoppingCart, TicketPercent, User, type LucideIcon } from 'lucide-react'
+import { Gift, Home, ShoppingCart, User, Wallet, type LucideIcon } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import './SessionChrome.css'
 
@@ -14,9 +14,9 @@ const items: Item[] = [
 
 const iconByName: Record<Item['icon'], LucideIcon> = {
   shop: ShoppingCart,
-  redeem: Gift,
+  redeem: Wallet,
   lobby: Home,
-  promo: TicketPercent,
+  promo: Gift,
   profile: User,
 }
 
