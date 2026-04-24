@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
+import { getCurrencyIconUrl } from '../../lib/currencyIcons'
 import { getWalletDisplay } from '../../wallet/formatWalletAmount'
 import { useWallet } from '../../wallet/walletContext'
 import './SessionChrome.css'
@@ -42,7 +43,16 @@ export function SessionHeader() {
         </div>
         <div className="session-header__center">
           <div className="session-header__pill" title="Wallet balance">
-            <span className="session-header__pill-label">{label}</span>
+            <span className="session-header__pill-label">
+              <img
+                src={getCurrencyIconUrl(activeWallet)}
+                alt=""
+                className="session-header__pill-label-img"
+                width={20}
+                height={20}
+              />
+              <span className="session-header__pill-label-sr">{label}</span>
+            </span>
             <span className="session-header__pill-amount">{amount}</span>
             <Link to="/shop" className="session-header__pill-plus" aria-label="Open shop to add coins">
               <Plus className="session-header__pill-plus-icon" size={20} strokeWidth={2.5} aria-hidden />
@@ -64,7 +74,13 @@ export function SessionHeader() {
                 (activeWallet === 'SC' ? ' is-sc' : ' is-gc')
               }
             >
-              {activeWallet}
+              <img
+                src={getCurrencyIconUrl(activeWallet)}
+                alt=""
+                className="session-header__wallet-thumb-img"
+                width={20}
+                height={20}
+              />
             </span>
           </button>
         </div>

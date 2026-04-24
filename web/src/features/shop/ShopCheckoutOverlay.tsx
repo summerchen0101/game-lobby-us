@@ -7,6 +7,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import "./ShopCheckout.css";
+import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import type { Pack } from "./types";
 
 const PANEL = "/imgs/panel/Panel_Shop";
@@ -73,15 +74,19 @@ function OrderSummaryView({
         <p className="shop-checkout__price">{pack.price}</p>
         <p className="shop-checkout__line">
           <span>Get</span>{" "}
-          <span className="shop-checkout__line-gc">
-            <span className="shop-page__chip shop-page__chip--gc">GC</span>
+            <span className="shop-checkout__line-gc">
+            <span className="shop-page__chip shop-page__chip--gc">
+              <img src={CURRENCY_ICON_GC} alt="" width={24} height={24} />
+            </span>
             <span className="shop-checkout__line-amt shop-checkout__line-amt--gc">
               {pack.gcLabel}
             </span>
           </span>{" "}
           <span>+ Free</span>{" "}
           <span className="shop-checkout__line-sc">
-            <span className="shop-page__chip shop-page__chip--sc">SC</span>
+            <span className="shop-page__chip shop-page__chip--sc">
+              <img src={CURRENCY_ICON_SC} alt="" width={24} height={24} />
+            </span>
             <span className="shop-checkout__line-amt shop-checkout__line-amt--sc">
               {pack.bonusSc}
             </span>

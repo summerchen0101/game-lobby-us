@@ -136,14 +136,18 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background: #22c55e;
-  color: #0a0a0a;
-  font-size: 0.65rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  overflow: hidden;
+  line-height: 0;
   flex-shrink: 0;
-  box-shadow: 0 0 12px rgb(34 197 94 / 35%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, #15803d 35%, transparent),
+    0 0 12px rgb(34 197 94 / 22%);
+}
+
+.redeem-page__sc-badge img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .redeem-page__amount {

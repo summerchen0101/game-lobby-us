@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
+import { CURRENCY_ICON_SC } from '../../lib/currencyIcons'
 import { formatWalletPillAmount } from '../../wallet/formatWalletAmount'
 import './RedeemPage.css'
 import './SessionPageDecor.css'
@@ -57,7 +58,7 @@ export function RedeemPage() {
 
         <div className="redeem-page__balance-row">
           <span className="redeem-page__sc-badge" aria-hidden>
-            sc
+            <img src={CURRENCY_ICON_SC} alt="" width={40} height={40} />
           </span>
           <p className="redeem-page__amount">{scDisplay}</p>
         </div>

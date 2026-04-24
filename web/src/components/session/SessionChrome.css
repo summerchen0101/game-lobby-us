@@ -122,10 +122,34 @@
 }
 
 .session-header__pill-label {
-  font-weight: 900;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  color: #fff;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  line-height: 0;
+}
+
+.session-header__pill-label-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* GC / SC text for screen readers only */
+.session-header__pill-label-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .session-header__pill-amount {
@@ -214,29 +238,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.6rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  color: #fff;
-  line-height: 1;
-  transition:
-    transform 0.28s ease,
-    background 0.2s ease;
+  padding: 0.1rem;
+  box-sizing: border-box;
+  line-height: 0;
+  transition: transform 0.28s ease;
   will-change: transform;
 }
 
-/* GC: thumb left, gold */
-.session-header__wallet-thumb.is-gc {
-  transform: translate(0, -50%);
-  background: #eab308;
-  color: #fff;
+.session-header__wallet-thumb-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-/* SC: thumb right, green — slide = inner width − thumb, vertically centered */
+/* GC: thumb left */
+.session-header__wallet-thumb.is-gc {
+  transform: translate(0, -50%);
+}
+
+/* SC: thumb right — slide = inner width − thumb, vertically centered */
 .session-header__wallet-thumb.is-sc {
   transform: translate(var(--wallet-slide), -50%);
-  background: #22c55e;
-  color: #fff;
 }
 
 /* —— Footer —— */
