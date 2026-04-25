@@ -39,7 +39,7 @@
   padding-top: clamp(0.6rem, 1.8vw, 1.05rem);
 }
 
-/* 整卡單一純色底；略扁、少留白；左圖放大貼高 */
+/* 整卡可點：使用 button，內層 CTA 僅作視覯 */
 .promo-page__card {
   --promo-card-purple: #242946;
   display: flex;
@@ -49,6 +49,15 @@
   /* 每張卡較高；插圖主要靠卡內空間呈現、少依賴外凸 */
   height: clamp(6.6rem, 19.2vw, 7.6rem);
   max-height: 7.85rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  text-align: inherit;
+  color: inherit;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
   border-radius: var(--crown-surface-card-radius);
   overflow: visible;
   background: var(--promo-card-purple);
@@ -56,6 +65,18 @@
   box-shadow: 0 0.3rem 0.75rem rgb(0 0 0 / 28%);
   position: relative;
   z-index: 0;
+  cursor: pointer;
+  transition: box-shadow 0.12s ease;
+}
+
+.promo-page__card:focus {
+  outline: none;
+}
+
+.promo-page__card:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--crown-gold, #c9a227),
+    0 0.3rem 0.75rem rgb(0 0 0 / 28%);
 }
 
 .promo-page__art {
@@ -150,7 +171,7 @@
     inset 0 1px 0 rgb(0 0 0 / 12%);
 }
 
-.promo-page__btn--light:hover {
+.promo-page__card:hover .promo-page__btn--light {
   filter: brightness(1.05);
 }
 
@@ -170,8 +191,8 @@
 
 .promo-page__btn-sc-icon {
   display: block;
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.8rem;
+  height: 1.8rem;
   object-fit: contain;
 }
 

@@ -317,8 +317,10 @@
   transform: translate(var(--wallet-slide), -50%);
 }
 
-/* —— Footer —— */
+/* —— Footer —— (GC / SC accent via data-active-wallet, same as .session-header) */
 .session-footer {
+  --session-footer-accent: #eab308;
+
   position: fixed;
   left: 0;
   right: 0;
@@ -326,8 +328,12 @@
   z-index: 200;
   padding-bottom: var(--safe-bottom);
   background: #000000;
-  border-top: 1px solid var(--crown-gold);
+  border-top: 1px solid var(--session-footer-accent);
   box-shadow: 0 -8px 32px rgb(0 0 0 / 55%);
+}
+
+.session-footer[data-active-wallet="SC"] {
+  --session-footer-accent: #4ade80;
 }
 
 .session-footer__list {
@@ -363,7 +369,7 @@
 }
 
 .session-footer__link.is-active {
-  color: var(--crown-gold);
+  color: var(--session-footer-accent);
 }
 
 .session-footer__icon {
@@ -374,7 +380,7 @@
 
 .session-footer__link.is-active .session-footer__icon {
   opacity: 1;
-  color: var(--crown-gold);
+  color: var(--session-footer-accent);
 }
 
 /* —— Support FAB —— */

@@ -1,5 +1,6 @@
 import { Gift, Home, ShoppingCart, User, Wallet, type LucideIcon } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { useWallet } from '../../wallet/walletContext'
 import './SessionChrome.css'
 
 type Item = { to: string; label: string; end?: boolean; icon: 'shop' | 'redeem' | 'lobby' | 'promo' | 'profile' }
@@ -21,8 +22,13 @@ const iconByName: Record<Item['icon'], LucideIcon> = {
 }
 
 export function SessionFooter() {
+  const { activeWallet } = useWallet()
   return (
-    <nav className="session-footer" aria-label="Main navigation">
+    <nav
+      className="session-footer"
+      data-active-wallet={activeWallet}
+      aria-label="Main navigation"
+    >
       <ul className="session-footer__list">
         {items.map(({ to, label, end, icon }) => {
           const Icon = iconByName[icon]
