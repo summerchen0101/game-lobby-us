@@ -23,7 +23,7 @@ function coinPileSrc(n: 1 | 2 | 3 | 4 | 5) {
   return `${PANEL}/icon_coinPile${n}.png`;
 }
 
-type CheckoutStep = "summary" | "card";
+type CheckoutStep = "summary" | "protect" | "card";
 
 export function ShopPage() {
   const [checkoutPack, setCheckoutPack] = useState<Pack | null>(null);

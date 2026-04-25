@@ -285,6 +285,126 @@
   gap: 0.5rem;
 }
 
+/* ---- Protect account ---- */
+.shop-checkout__protect-form {
+  padding-top: 0.5rem;
+}
+
+.shop-checkout__protect-lead {
+  margin: 0 0 0.2rem;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: #4ade80;
+  text-align: left;
+  font-weight: 500;
+  max-width: 100%;
+}
+
+.shop-checkout__fields--protect {
+  margin-top: 0.35rem;
+  gap: 0.6rem;
+}
+
+.shop-checkout__label-text--protect {
+  color: #f2f2f7;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.65rem;
+}
+
+.shop-checkout__input--protect {
+  background: #000;
+  color: #e5dcf5;
+  border: none;
+}
+
+.shop-checkout__input--protect::placeholder {
+  color: #a898c8;
+}
+
+.shop-checkout__input--protect:focus {
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 22%);
+}
+
+.shop-checkout__field--stack {
+  gap: 0.35rem;
+}
+
+.shop-checkout__field-heading {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #fff;
+  text-align: left;
+  margin: 0;
+}
+
+.shop-checkout__row-phone {
+  display: grid;
+  grid-template-columns: 4.25rem 1fr;
+  gap: 0.5rem;
+}
+
+.shop-checkout__row3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.4rem;
+  align-items: stretch;
+}
+
+.shop-checkout__input--code {
+  min-width: 0;
+  text-align: center;
+}
+
+.shop-checkout__input--grow {
+  min-width: 0;
+}
+
+.shop-checkout__select {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  background-color: #000;
+  color: #e5dcf5;
+  padding-right: 2.1rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 0.9rem;
+}
+
+.shop-checkout__helper-green {
+  margin: -0.2rem 0 0.1rem;
+  font-size: 0.6rem;
+  line-height: 1.4;
+  color: #4ade80;
+  text-align: left;
+  font-weight: 500;
+}
+
+.shop-checkout__footer-hint {
+  margin: 0.65rem 0 0.6rem;
+  font-size: 0.6rem;
+  line-height: 1.4;
+  color: #4ade80;
+  text-align: left;
+  font-weight: 500;
+}
+
+.shop-checkout__visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .shop-checkout__save {
   display: flex;
   align-items: center;
@@ -316,7 +436,7 @@
 }
 
 .shop-checkout__save-input:checked + .shop-checkout__save-box {
-  background: var(--crown-gold);
+  background: var(--crown-button-primary-bg);
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
 }
 
@@ -324,7 +444,7 @@
   content: "";
   width: 0.35rem;
   height: 0.55rem;
-  border: solid #1a1a0a;
+  border: solid #fff;
   border-width: 0 0.12rem 0.12rem 0;
   transform: rotate(45deg) translate(0, -0.05rem);
 }
@@ -352,37 +472,51 @@
   object-fit: contain;
 }
 
-.shop-checkout__submit {
+.shop-checkout__submit,
+.shop-checkout__submit--blue {
   width: 100%;
-  min-height: 2.75rem;
-  margin-top: auto;
-  padding: 0.5rem 1rem;
+  box-sizing: border-box;
+  min-height: 2.5rem;
   border: none;
   border-radius: 9999px;
+  color: var(--crown-button-primary-fg);
   background: linear-gradient(
     180deg,
-    var(--crown-secondary-gradient-top) 0%,
-    var(--crown-purple) 42%,
-    var(--crown-purple-deep) 100%
+    color-mix(in srgb, var(--crown-button-primary-bg) 88%, #ffffff) 0%,
+    var(--crown-button-primary-bg) 48%,
+    color-mix(in srgb, var(--crown-button-primary-bg) 72%, #000000) 100%
   );
-  color: #1a1a0a;
   font: inherit;
   font-size: 0.85rem;
   font-weight: 900;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 2px 0 0 var(--crown-purple-shadow);
+  box-shadow: 0 2px 0 0
+    color-mix(in srgb, #000000 40%, var(--crown-button-primary-bg));
   transition:
     filter 0.12s ease,
     transform 0.08s ease;
 }
 
-.shop-checkout__submit:hover {
+.shop-checkout__submit {
+  margin-top: auto;
+  padding: 0.5rem 1rem;
+}
+
+.shop-checkout__submit--blue {
+  margin-top: 0.15rem;
+  padding: 0.5rem 1rem;
+}
+
+.shop-checkout__submit:hover,
+.shop-checkout__submit--blue:hover {
   filter: brightness(1.05);
 }
 
-.shop-checkout__submit:active {
+.shop-checkout__submit:active,
+.shop-checkout__submit--blue:active {
   transform: translateY(1px);
-  box-shadow: 0 1px 0 0 var(--crown-purple-shadow);
+  box-shadow: 0 1px 0 0
+    color-mix(in srgb, #000000 40%, var(--crown-button-primary-bg));
 }
