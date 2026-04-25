@@ -19,7 +19,6 @@ a.btn-crown-secondary {
   justify-content: center;
   min-height: var(--min-tap);
   padding: 0.55rem 1.5rem;
-  border: none;
   border-radius: var(--crown-btn-radius);
   font-weight: 700;
   font-size: 0.875rem;
@@ -28,40 +27,37 @@ a.btn-crown-secondary {
   transition:
     transform 0.08s ease,
     filter 0.15s ease;
-  box-shadow:
-    0 var(--crown-btn-shadow-h) 0 0 var(--crown-gold-shadow),
-    inset 0 -1px 0 rgb(255 255 255 / 18%);
 }
 
 .btn-crown-primary {
-  background: linear-gradient(
-    180deg,
-    var(--crown-gold-hover) 0%,
-    var(--crown-gold) 55%,
-    var(--crown-primary-gradient-end) 100%
-  );
-  color: #1a1000;
+  border: none;
+  background: var(--crown-button-primary-bg, #6085f8);
+  color: var(--crown-button-primary-fg, #ffffff);
+  box-shadow:
+    0 var(--crown-btn-shadow-h) 0 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 20%);
 }
 
 .btn-crown-primary:hover:not(:disabled) {
-  filter: brightness(1.06);
+  filter: brightness(1.08);
 }
 
 .btn-crown-primary:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow:
     0 calc(var(--crown-btn-shadow-h) - 1px) 0 0 var(--crown-gold-shadow),
-    inset 0 -1px 0 rgb(255 255 255 / 12%);
+    inset 0 1px 0 rgb(0 0 0 / 15%);
 }
 
 .btn-crown-secondary {
+  border: none;
   background: linear-gradient(
     180deg,
     var(--crown-secondary-gradient-top) 0%,
     var(--crown-purple) 42%,
     var(--crown-purple-deep) 100%
   );
-  color: #0a1a0f;
+  color: #1a1a0a;
   box-shadow:
     0 var(--crown-btn-shadow-h) 0 0 var(--crown-purple-shadow),
     inset 0 -1px 0 rgb(255 255 255 / 22%);

@@ -21,7 +21,7 @@
   padding: var(--space-8) var(--space-5);
   border-radius: var(--crown-surface-card-radius);
   background: var(--crown-surface-card-bg);
-  border: 1px solid var(--crown-surface-card-border);
+  border: none;
   box-shadow: var(--crown-surface-card-shadow);
   text-align: center;
 }

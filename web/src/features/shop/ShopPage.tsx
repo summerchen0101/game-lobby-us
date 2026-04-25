@@ -47,37 +47,38 @@ export function ShopPage() {
         <ul className="shop-page__grid">
           {PACKS.map((p) => (
             <li key={p.id} className="shop-page__card">
-              <div className="shop-page__card-top">
-                <span className="shop-page__gc-row">
-                  <span className="shop-page__chip shop-page__chip--gc">
-                    <img src={CURRENCY_ICON_GC} alt="" width={24} height={24} />
+              <div className="shop-page__card-mid">
+                <div className="shop-page__card-top">
+                  <span className="shop-page__gc-row">
+                    <span className="shop-page__chip shop-page__chip--gc">
+                      <img src={CURRENCY_ICON_GC} alt="" width={24} height={24} />
+                    </span>
+                    <span className="shop-page__gc-amount">{p.gcLabel}</span>
                   </span>
-                  <span className="shop-page__gc-amount">{p.gcLabel}</span>
-                </span>
+                </div>
+                <div className="shop-page__card-art" data-pile={p.coinPile}>
+                  <img
+                    src={coinPileSrc(p.coinPile)}
+                    alt=""
+                    className="shop-page__card-art-img"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <p
+                  className="shop-page__bonus"
+                  aria-label={`Plus free SC ${p.bonusSc}`}>
+                  <span className="shop-page__bonus-free">+FREE</span>
+                  <span className="shop-page__chip shop-page__chip--sc">
+                    <img src={CURRENCY_ICON_SC} alt="" width={24} height={24} />
+                  </span>
+                  <span className="shop-page__bonus-amt">{p.bonusSc}</span>
+                </p>
               </div>
-              <div className="shop-page__card-art" data-pile={p.coinPile}>
-                <img
-                  src={coinPileSrc(p.coinPile)}
-                  alt=""
-                  className="shop-page__card-art-img"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <p
-                className="shop-page__bonus"
-                aria-label={`Plus free SC ${p.bonusSc}`}>
-                <span className="shop-page__bonus-free">+FREE</span>
-                <span className="shop-page__chip shop-page__chip--sc">
-                  <img src={CURRENCY_ICON_SC} alt="" width={24} height={24} />
-                </span>
-                <span className="shop-page__bonus-amt">{p.bonusSc}</span>
-              </p>
               <button
                 type="button"
                 className="shop-page__price-btn"
-                onClick={() => openCheckout(p)}
-              >
+                onClick={() => openCheckout(p)}>
                 {p.price}
               </button>
             </li>

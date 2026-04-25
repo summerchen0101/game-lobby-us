@@ -66,7 +66,7 @@
   margin: 0 0 var(--space-5);
   font-size: clamp(1.1rem, 0.95rem + 0.8vw, 1.35rem);
   font-weight: 800;
-  color: #fff;
+  color: var(--color-text);
   letter-spacing: 0.03em;
 }
 
@@ -92,7 +92,7 @@
   scrollbar-width: thin;
   background: rgb(0 0 0 / 35%);
   border-radius: 0;
-  border: 1px solid rgb(234 179 8 / 20%);
+  border: none;
 }
 
 .lobby-game-filter__tab {
@@ -102,7 +102,7 @@
   border: 1px solid transparent;
   border-radius: 9999px;
   background: transparent;
-  color: #fff;
+  color: var(--color-text);
   font: inherit;
   font-size: 0.68rem;
   font-weight: 800;
@@ -118,12 +118,12 @@
 }
 
 .lobby-game-filter__tab:hover {
-  color: #fde68a;
+  color: var(--crown-gold-hover);
 }
 
 .lobby-game-filter__tab.is-active {
-  border-color: #eab308;
-  color: #eab308;
+  border-color: var(--crown-gold);
+  color: var(--crown-gold);
   box-shadow: none;
 }
 
@@ -377,7 +377,7 @@
   margin: 0 0 var(--space-4);
   font-size: clamp(0.95rem, 0.85rem + 0.5vw, 1.1rem);
   font-weight: 800;
-  color: #fff;
+  color: var(--color-text);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -473,7 +473,7 @@
 .lobby-game-card__thumb {
   aspect-ratio: 3 / 4;
   border-radius: 0.75rem;
-  background: linear-gradient(145deg, #2a2a2a 0%, #121212 100%);
+  background: linear-gradient(145deg, #2d3358 0%, #1a1f35 100%);
   background-size: cover;
   background-position: center;
   border: 1px solid rgb(255 255 255 / 12%);
@@ -485,7 +485,7 @@
 
 .lobby-game-card:hover:not(:disabled) .lobby-game-card__thumb {
   transform: translateY(-2px);
-  border-color: rgb(255 198 0 / 35%);
+  border-color: color-mix(in srgb, var(--crown-gold) 45%, transparent);
 }
 
 .lobby-game-card__fallback {
@@ -505,7 +505,7 @@
   margin-top: var(--space-2);
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-text);
   line-height: 1.25;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -550,7 +550,7 @@
   padding: var(--space-4) var(--space-2);
   background: var(--crown-benefit-card-bg);
   border-radius: var(--crown-surface-card-radius);
-  border: 1px solid var(--crown-benefit-card-border);
+  border: none;
   box-shadow: 0 4px 16px
     color-mix(in srgb, var(--crown-purple-deep) 15%, transparent);
 }
@@ -573,7 +573,7 @@
   margin: 0;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #e5e5e5;
+  color: var(--color-text-muted);
   line-height: 1.35;
 }
 
@@ -637,10 +637,10 @@ html.guest-lobby-page body::-webkit-scrollbar {
   background:
     radial-gradient(
       ellipse 120% 80% at 50% 0%,
-      rgb(30 58 138 / 55%),
+      rgb(253 226 1 / 14%),
       transparent 55%
     ),
-    linear-gradient(180deg, #0f172a 0%, #0a0f1a 100%);
+    linear-gradient(180deg, #242946 0%, #1a1f35 100%);
   border-radius: 0;
   box-shadow: inset 0 -1px 0 rgb(255 255 255 / 6%);
   overflow: hidden;
@@ -674,7 +674,6 @@ html.guest-lobby-page body::-webkit-scrollbar {
   justify-content: center;
   min-height: 2.5rem;
   padding: 0 var(--space-4);
-  border: none;
   border-radius: 999px;
   font: inherit;
   font-weight: 900;
@@ -682,11 +681,13 @@ html.guest-lobby-page body::-webkit-scrollbar {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  color: #fff;
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 45%, #1d4ed8 100%);
+  color: var(--color-text);
+  background: var(--crown-button-primary-bg, #242946);
+  border: none;
   box-shadow:
-    0 4px 0 #1e3a8a,
-    0 6px 20px rgb(0 0 0 / 35%);
+    0 4px 0 var(--crown-gold-shadow),
+    0 6px 20px rgb(0 0 0 / 35%),
+    inset 0 1px 0 rgb(0 0 0 / 16%);
   transition: filter 0.15s ease;
 }
 
@@ -704,8 +705,9 @@ html.guest-lobby-page body::-webkit-scrollbar {
   transform: translate(-50%, 0.25rem);
   box-sizing: border-box;
   box-shadow:
-    0 3px 0 #1e3a8a,
-    0 4px 14px rgb(0 0 0 / 32%);
+    0 3px 0 var(--crown-gold-shadow),
+    0 4px 14px rgb(0 0 0 / 32%),
+    inset 0 1px 0 rgb(0 0 0 / 16%);
 }
 
 .guest-landing__signup-wide {
@@ -716,8 +718,9 @@ html.guest-lobby-page body::-webkit-scrollbar {
   font-size: 0.72rem;
   letter-spacing: 0.05em;
   box-shadow:
-    0 3px 0 #1e3a8a,
-    0 4px 16px rgb(0 0 0 / 32%);
+    0 3px 0 var(--crown-gold-shadow),
+    0 4px 16px rgb(0 0 0 / 32%),
+    inset 0 1px 0 rgb(0 0 0 / 16%);
 }
 
 .guest-landing__claim-banner:hover,
@@ -750,7 +753,7 @@ html.guest-lobby-page body::-webkit-scrollbar {
 }
 
 .guest-landing__accent {
-  color: #4ade80;
+  color: var(--crown-gold);
   font-weight: 900;
 }
 
@@ -772,7 +775,7 @@ html.guest-lobby-page body::-webkit-scrollbar {
   gap: var(--space-3);
   padding: var(--space-2) var(--page-pad-inline);
   padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%);
+  background: linear-gradient(180deg, #2a3154 0%, #242946 100%);
   border-top: 1px solid rgb(255 255 255 / 12%);
   box-shadow: 0 -8px 24px rgb(0 0 0 / 35%);
   pointer-events: auto;
@@ -793,7 +796,6 @@ html.guest-lobby-page body::-webkit-scrollbar {
   margin-left: auto;
   min-height: var(--min-tap);
   padding: 0.3rem 0.55rem;
-  border: none;
   border-radius: 999px;
   font: inherit;
   font-weight: 800;
@@ -801,9 +803,12 @@ html.guest-lobby-page body::-webkit-scrollbar {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
-  color: #fff;
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
-  box-shadow: 0 2px 0 #1e3a8a;
+  color: var(--color-text);
+  background: var(--crown-button-primary-bg, #242946);
+  border: none;
+  box-shadow:
+    0 2px 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 16%);
   transition: filter 0.15s ease;
   white-space: nowrap;
   line-height: 1.2;
@@ -824,12 +829,14 @@ html.guest-lobby-page body::-webkit-scrollbar {
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: none;
   border-radius: 50%;
   cursor: pointer;
-  color: #fff;
-  background: #111827;
-  box-shadow: 0 6px 20px rgb(0 0 0 / 45%);
+  color: var(--color-text);
+  background: var(--crown-button-primary-bg, #6085f8);
+  border: none;
+  box-shadow:
+    0 2px 0 rgb(0 0 0 / 35%),
+    0 8px 24px rgb(0 0 0 / 45%);
   transition:
     transform 0.08s ease,
     filter 0.15s ease;

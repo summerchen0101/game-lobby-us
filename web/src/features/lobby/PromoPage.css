@@ -7,7 +7,7 @@
   overflow: visible;
   background-image: repeating-linear-gradient(
     115deg,
-    rgb(80 100 200 / 4%) 0 2px,
+    color-mix(in srgb, var(--crown-gold) 6%, transparent) 0 2px,
     transparent 2px 14px
   );
 }
@@ -39,9 +39,9 @@
   padding-top: clamp(0.6rem, 1.8vw, 1.05rem);
 }
 
-/* 整卡單一純紫底（對齊設計色票 #2D235D）；略扁、少留白；左圖放大貼高 */
+/* 整卡單一純色底；略扁、少留白；左圖放大貼高 */
 .promo-page__card {
-  --promo-card-purple: #2d235d;
+  --promo-card-purple: #242946;
   display: flex;
   flex-direction: row;
   align-items: stretch;
@@ -130,8 +130,8 @@
   min-height: 1.85rem;
   min-width: 4.6rem;
   padding: 0.22rem 0.8rem;
-  border: none;
   border-radius: 999px;
+  box-sizing: border-box;
   font: inherit;
   font-size: 0.72rem;
   font-weight: 900;
@@ -142,9 +142,12 @@
 }
 
 .promo-page__btn--light {
-  background: #fff;
-  color: #0a0a0a;
-  box-shadow: 0 2px 0 rgb(0 0 0 / 12%);
+  background: var(--crown-button-primary-bg, #242946);
+  color: var(--color-text, #fff);
+  border: none;
+  box-shadow:
+    0 2px 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 12%);
 }
 
 .promo-page__btn--light:hover {
@@ -165,8 +168,13 @@
   width: 1.4rem;
   height: 1.4rem;
   border-radius: 50%;
-  background: linear-gradient(180deg, #3ecf6a 0%, #1fa84a 100%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
+  background: linear-gradient(
+    180deg,
+    var(--crown-gold-hover) 0%,
+    var(--crown-gold) 55%,
+    var(--crown-purple-deep) 100%
+  );
+  box-shadow: inset 0 1px 0 rgb(0 0 0 / 22%);
   flex-shrink: 0;
 }
 

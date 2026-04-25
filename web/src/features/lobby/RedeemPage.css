@@ -9,15 +9,15 @@
   font-weight: 900;
   letter-spacing: 0.12em;
   text-align: center;
-  color: #fff;
+  color: var(--color-text);
 }
 
 .redeem-page__ticker-outer {
   margin: 0 0 var(--space-2);
   overflow: hidden;
-  background: #1a222c;
+  background: #1a1f35;
   border-radius: 0.35rem;
-  border: 1px solid rgb(74 222 128 / 28%);
+  border: 1px solid color-mix(in srgb, var(--crown-gold) 22%, transparent);
 }
 
 .redeem-page__ticker-track {
@@ -27,7 +27,7 @@
   padding: 0.4rem 0;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #4ade80;
+  color: var(--crown-gold);
   white-space: nowrap;
   animation: redeem-ticker 22s linear infinite;
 }
@@ -52,13 +52,13 @@
   letter-spacing: 0.1em;
   text-align: center;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--color-text);
 }
 
 .redeem-page__card {
   border-radius: var(--crown-surface-card-radius);
   background: var(--crown-surface-card-bg);
-  border: 1px solid var(--crown-surface-card-border);
+  border: none;
   padding: var(--space-4) var(--space-4) var(--space-5);
   box-shadow: var(--crown-surface-card-shadow);
 }
@@ -79,7 +79,7 @@
   border: none;
   border-radius: 0.4rem;
   background: rgb(0 0 0 / 25%);
-  color: #4ade80;
+  color: var(--crown-gold);
   font-size: 1.1rem;
   cursor: pointer;
   text-decoration: none;
@@ -90,7 +90,7 @@
   margin: 0;
   font-size: 0.95rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--color-text);
 }
 
 .redeem-page__info {
@@ -102,8 +102,8 @@
   border: none;
   padding: 0;
   border-radius: 50%;
-  background: #eab308;
-  color: #0a0a0a;
+  background: var(--crown-gold);
+  color: #1a1a0a;
   font-size: 0.85rem;
   font-weight: 900;
   font-style: italic;
@@ -140,8 +140,8 @@
   line-height: 0;
   flex-shrink: 0;
   box-shadow:
-    0 0 0 1px color-mix(in srgb, #15803d 35%, transparent),
-    0 0 12px rgb(34 197 94 / 22%);
+    0 0 0 1px color-mix(in srgb, #ffffff 35%, transparent),
+    0 0 12px rgb(255 255 255 / 12%);
 }
 
 .redeem-page__sc-badge img {
@@ -155,7 +155,7 @@
   margin: 0;
   font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
   font-weight: 900;
-  color: #fff;
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -163,19 +163,19 @@
   margin-top: var(--space-4);
   padding: var(--space-4);
   border-radius: 0.75rem;
-  background: #1a222c;
-  border: 1px solid rgb(74 222 128 / 18%);
+  background: #1a1f35;
+  border: 1px solid color-mix(in srgb, var(--crown-gold) 16%, transparent);
 }
 
 .redeem-page__panel--warn .redeem-page__panel-title {
-  color: #fff;
+  color: var(--color-text);
 }
 
 .redeem-page__panel-title {
   margin: 0 0 var(--space-2);
   font-size: 0.95rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--color-text);
 }
 
 .redeem-page__panel-text {
@@ -189,7 +189,7 @@
   margin: 0 0 var(--space-3);
   font-size: 0.9rem;
   font-weight: 800;
-  color: #eab308;
+  color: var(--crown-gold);
 }
 
 .redeem-page__to-lobby {
@@ -200,8 +200,13 @@
   padding: 0.9rem 1.25rem;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(180deg, #86efac 0%, #4ade80 42%, #16a34a 100%);
-  color: #0a1a0f;
+  background: linear-gradient(
+    180deg,
+    var(--crown-secondary-gradient-top) 0%,
+    var(--crown-purple) 42%,
+    var(--crown-purple-deep) 100%
+  );
+  color: #1a1a0a;
   font: inherit;
   font-size: 0.85rem;
   font-weight: 900;
@@ -210,7 +215,7 @@
   text-decoration: none;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgb(22 163 74 / 28%);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--crown-purple-shadow) 35%, transparent);
 }
 
 .redeem-page__to-lobby:hover {
@@ -221,6 +226,6 @@
   margin: var(--space-3) 0 0;
   font-size: 0.8rem;
   text-align: center;
-  color: #22c55e;
+  color: var(--crown-gold);
   font-weight: 700;
 }

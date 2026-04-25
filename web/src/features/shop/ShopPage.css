@@ -29,7 +29,7 @@
   font-size: clamp(1.75rem, 1.2rem + 2vw, 2.25rem);
   font-weight: 900;
   letter-spacing: 0.08em;
-  color: #fff;
+  color: var(--color-text);
   text-align: center;
 }
 
@@ -38,7 +38,7 @@
   font-size: 0.95rem;
   font-weight: 400;
   letter-spacing: 0.12em;
-  color: #22c55e;
+  color: var(--crown-locale-green);
   text-align: center;
 }
 
@@ -55,13 +55,25 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  gap: 0.45rem;
   padding: clamp(0.5rem, 1.8vw, var(--space-3))
     clamp(0.4rem, 1.1vw, var(--space-2));
   border-radius: var(--crown-surface-card-radius);
   background: var(--crown-surface-card-bg);
-  border: 1px solid var(--crown-surface-card-border);
+  border: none;
   box-shadow: var(--crown-surface-card-shadow);
   min-width: 0;
+}
+
+.shop-page__card-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  padding: 0.32rem 0.28rem 0.4rem;
+  border-radius: calc(var(--crown-surface-card-radius) - 2px);
+  background: #000;
+  overflow: hidden;
 }
 
 .shop-page__card-top {
@@ -97,19 +109,19 @@
 }
 
 .shop-page__chip--gc {
-  box-shadow: 0 0 0 1px color-mix(in srgb, #ca8a04 35%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--crown-gold) 40%, transparent);
 }
 
 .shop-page__chip--sc {
   width: 1.45rem;
   height: 1.45rem;
-  box-shadow: 0 0 0 1px color-mix(in srgb, #15803d 35%, transparent);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 35%);
 }
 
 .shop-page__gc-amount {
   font-weight: 900;
   font-size: clamp(0.82rem, 2.5vw, 1.1rem);
-  color: #eab308;
+  color: var(--crown-gold);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -124,7 +136,6 @@
   width: 100%;
   height: 80px;
   margin-bottom: 0.3rem;
-  border-radius: 0.4rem;
   background: transparent;
   overflow: hidden;
 }
@@ -133,10 +144,11 @@
   display: block;
   width: 100%;
   max-width: 6.25rem;
-  height: 80px;
+  height: 72px;
   object-fit: cover;
   object-position: center;
   margin: 0 auto;
+  transform: scale(1.15);
 }
 
 .shop-page__bonus {
@@ -145,9 +157,9 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.2rem;
-  margin: 0 0 0.4rem;
-  font-size: clamp(0.7rem, 1.95vw, 0.9rem);
-  font-weight: 800;
+  margin: 0;
+  font-size: clamp(0.6rem, 1.6vw, 0.75rem);
+  font-weight: 400;
   color: #e5e5e5;
   text-align: center;
   line-height: 1.2;
@@ -158,19 +170,19 @@
 }
 
 .shop-page__bonus-amt {
-  font-weight: 800;
+  font-weight: 400;
   color: #fafafa;
 }
 
 .shop-page__price-btn {
-  --shop-price-btn-shadow: rgb(0 0 0 / 22%);
+  --shop-price-btn-shadow: var(--crown-gold-shadow);
   width: 100%;
   box-sizing: border-box;
   margin: 0;
   padding: 0.38rem 0.35rem;
   min-height: 1.9rem;
-  border: 1px solid rgb(255 255 255 / 28%);
-  border-radius: 0.45rem;
+  border: none;
+  border-radius: 9999px;
   font: inherit;
   font-weight: 900;
   font-size: clamp(0.9rem, 2.5vw, 1.12rem);
@@ -178,12 +190,12 @@
   letter-spacing: 0.02em;
   text-transform: none;
   cursor: pointer;
-  color: #0a0a0a;
+  color: var(--color-text);
   text-shadow: none;
-  background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 55%, #e8e8ea 100%);
+  background: var(--crown-button-primary-bg, #242946);
   box-shadow:
     0 2px 0 0 var(--shop-price-btn-shadow),
-    inset 0 1px 0 rgb(255 255 255 / 95%);
+    inset 0 1px 0 rgb(0 0 0 / 16%);
   transition:
     filter 0.12s ease,
     transform 0.08s ease;
@@ -197,5 +209,5 @@
   transform: translateY(1px);
   box-shadow:
     0 1px 0 0 var(--shop-price-btn-shadow),
-    inset 0 1px 0 rgb(255 255 255 / 70%);
+    inset 0 1px 0 rgb(0 0 0 / 12%);
 }

@@ -52,7 +52,7 @@
     0 0 0 1px rgb(0 0 0 / 55%),
     0 4px 14px rgb(0 0 0 / 55%),
     0 0 20px rgb(234 179 8 / 12%),
-    inset 0 1px 0 rgb(255 255 255 / 12%);
+    inset 0 1px 0 rgb(0 0 0 / 18%);
 }
 
 .lobby-jackpot-strip__title {
@@ -90,11 +90,16 @@
   color: #0a0a0a;
   box-shadow:
     0 1px 2px rgb(0 0 0 / 40%),
-    inset 0 1px 0 rgb(255 255 255 / 22%);
+    inset 0 1px 0 rgb(0 0 0 / 20%);
 }
 
 .lobby-jackpot-strip__index.is-one {
-  background: linear-gradient(180deg, #fde047 0%, #eab308 100%);
+  background: linear-gradient(
+    180deg,
+    var(--crown-gold-hover) 0%,
+    var(--crown-gold) 55%,
+    var(--crown-purple-deep) 100%
+  );
 }
 
 .lobby-jackpot-strip__index.is-two {

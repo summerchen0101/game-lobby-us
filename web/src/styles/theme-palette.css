@@ -1,5 +1,5 @@
 /**
- * 全站配色與品牌色票（預設＝Logo：炭灰底、暖金、螢光綠）。
+ * 全站配色與品牌色票（#242946 底、#6085f8 主按鈕、#ffffff 文、#fde201 強調、#14db75 局部綠：switch／頭像／Shop 副標）。
  *
  * 檔期換色：
  * 1. 在 theme-seasonal.css 新增 [data-theme="檔名"] { … } 覆寫下方變數
@@ -9,56 +9,51 @@
  */
 :root {
   /* —— 頁面表面 —— */
-  --color-bg: #141b22;
-  --color-surface: #0f1419;
-  --color-elevated: #1b2631;
-  --color-border: #2d3a45;
-  --session-chrome-surface: #0c1014;
-  --session-fab-surface: #0f1419;
-  --color-text: #f5f5f5;
-  --color-text-muted: #a3a3a3;
+  --color-bg: #242946;
+  --color-surface: #242946;
+  --color-elevated: #242946;
+  --color-border: color-mix(in srgb, #ffffff 12%, #242946);
+  --session-chrome-surface: #242946;
+  --session-fab-surface: #242946;
+  --color-text: #ffffff;
+  --color-text-muted: rgb(255 255 255 / 68%);
   --color-accent: var(--crown-gold);
   --color-accent-hover: var(--crown-gold-hover);
 
-  /* —— 品牌（Crown／按鈕混色會引用） —— */
-  --crown-gold: #e6c040;
-  --crown-gold-hover: #f5d25a;
-  --crown-gold-shadow: #9a7030;
-  --crown-primary-gradient-end: #c9a06a;
+  /* 主按鈕（crown-theme、多頁內聯鈕） */
+  --crown-button-primary-bg: #6085f8;
+  --crown-button-primary-fg: #ffffff;
+  --crown-gold: #fde201;
+  --crown-gold-hover: #ffec4d;
+  --crown-gold-shadow: color-mix(in srgb, #000000 42%, #6085f8);
+  --crown-primary-gradient-end: #1a1f35;
 
-  --crown-mint: #22c55e;
-  --crown-mint-shadow: #15803d;
+  /* 局部綠：Profile switch、頭像、Shop 副標等 */
+  --crown-locale-green: #14db75;
+  --crown-mint: var(--crown-locale-green);
+  --crown-mint-shadow: color-mix(in srgb, #000000 45%, #14db75);
 
-  /* 沿用原名：實際為螢光綠階（color-mix、次按鈕） */
-  --crown-purple: #4ade80;
-  --crown-purple-deep: #16a34a;
-  --crown-purple-shadow: #14532d;
-  --crown-secondary-gradient-top: #86efac;
+  /* 次按鈕階：亮黃漸層＋深字 */
+  --crown-purple: #fde201;
+  --crown-purple-deep: #b89f00;
+  --crown-purple-shadow: #4a3f00;
+  --crown-secondary-gradient-top: #fff59d;
 
-  --crown-surface-dark: #191919;
+  --crown-surface-dark: #1a1f35;
 
-  /* —— 卡片表面（可整段替換成檔期漸層） —— */
-  --crown-surface-card-bg: linear-gradient(
-    165deg,
-    #252d38 0%,
-    #1a222c 50%,
-    #12181f 100%
-  );
-  --crown-surface-card-border: color-mix(
-    in srgb,
-    color-mix(in srgb, #c9a06a 35%, #6b7280) 40%,
-    transparent
-  );
+  /* —— 卡片表面 —— */
+  --crown-surface-card-bg: #242946;
+  --crown-surface-card-border: transparent;
   --crown-surface-card-shadow:
     0 14px 44px rgb(0 0 0 / 0.38),
-    inset 0 1px 0 color-mix(in srgb, var(--crown-purple) 12%, transparent);
+    inset 0 1px 0 rgb(0 0 0 / 22%);
 
   --crown-benefit-card-bg: var(--crown-surface-card-bg);
   --crown-benefit-card-border: var(--crown-surface-card-border);
 
   /* —— 全站／大廳背景霧光（site-background、LobbyPage） —— */
-  --theme-radial-green-body: rgb(74 222 128 / 5%);
-  --theme-radial-gold-body: rgb(230 192 64 / 6%);
-  --theme-radial-green-lobby: rgb(74 222 128 / 7%);
-  --theme-radial-gold-lobby: rgb(230 192 64 / 8%);
+  --theme-radial-green-body: rgb(36 41 70 / 6%);
+  --theme-radial-gold-body: rgb(253 226 1 / 6%);
+  --theme-radial-green-lobby: rgb(36 41 70 / 7%);
+  --theme-radial-gold-lobby: rgb(253 226 1 / 8%);
 }
