@@ -1,53 +1,29 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { Crown, Info, Send, Volume2 } from "lucide-react";
+import { Copy, Crown, Info, Volume2 } from "lucide-react";
 import { useAuth } from "../../auth/useAuth";
-import { useGameShell } from "../../components/useGameShell";
-import { ApiError } from "../../lib/api/client";
-import { fetchDepositUrl } from "../../lib/api/wallet";
-import { mockBumpBalance } from "../../lib/api/mock";
-import { isMockMode } from "../../lib/env";
 import "./ProfilePage.css";
 import "./SessionPageDecor.css";
 
 const SOUND_KEY = "wynoco_profile_sound_on";
-const LOCATION_KEY = "wynoco_profile_location_on";
 const RANK_MAX = 500;
 /** Placeholder until rank API exists */
 const RANK_PCT = 0;
 
-function formatBalance(n: number | undefined, currency?: string) {
-  if (n === undefined) return "—";
-  const u = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(
-    n,
-  );
-  return currency ? `${u} ${currency}` : u;
-}
-
 export function ProfilePage() {
-  const { user, token, refreshUser, logout } = useAuth();
-  const { open: openShell } = useGameShell();
-  const [depositing, setDepositing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, refreshUser, logout } = useAuth();
   const [soundOn, setSoundOn] = useState(true);
-  const [locationOn, setLocationOn] = useState(false);
+  const [uidCopied, setUidCopied] = useState(false);
   const fundsRef = useRef<HTMLDialogElement>(null);
-  const locationLabelId = useId();
+  const uidCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const soundLabelId = useId();
 
   const rankCurrent = Math.round((RANK_PCT / 100) * RANK_MAX);
 
   const onRefresh = useCallback(async () => {
-    setError(null);
     try {
       await refreshUser();
-    } catch (e) {
-      const msg =
-        e instanceof ApiError
-          ? e.message
-          : e instanceof Error
-            ? e.message
-            : "Could not refresh";
-      setError(msg);
+    } catch {
+      /* ignore */
     }
   }, [refreshUser]);
 
@@ -58,12 +34,6 @@ export function ProfilePage() {
       setSoundOn(false);
     } else if (v === "1") {
       setSoundOn(true);
-    }
-    const loc = window.localStorage.getItem(LOCATION_KEY);
-    if (loc === "1") {
-      setLocationOn(true);
-    } else if (loc === "0") {
-      setLocationOn(false);
     }
   }, []);
 
@@ -77,6 +47,34 @@ export function ProfilePage() {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [onRefresh]);
 
+  useEffect(() => {
+    return () => {
+      if (uidCopyTimeoutRef.current) {
+        clearTimeout(uidCopyTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const copyUid = useCallback(() => {
+    const id = user?.id;
+    if (!id) return;
+    void navigator.clipboard
+      .writeText(id)
+      .then(() => {
+        setUidCopied(true);
+        if (uidCopyTimeoutRef.current) {
+          clearTimeout(uidCopyTimeoutRef.current);
+        }
+        uidCopyTimeoutRef.current = setTimeout(() => {
+          setUidCopied(false);
+          uidCopyTimeoutRef.current = null;
+        }, 2000);
+      })
+      .catch(() => {
+        /* ignore unsupported / denied */
+      });
+  }, [user?.id]);
+
   const initial = (
     user?.displayName?.trim()?.[0] ??
     user?.id?.[0] ??
@@ -85,35 +83,6 @@ export function ProfilePage() {
 
   const displayHandle = user?.displayName?.trim() || user?.id?.trim() || "—";
 
-  async function onDeposit() {
-    if (!token) return;
-    setError(null);
-    setDepositing(true);
-    try {
-      const returnUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
-      const res = await fetchDepositUrl(token, returnUrl);
-      openShell({
-        url: res.url,
-        isPayment: true,
-        openInNewWindow: res.openInNewWindow,
-      });
-      if (isMockMode()) {
-        mockBumpBalance();
-        await refreshUser();
-      }
-    } catch (e) {
-      const msg =
-        e instanceof ApiError
-          ? e.message
-          : e instanceof Error
-            ? e.message
-            : "Could not open add funds";
-      setError(msg);
-    } finally {
-      setDepositing(false);
-    }
-  }
-
   function toggleSound() {
     setSoundOn((prev) => {
       const next = !prev;
@@ -121,29 +90,6 @@ export function ProfilePage() {
         window.localStorage.setItem(SOUND_KEY, next ? "1" : "0");
       } catch {
         /* ignore */
-      }
-      return next;
-    });
-  }
-
-  function toggleLocation() {
-    setLocationOn((prev) => {
-      const next = !prev;
-      try {
-        window.localStorage.setItem(LOCATION_KEY, next ? "1" : "0");
-      } catch {
-        /* ignore */
-      }
-      if (next && typeof navigator !== "undefined" && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          () => {
-            /* preference only; no UI yet */
-          },
-          () => {
-            /* denied — keep toggle state; user can turn off */
-          },
-          { maximumAge: 60_000, timeout: 10_000 },
-        );
       }
       return next;
     });
@@ -176,12 +122,6 @@ export function ProfilePage() {
       <div className="profile-page__card">
         <div className="profile-page__hero">
           <div className="profile-page__avatar-stack">
-            <Crown
-              className="profile-page__crown-above"
-              size={22}
-              strokeWidth={2}
-              aria-hidden
-            />
             <div className="profile-page__avatar" aria-hidden>
               {initial}
               <button
@@ -195,6 +135,26 @@ export function ProfilePage() {
             </div>
           </div>
           <p className="profile-page__display-name">{displayHandle}</p>
+          <div className="profile-page__uid-inline">
+            <span className="profile-page__uid-muted">
+              <span className="profile-page__uid-prefix">UID:</span>
+              {user?.id ?? "—"}
+            </span>
+            <button
+              type="button"
+              className="profile-page__copy profile-page__copy--icon"
+              onClick={copyUid}
+              disabled={!user?.id}
+              aria-label="Copy UID"
+              title="Copy UID">
+              <Copy size={16} strokeWidth={2.25} aria-hidden />
+            </button>
+          </div>
+          {uidCopied ? (
+            <p className="profile-page__copy-toast" role="status">
+              Copied
+            </p>
+          ) : null}
           <div className="profile-page__level-row">
             <span className="profile-page__level-label">Entry level</span>
             <button
@@ -205,20 +165,6 @@ export function ProfilePage() {
               <Info size={18} strokeWidth={2.5} aria-hidden />
             </button>
           </div>
-          {/* <div className="profile-page__uid-inline">
-            <span className="profile-page__uid-muted">
-              UID {user?.id ?? "—"}
-            </span>
-            <button
-              type="button"
-              className="profile-page__copy profile-page__copy--compact"
-              onClick={() => {
-                void copyUid();
-              }}
-              disabled={!user?.id}>
-              Copy
-            </button>
-          </div> */}
         </div>
         <div className="profile-page__progress">
           <div className="profile-page__bar-row">
@@ -244,26 +190,6 @@ export function ProfilePage() {
         </div>
 
         <div className="profile-page__settings">
-          <div className="profile-page__setting-row">
-            <span className="profile-page__setting-label" id={locationLabelId}>
-              <Send
-                className="profile-page__setting-icon"
-                size={18}
-                strokeWidth={2}
-                aria-hidden
-              />
-              Location
-            </span>
-            <button
-              type="button"
-              className="profile-page__switch"
-              role="switch"
-              aria-checked={locationOn}
-              aria-labelledby={locationLabelId}
-              onClick={toggleLocation}>
-              <span className="profile-page__switch-thumb" />
-            </button>
-          </div>
           <div className="profile-page__setting-row">
             <span className="profile-page__setting-label" id={soundLabelId}>
               <Volume2
@@ -313,43 +239,9 @@ export function ProfilePage() {
           </button>
         </div>
 
-        <div className="profile-page__wallet">
-          <p className="profile-page__wallet-title">Wallet</p>
-          <p
-            className="profile-page__uid profile-page__wallet-balance"
-            style={{ margin: 0, fontSize: "0.88rem" }}>
-            Balance:{" "}
-            <strong style={{ color: "var(--crown-gold, #e6c040)" }}>
-              {formatBalance(user?.balance, user?.currency)}
-            </strong>
-          </p>
-          {error ? <p className="profile-page__error">{error}</p> : null}
-          <div className="profile-page__wallet-row">
-            <button
-              type="button"
-              className="btn-crown-primary profile-page__btn-block"
-              onClick={() => onDeposit()}
-              disabled={depositing}>
-              {depositing ? "Preparing…" : "Add funds"}
-            </button>
-            <button
-              type="button"
-              className="btn-crown-ghost profile-page__btn-block"
-              onClick={onRefresh}>
-              Refresh balance
-            </button>
-          </div>
-        </div>
-
         <a className="profile-page__privacy" href="#privacy">
           Privacy Policy
         </a>
-
-        <p className="profile-page__hint">
-          When you return from checkout or another page, we try to refresh your
-          balance. If the amount looks stale, tap &quot;Refresh balance&quot;
-          manually.
-        </p>
       </div>
 
       <dialog
