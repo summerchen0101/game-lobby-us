@@ -1,10 +1,12 @@
 .session-layout {
+  /* 與 .session-header 內層 min-height + padding 對齊，供主內容避開 fixed header */
+  --session-header-stripe-h: calc(var(--space-3) + 3.35rem + var(--space-2));
+
   display: flex;
   flex-direction: column;
   min-height: 100%;
   min-height: 100dvh;
   min-height: 100svh;
-  padding-top: var(--safe-top);
   background: transparent;
 }
 
@@ -17,30 +19,22 @@
 .session-layout--hero-overlay .session-header {
   --hdr-bg: linear-gradient(180deg, rgb(0 0 0 / 0.38) 0%, transparent 100%);
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
   z-index: 200;
-  flex-shrink: 0;
   background: var(--hdr-bg);
-  backdrop-filter: none;
+  backdrop-filter: blur(10px);
   border: none;
-}
-
-.session-layout--hero-overlay .session-header[data-active-wallet="SC"] {
-  backdrop-filter: none;
-}
-
-.session-layout--hero-overlay .session-header__inner {
-  padding-top: max(var(--safe-top), var(--space-2));
 }
 
 .session-layout__main {
   flex: 1 1 auto;
   min-height: 0;
   width: 100%;
+  padding-top: calc(var(--safe-top) + var(--session-header-stripe-h));
   padding-bottom: var(--session-footer-h, calc(4.25rem + var(--safe-bottom)));
+}
+
+.session-layout--hero-overlay .session-layout__main {
+  padding-top: 0;
 }
 
 /* —— Header —— (GC / SC themes via data-active-wallet) */
@@ -50,10 +44,18 @@
   /* 頂 25% 黑、底全透，整塊覆蓋 */
   --hdr-bg: linear-gradient(180deg, rgb(0 0 0 / 0.25) 0%, transparent 100%);
 
-  /* 金額藥丸內圓幣圖、加號鈕等直徑 */
-  --hdr-pill-circle: 1.85rem;
-  /* 與 .session-header__pill 上下 padding 0.2rem + 最大內層圓鈕一致 */
-  --hdr-pill-outer-h: calc(0.2rem + 0.2rem + var(--hdr-pill-circle));
+  /* 左欄頭像邊長；中間藥丸、右欄 wallet switch 同高 */
+  --hdr-avatar-size: 2.25rem;
+  /* 金額藥丸左圓（幣圖）= wallet thumb，與右欄 track 內圓同直徑 */
+  --hdr-pill-circle: 1.95rem;
+  /* 右 + 圓鈕略小於左圓，仍垂直置中 */
+  --hdr-pill-plus-size: 1.68rem;
+  /* 右欄 wallet track 內圓與左緣；中間藥丸左緣與之對齊 */
+  --hdr-pill-inset: 0rem;
+  /* 中間藥丸右側：+ 圓鈕勿貼內框 */
+  --hdr-pill-pad-inline-end: 0.13rem;
+  /* 與頭像同高 */
+  --hdr-pill-outer-h: var(--hdr-avatar-size);
   /* 中間金額藥丸固定寬度（+ 鈕靠右、中間留空如設計圖） */
   --hdr-pill-width: 19rem;
   /* 頂欄左右內距略小於全站 page-pad，logo / switch 更靠邊，仍保 safe-area */
@@ -67,11 +69,18 @@
   --hdr-pill-plus-bg: #eab308;
   --hdr-pill-plus-fg: #0a0a0a;
   --hdr-focus: #eab308;
+  /* 右欄 switch 軌道內底：與黃色框線 (#eab308) 同色半透明 */
+  --hdr-wallet-track-bg: rgb(234 179 8 / 0.2);
 
-  position: sticky;
+  position: fixed;
+  left: 0;
+  right: 0;
   top: 0;
   z-index: 150;
+  width: 100%;
+  box-sizing: border-box;
   flex-shrink: 0;
+  padding-top: var(--safe-top);
   background: var(--hdr-bg);
   backdrop-filter: blur(10px);
 }
@@ -84,13 +93,15 @@
   --hdr-pill-plus-bg: #22c55e;
   --hdr-pill-plus-fg: #fff;
   --hdr-focus: #4ade80;
+  /* 右欄 switch 軌道內底：與綠色框線 (#4ade80) 同色半透明 */
+  --hdr-wallet-track-bg: rgb(74 222 128 / 0.2);
 
   backdrop-filter: blur(10px);
 }
 
 .session-header__inner {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: var(--space-2);
   min-height: 3.35rem;
   padding: var(--space-3) var(--session-header-pad-x-end) var(--space-2)
@@ -115,8 +126,8 @@
 }
 
 .session-header__avatar {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: var(--hdr-avatar-size);
+  height: var(--hdr-avatar-size);
   border-radius: 50%;
   background: linear-gradient(145deg, #2d3a45 0%, #12181f 100%);
   border: var(--hdr-avatar-border);
@@ -134,7 +145,7 @@
   min-width: 0;
   min-height: 0;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
 }
 
@@ -145,11 +156,10 @@
   flex-shrink: 0;
   width: var(--hdr-pill-width);
   max-width: 100%;
-  height: 100%;
+  height: var(--hdr-avatar-size);
   min-height: var(--hdr-pill-outer-h);
-  max-height: 100%;
   box-sizing: border-box;
-  padding: 0.2rem 0.3rem 0.2rem 0.3rem;
+  padding: 0 var(--hdr-pill-pad-inline-end) 0 var(--hdr-pill-inset);
   border-radius: 999px;
   background: #0a0a0a;
   border: var(--hdr-pill-border);
@@ -202,8 +212,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--hdr-pill-circle);
-  height: var(--hdr-pill-circle);
+  width: var(--hdr-pill-plus-size);
+  height: var(--hdr-pill-plus-size);
   margin-left: auto;
   border-radius: 50%;
   background: var(--hdr-pill-plus-bg);
@@ -211,8 +221,8 @@
   line-height: 0;
   text-decoration: none;
   flex-shrink: 0;
-  min-width: var(--hdr-pill-circle);
-  min-height: var(--hdr-pill-circle);
+  min-width: var(--hdr-pill-plus-size);
+  min-height: var(--hdr-pill-plus-size);
   position: relative;
   z-index: 1;
 }
@@ -230,17 +240,17 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: center;
   justify-content: flex-end;
   min-width: 0;
 }
 
-/* Sliding wallet switch: pill track + circular thumb (GC / SC) — 外觀與中間金額藥丸對齊 */
+/* Sliding wallet switch: pill track + circular thumb (GC / SC) — 與中間金額藥丸、頭像同高 */
 .session-header__wallet-track {
-  /* 與中間幣圓鈕同直徑，外圈高度由列 stretch 與中間藥丸一致 */
+  /* 與中間幣圓鈕同直徑，外圈高度 = --hdr-avatar-size */
   --wallet-thumb: var(--hdr-pill-circle);
-  /* inner edge inset = same as pill padding (visual single ring, no "double" gold) */
-  --wallet-inset: 0.2rem;
+  /* 與中間金額藥丸 --hdr-pill-inset 同值 */
+  --wallet-inset: var(--hdr-pill-inset);
   /* travel = track width − paddings − borders − thumb (matches --hdr-stroke 2px) */
   --wallet-slide: calc(
     4.4rem - 2 * var(--wallet-inset) - 2 * var(--hdr-stroke) -
@@ -250,7 +260,7 @@
   position: relative;
   display: block;
   width: 4.4rem;
-  height: 100%;
+  height: var(--hdr-avatar-size);
   min-height: var(--hdr-pill-outer-h);
   margin: 0;
   padding: 0;
@@ -258,7 +268,7 @@
   box-sizing: border-box;
   border: var(--hdr-pill-border);
   border-radius: 999px;
-  background: #0a0a0a;
+  background: var(--hdr-wallet-track-bg);
   box-shadow: var(--hdr-pill-glow);
   cursor: pointer;
   flex-shrink: 0;
@@ -283,7 +293,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.1rem;
+  padding: 0rem;
   box-sizing: border-box;
   line-height: 0;
   transition: transform 0.28s ease;

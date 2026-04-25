@@ -1,6 +1,12 @@
 .auth-layout {
+  /* 與 .marketing-top-bar 總高一致，避開 fixed 頂欄 */
+  --marketing-top-bar-total: calc(
+    var(--safe-top) + 2 * var(--space-2) + var(--header-h)
+  );
+
   min-height: 100dvh;
   position: relative;
+  padding-top: var(--marketing-top-bar-total);
 }
 
 .auth-layout::before {

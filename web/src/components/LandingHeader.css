@@ -1,5 +1,7 @@
 .landing-header {
-  position: sticky;
+  position: fixed;
+  left: 0;
+  right: 0;
   top: 0;
   z-index: 100;
   flex-shrink: 0;
@@ -10,19 +12,9 @@
 }
 
 .landing-header--over-hero {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 20;
-  padding-top: 0;
   background: linear-gradient(180deg, rgb(0 0 0 / 0.38) 0%, transparent 100%);
   border-bottom: none;
-  backdrop-filter: none;
-}
-
-.landing-header--over-hero .landing-header__inner {
-  padding-top: max(var(--safe-top), var(--space-2));
+  backdrop-filter: blur(12px);
 }
 
 .landing-header__inner {
