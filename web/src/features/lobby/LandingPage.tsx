@@ -84,7 +84,6 @@ export function LandingPage() {
   const [apiItems, setApiItems] = useState<Game[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [registerEmailForm, setRegisterEmailForm] = useState(false)
   const [lobbyFilter, setLobbyFilter] = useState<LobbyFilterTab>('all')
 
   const tpId = trustpilotBusinessUnitId()
@@ -113,10 +112,6 @@ export function LandingPage() {
     const el = document.getElementById(`lobby-tab-${lobbyFilter}`)
     el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
   }, [token, lobbyFilter])
-
-  useEffect(() => {
-    if (!registerOpen) setRegisterEmailForm(false)
-  }, [registerOpen])
 
   useEffect(() => {
     const auth = searchParams.get('auth')
@@ -294,7 +289,7 @@ export function LandingPage() {
           <h2 id="guest-top-games-heading" className="guest-landing__row-title">
             TOP <span className="guest-landing__accent">FREE-TO-PLAY</span> CASINO STYLE GAMES
           </h2>
-          {renderGameTrack(GUEST_TOP_GAMES, 0)}
+          {renderGameTrack(GUEST_TOP_GAMES, 0, false)}
         </section>
 
         <section
@@ -304,7 +299,7 @@ export function LandingPage() {
           <h2 id="guest-demo-games-heading" className="guest-landing__row-title guest-landing__row-title--demo">
             <span className="guest-landing__accent">DEMO</span> here
           </h2>
-          {renderGameTrack(GUEST_DEMO_ROW_GAMES, GUEST_TOP_GAMES.length)}
+          {renderGameTrack(GUEST_DEMO_ROW_GAMES, GUEST_TOP_GAMES.length, false)}
         </section>
 
         <div className="guest-landing__signup-cta page-container">
@@ -457,17 +452,11 @@ export function LandingPage() {
       />
       <RegisterModal
         open={registerOpen}
-        onClose={() => {
-          closeRegister()
-          setRegisterEmailForm(false)
-        }}
+        onClose={closeRegister}
         onSwitchLogin={() => {
           closeRegister()
           openLoginDirect()
         }}
-        showEmailForm={registerEmailForm}
-        onShowEmailForm={() => setRegisterEmailForm(true)}
-        onBackFromEmail={() => setRegisterEmailForm(false)}
       />
     </div>
   )

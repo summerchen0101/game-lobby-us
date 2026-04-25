@@ -216,3 +216,163 @@
   text-align: center;
   color: var(--crown-gold-hover);
 }
+
+/* —— 註冊／登入彈窗：黑膠囊欄位（與舊 auth-modal__input 區隔） —— */
+.auth-modal--register .auth-modal__field-label--register,
+.auth-modal--login .auth-modal__field-label--register {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+}
+
+.auth-modal--register .auth-modal__input--register,
+.auth-modal--login .auth-modal__input--register {
+  background: #000000;
+  border: 1px solid color-mix(in srgb, #6b4cff 35%, #000000);
+  color: #ffffff;
+}
+
+.auth-modal--register .auth-modal__input--register::placeholder,
+.auth-modal--login .auth-modal__input--register::placeholder {
+  color: #a18cd1;
+  opacity: 0.9;
+}
+
+.auth-modal--register .auth-modal__input--register:focus,
+.auth-modal--login .auth-modal__input--register:focus {
+  outline: 2px solid var(--crown-locale-green);
+  outline-offset: 1px;
+}
+
+.auth-modal__password-wrap {
+  position: relative;
+  margin-bottom: var(--space-3);
+}
+
+.auth-modal--register .auth-modal__input--password,
+.auth-modal--login .auth-modal__input--password {
+  padding-right: 3rem;
+  margin-bottom: 0;
+}
+
+.auth-modal--register .auth-modal__password-wrap .auth-modal__input--register,
+.auth-modal--login .auth-modal__password-wrap .auth-modal__input--register {
+  margin-bottom: 0;
+}
+
+.auth-modal__password-toggle {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: none;
+  border-radius: 0.35rem;
+  background: none;
+  color: rgb(255 255 255 / 55%);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.auth-modal__password-toggle:hover {
+  color: rgb(255 255 255 / 80%);
+}
+
+.auth-modal__password-toggle:focus-visible {
+  outline: 2px solid var(--crown-locale-green);
+  outline-offset: 2px;
+}
+
+.auth-modal__legal {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.auth-modal__checkbox {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
+  border-radius: 0.3rem;
+  border: 1px solid color-mix(in srgb, #ffffff 25%, #000000);
+  background: #0a0a0f;
+  accent-color: var(--crown-button-primary-bg);
+  cursor: pointer;
+}
+
+.auth-modal__legal-text {
+  font-size: 0.7rem;
+  line-height: 1.5;
+  font-weight: 500;
+  color: rgb(255 255 255 / 95%);
+  cursor: pointer;
+}
+
+/* —— 登入彈窗：標題列、忘記密碼連結、說明文案 —— */
+.auth-modal__head-row.auth-modal__head-row {
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+
+.auth-modal__title--natural {
+  text-transform: none;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.auth-modal__head-btn--close {
+  font-size: var(--modal-close-glyph-size);
+  line-height: 1;
+  font-weight: 300;
+}
+
+.auth-modal__footer--center {
+  margin-top: var(--space-3);
+}
+
+.auth-modal__link--forgot {
+  color: var(--auth-forgot-link);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  padding: 0;
+  font-size: 0.88rem;
+}
+
+.auth-modal__link--forgot:hover {
+  color: var(--auth-forgot-link-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-modal__link--forgot:focus-visible {
+  outline: 2px solid var(--auth-forgot-link);
+  outline-offset: 3px;
+  border-radius: 0.2rem;
+}
+
+.auth-modal__forgot-instruction {
+  margin: 0 0 var(--space-4);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--crown-gold);
+}
+
+.auth-modal__forgot-toast {
+  margin: 0 0 var(--space-3);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  text-align: center;
+  color: rgb(255 255 255 / 88%);
+}

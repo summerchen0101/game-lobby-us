@@ -28,7 +28,7 @@
 
 @media (min-width: 48rem) {
   .landing-header__inner {
-    padding-inline: clamp(var(--space-4), 4vw, 4.375rem);
+    padding-inline: clamp(var(--space-3), 4vw, 4.375rem);
   }
 }
 

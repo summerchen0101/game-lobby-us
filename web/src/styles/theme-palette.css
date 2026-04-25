@@ -34,6 +34,10 @@
   --crown-gold-shadow: color-mix(in srgb, #000000 42%, #6b4cff);
   --crown-primary-gradient-end: #1a1f35;
 
+  /* Auth：忘記密碼連結（主色 default／hover 輔色，與主按鈕＋金強調一致） */
+  --auth-forgot-link: var(--crown-locale-green);
+  --auth-forgot-link-hover: var(--crown-gold);
+
   /* 局部 accent（舊稱局部綠）：Profile switch、頭像、Shop 副標等 */
   --crown-locale-green: #7b6dfd;
   --crown-mint: var(--crown-locale-green);

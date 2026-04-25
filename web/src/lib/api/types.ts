@@ -21,6 +21,8 @@ export type RegisterBody = {
   displayName?: string
 }
 
+export type ForgotPasswordBody = { email: string }
+
 export type Game = {
   id: string
   title: string

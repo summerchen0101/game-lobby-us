@@ -734,6 +734,13 @@ html.guest-lobby-page body::-webkit-scrollbar {
 
 .guest-landing__games-block {
   padding-top: var(--space-6);
+  /* 與已登入大廳遊戲卡同寬（見 .lobby-landing--session .lobby-games-group .lobby-game-card） */
+  container-type: inline-size;
+}
+
+.lobby-landing--guest .guest-landing__games-block .lobby-game-card {
+  width: calc((100cqi - 2 * var(--space-3)) / 3);
+  box-sizing: border-box;
 }
 
 .guest-landing__row-title {
@@ -779,7 +786,7 @@ html.guest-lobby-page body::-webkit-scrollbar {
   gap: var(--space-3);
   padding: var(--space-2) var(--space-2);
   padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(180deg, #2a3154 0%, #242946 100%);
+  background: linear-gradient(180deg, #3c0553 0%, #0c0324 100%);
   border-top: 1px solid rgb(255 255 255 / 12%);
   box-shadow: 0 -8px 24px rgb(0 0 0 / 35%);
   pointer-events: auto;
