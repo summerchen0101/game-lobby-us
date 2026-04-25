@@ -463,7 +463,7 @@
 }
 
 .shop-checkout__save-input:checked + .shop-checkout__save-box {
-  background: var(--crown-button-primary-bg);
+  background: var(--crown-button-primary-gradient);
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
 }
 
@@ -507,12 +507,7 @@
   border: none;
   border-radius: 9999px;
   color: var(--crown-button-primary-fg);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--crown-button-primary-bg) 88%, #ffffff) 0%,
-    var(--crown-button-primary-bg) 48%,
-    color-mix(in srgb, var(--crown-button-primary-bg) 72%, #000000) 100%
-  );
+  background: var(--crown-button-primary-gradient);
   font: inherit;
   font-size: 0.85rem;
   font-weight: 900;

@@ -193,7 +193,7 @@
   cursor: pointer;
   color: var(--color-text);
   text-shadow: none;
-  background: var(--crown-button-primary-bg, #242946);
+  background: var(--crown-button-primary-gradient);
   box-shadow:
     0 2px 0 0 var(--shop-price-btn-shadow),
     inset 0 1px 0 rgb(0 0 0 / 16%);

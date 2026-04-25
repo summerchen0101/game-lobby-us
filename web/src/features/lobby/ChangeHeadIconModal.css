@@ -134,7 +134,7 @@
   text-transform: uppercase;
   color: #fff;
   cursor: pointer;
-  background: linear-gradient(95deg, #5eb8ff 0%, #6b4cff 50%, #8b5cf6 100%);
+  background: var(--crown-button-primary-gradient);
   -webkit-tap-highlight-color: transparent;
 }
 

@@ -163,7 +163,7 @@
 }
 
 .promo-page__btn--light {
-  background: var(--crown-button-primary-bg, #242946);
+  background: var(--crown-button-primary-gradient);
   color: var(--color-text, #fff);
   border: none;
   box-shadow:

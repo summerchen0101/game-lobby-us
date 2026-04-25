@@ -1,5 +1,5 @@
 /**
- * 全站配色與品牌色票（#242946 底、#6085f8 主按鈕、#ffffff 文、#fde201 強調、#14db75 局部綠：switch／頭像／Shop 副標）。
+ * 全站配色與品牌色票（#242946 底、主按鈕為藍→紫漸層／#6b4cff 單色基準、#ffffff 文、#fde201 強調、#14db75 局部綠：switch／頭像／Shop 副標）。
  *
  * 檔期換色：
  * 1. 在 theme-seasonal.css 新增 [data-theme="檔名"] { … } 覆寫下方變數
@@ -20,12 +20,18 @@
   --color-accent: var(--crown-gold);
   --color-accent-hover: var(--crown-gold-hover);
 
-  /* 主按鈕（crown-theme、多頁內聯鈕） */
-  --crown-button-primary-bg: #6085f8;
+  /* 主按鈕（crown-theme、多頁內聯鈕）；檔期可覆寫 gradient 與 bg */
+  --crown-button-primary-gradient: linear-gradient(
+    95deg,
+    #5eb8ff 0%,
+    #6b4cff 50%,
+    #8b5cf6 100%
+  );
+  --crown-button-primary-bg: #6b4cff;
   --crown-button-primary-fg: #ffffff;
   --crown-gold: #fde201;
   --crown-gold-hover: #ffec4d;
-  --crown-gold-shadow: color-mix(in srgb, #000000 42%, #6085f8);
+  --crown-gold-shadow: color-mix(in srgb, #000000 42%, #6b4cff);
   --crown-primary-gradient-end: #1a1f35;
 
   /* 局部綠：Profile switch、頭像、Shop 副標等 */

@@ -230,7 +230,7 @@
   min-height: 2.6rem;
   border: none;
   border-radius: var(--crown-btn-radius, 999px);
-  background: var(--crown-button-primary-bg, #6085f8);
+  background: var(--crown-button-primary-gradient);
   color: var(--crown-button-primary-fg, #ffffff);
   font: inherit;
   font-size: 0.88rem;

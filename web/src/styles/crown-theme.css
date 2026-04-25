@@ -31,7 +31,7 @@ a.btn-crown-secondary {
 
 .btn-crown-primary {
   border: none;
-  background: var(--crown-button-primary-bg, #6085f8);
+  background: var(--crown-button-primary-gradient);
   color: var(--crown-button-primary-fg, #ffffff);
   box-shadow:
     0 var(--crown-btn-shadow-h) 0 0 var(--crown-gold-shadow),

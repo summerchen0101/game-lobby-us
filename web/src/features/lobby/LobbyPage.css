@@ -682,7 +682,7 @@ html.guest-lobby-page body::-webkit-scrollbar {
   text-transform: uppercase;
   cursor: pointer;
   color: var(--color-text);
-  background: var(--crown-button-primary-bg, #242946);
+  background: var(--crown-button-primary-gradient);
   border: none;
   box-shadow:
     0 4px 0 var(--crown-gold-shadow),
@@ -804,7 +804,7 @@ html.guest-lobby-page body::-webkit-scrollbar {
   text-transform: uppercase;
   cursor: pointer;
   color: var(--color-text);
-  background: var(--crown-button-primary-bg, #242946);
+  background: var(--crown-button-primary-gradient);
   border: none;
   box-shadow:
     0 2px 0 var(--crown-gold-shadow),
@@ -832,7 +832,7 @@ html.guest-lobby-page body::-webkit-scrollbar {
   border-radius: 50%;
   cursor: pointer;
   color: var(--color-text);
-  background: var(--crown-button-primary-bg, #6085f8);
+  background: var(--crown-button-primary-gradient);
   border: none;
   box-shadow:
     0 2px 0 rgb(0 0 0 / 35%),

@@ -1,7 +1,7 @@
 .lobby-comp {
   /* Scoped green accent for this footer only; global --crown-gold unchanged */
   --lobby-comp-accent: #4ade80;
-  --lobby-comp-btn-shadow: color-mix(in srgb, #000000 42%, #22c55e);
+  --lobby-comp-btn-shadow: color-mix(in srgb, #000000 42%, #6b4cff);
   padding-block: var(--space-8) var(--space-10);
   margin-top: var(--space-4);
 }
@@ -104,7 +104,7 @@
   text-transform: uppercase;
   text-decoration: none;
   color: var(--color-text);
-  background: var(--crown-button-primary-bg, #242946);
+  background: var(--crown-button-primary-gradient);
   border: none;
   box-shadow:
     0 3px 0 var(--lobby-comp-btn-shadow),
