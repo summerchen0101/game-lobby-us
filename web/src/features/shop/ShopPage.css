@@ -1,6 +1,7 @@
 .shop-page {
   padding-top: var(--space-3);
-  padding-bottom: var(--space-8);
+  /* More scroll room above the session footer (was --space-8) */
+  padding-bottom: calc(var(--space-8) + var(--space-6));
 }
 
 .shop-page__inner {

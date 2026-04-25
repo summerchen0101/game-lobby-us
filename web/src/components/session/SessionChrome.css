@@ -400,34 +400,3 @@
   color: var(--session-footer-accent);
 }
 
-/* —— Support FAB —— */
-.session-support-fab {
-  position: fixed;
-  right: max(var(--page-pad-inline), var(--safe-right));
-  bottom: calc(
-    var(--session-footer-h, calc(3.6rem + var(--safe-bottom))) + var(--space-3)
-  );
-  z-index: 180;
-  width: 3rem;
-  height: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: 50%;
-  background: #0f1418;
-  color: var(--color-text);
-  cursor: pointer;
-  box-shadow:
-    0 2px 0 rgb(0 0 0 / 45%),
-    0 8px 24px rgb(0 0 0 / 40%);
-}
-
-.session-support-fab:hover {
-  filter: brightness(1.08);
-}
-
-.session-support-fab svg {
-  width: 1.35rem;
-  height: 1.35rem;
-}

@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/useAuth'
 import { LandingHeader } from '../../components/LandingHeader'
 import { LobbyJackpotStrip } from '../../components/LobbyJackpotStrip'
 import { SessionChromeShell } from '../../components/session/SessionChromeShell'
+import { SupportFab } from '../../components/session/SupportFab'
 import { LobbyComplianceFooter } from '../../components/LobbyComplianceFooter'
 import { TrustpilotSection } from '../../components/TrustpilotSection'
 import { useGameShell } from '../../components/useGameShell'
@@ -11,7 +12,7 @@ import { useAuthModals } from '../auth/authModalsContext'
 import { LoginModal } from '../auth/LoginModal'
 import { RegisterModal } from '../auth/RegisterModal'
 import { TermsGateModal } from '../auth/TermsGateModal'
-import { supportChatUrl, trustpilotBusinessUnitId } from '../../lib/env'
+import { trustpilotBusinessUnitId } from '../../lib/env'
 import { ApiError } from '../../lib/api/client'
 import { fetchGames } from '../../lib/api/games'
 import type { Game } from '../../lib/api/types'
@@ -195,11 +196,6 @@ export function LandingPage() {
     openTermsThen('register')
   }
 
-  function onGuestChatClick() {
-    const u = supportChatUrl()
-    if (u) window.open(u, '_blank', 'noopener,noreferrer')
-  }
-
   function gameCard(g: Game, index: number, thumbBase: number, showTextLabels = true) {
     const thumb = gameEntryThumbnail(thumbBase + index, g.thumbnailUrl)
     return (
@@ -325,19 +321,7 @@ export function LandingPage() {
         </button>
       </div>
 
-      <button
-        type="button"
-        className="guest-landing__chat-fab"
-        aria-label="Chat support"
-        onClick={onGuestChatClick}
-      >
-        <svg className="guest-landing__chat-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden>
-          <path
-            fill="currentColor"
-            d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"
-          />
-        </svg>
-      </button>
+      <SupportFab placement="guest" />
     </>
   )
 
