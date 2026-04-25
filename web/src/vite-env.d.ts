@@ -19,6 +19,10 @@ interface ImportMetaEnv {
   readonly VITE_UNITY_DEMO_URL?: string
   /** 大廳主視覺圖 URL（可覆寫預設 sample 圖） */
   readonly VITE_LOBBY_HERO_IMAGE?: string
+  /** 訪客首頁 hero 圖；未設則沿用 VITE_LOBBY_HERO_IMAGE／預設 */
+  readonly VITE_GUEST_HERO_IMAGE?: string
+  /** 訪客頁聊天 FAB：完整 URL，點擊時新分頁開啟 */
+  readonly VITE_SUPPORT_CHAT_URL?: string
   /** Trustpilot Business Unit ID；未設則不載入 widget */
   readonly VITE_TRUSTPILOT_BUSINESS_UNIT_ID?: string
   /** 浮動 CTA 點擊導向（預設 /profile） */

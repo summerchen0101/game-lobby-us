@@ -28,11 +28,9 @@ export function ProfilePage() {
   const { open: openShell } = useGameShell();
   const [depositing, setDepositing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copyMsg, setCopyMsg] = useState<string | null>(null);
   const [soundOn, setSoundOn] = useState(true);
   const [locationOn, setLocationOn] = useState(false);
   const fundsRef = useRef<HTMLDialogElement>(null);
-  const liveId = useId();
   const locationLabelId = useId();
   const soundLabelId = useId();
 
@@ -114,18 +112,6 @@ export function ProfilePage() {
     } finally {
       setDepositing(false);
     }
-  }
-
-  async function copyUid() {
-    if (!user?.id) return;
-    setCopyMsg(null);
-    try {
-      await navigator.clipboard.writeText(user.id);
-      setCopyMsg("Copied");
-    } catch {
-      setCopyMsg("Could not copy—select the ID manually");
-    }
-    window.setTimeout(() => setCopyMsg(null), 2500);
   }
 
   function toggleSound() {
@@ -234,16 +220,6 @@ export function ProfilePage() {
             </button>
           </div> */}
         </div>
-        {copyMsg ? (
-          <p
-            className="profile-page__copy-toast"
-            id={liveId}
-            role="status"
-            aria-live="polite">
-            {copyMsg}
-          </p>
-        ) : null}
-
         <div className="profile-page__progress">
           <div className="profile-page__bar-row">
             <div

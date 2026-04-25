@@ -13,13 +13,19 @@ function formatHeaderBalance(n: number | undefined, currency?: string) {
 type Props = {
   onJoinUs: () => void
   onLogin: () => void
+  /** 疊在首屏 banner 上（未登入大廳） */
+  overHero?: boolean
 }
 
-export function LandingHeader({ onJoinUs, onLogin }: Props) {
+export function LandingHeader({ onJoinUs, onLogin, overHero = false }: Props) {
   const { user, logout } = useAuth()
 
   return (
-    <header className="landing-header">
+    <header
+      className={
+        'landing-header' + (overHero ? ' landing-header--over-hero' : '')
+      }
+    >
       <div className="landing-header__inner page-container">
         <Link to="/" className="landing-header__brand">
           <img
@@ -50,11 +56,11 @@ export function LandingHeader({ onJoinUs, onLogin }: Props) {
             </div>
           ) : (
             <div className="landing-header__auth-btns">
-              <button type="button" className="landing-header__join" onClick={onJoinUs}>
-                JOIN US
-              </button>
               <button type="button" className="landing-header__login" onClick={onLogin}>
                 LOGIN
+              </button>
+              <button type="button" className="landing-header__join" onClick={onJoinUs}>
+                JOIN US
               </button>
             </div>
           )}

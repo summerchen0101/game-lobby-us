@@ -21,3 +21,9 @@ export function floatingCtaPath(): string {
   const v = import.meta.env.VITE_FLOATING_CTA_PATH?.trim()
   return v || '/profile'
 }
+
+/** 訪客頁聊天 FAB：有值則點擊時 window.open（新分頁）。 */
+export function supportChatUrl(): string | undefined {
+  const v = import.meta.env.VITE_SUPPORT_CHAT_URL?.trim()
+  return v || undefined
+}

@@ -8,6 +8,34 @@
   background: transparent;
 }
 
+/* 大廳：banner 頂到螢幕上緣，safe 改由 header 內層處理 */
+.session-layout--hero-overlay {
+  position: relative;
+  padding-top: 0;
+}
+
+.session-layout--hero-overlay .session-header {
+  --hdr-bg: linear-gradient(180deg, rgb(0 0 0 / 0.38) 0%, transparent 100%);
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 200;
+  flex-shrink: 0;
+  background: var(--hdr-bg);
+  backdrop-filter: none;
+  border: none;
+}
+
+.session-layout--hero-overlay .session-header[data-active-wallet="SC"] {
+  backdrop-filter: none;
+}
+
+.session-layout--hero-overlay .session-header__inner {
+  padding-top: max(var(--safe-top), var(--space-2));
+}
+
 .session-layout__main {
   flex: 1 1 auto;
   min-height: 0;

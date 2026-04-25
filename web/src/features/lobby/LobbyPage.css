@@ -6,14 +6,22 @@
 
 /* 大廳專屬氣氛霧面；底紋格點由全站 body（site-background.css）提供，避免重複鋪圖 */
 .lobby-landing::before {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   background-color: transparent;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, var(--theme-radial-green-lobby), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 40%, var(--theme-radial-gold-lobby), transparent 45%);
+    radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      var(--theme-radial-green-lobby),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 100% 40%,
+      var(--theme-radial-gold-lobby),
+      transparent 45%
+    );
   pointer-events: none;
 }
 
@@ -23,15 +31,27 @@
   gap: 0;
 }
 
+/* 已登入大廳 banner 滿版；頂欄疊圖由 SessionChromeShell headerOverHero 處理 */
 .lobby-hero-banner {
-  padding-top: var(--space-4);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding: 0;
 }
 
-.lobby-hero-banner__content {
-  border-radius: var(--crown-card-radius);
+.lobby-hero-banner__art-wrap {
+  position: relative;
+  z-index: 0;
+  margin: 0;
+  max-width: none;
+  border-radius: 0;
   overflow: hidden;
   line-height: 0;
-  box-shadow: 0 12px 40px rgb(0 0 0 / 45%);
+  box-shadow: none;
+  /* 讓底端 Jackpot 整排略往下，減少壓在圖上的面積 */
+  padding-bottom: 1.5rem;
+  box-sizing: border-box;
 }
 
 .lobby-hero-banner__img {
@@ -40,71 +60,6 @@
   height: auto;
   object-fit: cover;
   max-height: min(52vh, 420px);
-}
-
-.lobby-claim-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--space-3);
-  padding-block: var(--space-6);
-}
-
-.lobby-welcome {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--text-small);
-}
-
-.lobby-welcome strong {
-  color: var(--crown-gold);
-  font-weight: 700;
-}
-
-.lobby-claim-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  justify-content: center;
-}
-
-.lobby-claim-link {
-  text-decoration: none;
-}
-
-.lobby-claim-btn-welcome,
-a.lobby-claim-btn-welcome {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 22rem;
-  min-height: 3.25rem;
-  padding: 0 var(--space-6);
-  border: none;
-  border-radius: 999px;
-  text-decoration: none;
-  font: inherit;
-  font-weight: 900;
-  font-size: 0.95rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  cursor: pointer;
-  color: #0a1a0f;
-  background: linear-gradient(180deg, #86efac 0%, #4ade80 42%, #16a34a 100%);
-  box-shadow: 0 5px 0 #14532d;
-  transition: filter 0.15s ease;
-}
-
-.btn-crown-welcome:hover {
-  filter: brightness(1.06);
-}
-
-.lobby-hint {
-  margin: 0;
-  font-size: 0.75rem;
-  color: rgb(255 255 255 / 45%);
 }
 
 .lobby-section-title {
@@ -327,7 +282,8 @@ a.lobby-claim-btn-welcome {
   background: var(--crown-benefit-card-bg);
   border-radius: var(--crown-surface-card-radius);
   border: 1px solid var(--crown-benefit-card-border);
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--crown-purple-deep) 15%, transparent);
+  box-shadow: 0 4px 16px
+    color-mix(in srgb, var(--crown-purple-deep) 15%, transparent);
 }
 
 .lobby-benefit-card__img-wrap {
@@ -356,56 +312,269 @@ a.lobby-claim-btn-welcome {
   color: var(--crown-gold);
 }
 
-.lobby-floating-cta {
+/* —— 訪客首頁（參考未登入行銷稿） —— */
+/* 未登入大廳：隱藏主捲軸與內層可捲區捲動條（仍可用觸控／滾輪捲動） */
+html.guest-lobby-page {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html.guest-lobby-page::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+html.guest-lobby-page body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html.guest-lobby-page body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+.lobby-landing--guest {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.lobby-landing--guest .lobby-games-scroller {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lobby-landing--guest .lobby-games-scroller::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+.lobby-landing--guest .guest-landing__main {
+  padding-bottom: var(--space-6);
+}
+
+/* 全寬 banner（勿加 page-container，避免 max-width 造成左右露底） */
+.guest-landing__hero {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding: 0;
+  text-align: center;
+  background:
+    radial-gradient(
+      ellipse 120% 80% at 50% 0%,
+      rgb(30 58 138 / 55%),
+      transparent 55%
+    ),
+    linear-gradient(180deg, #0f172a 0%, #0a0f1a 100%);
+  border-radius: 0;
+  box-shadow: inset 0 -1px 0 rgb(255 255 255 / 6%);
+  overflow: hidden;
+}
+
+.guest-landing__hero-art-wrap {
+  position: relative;
+  z-index: 0;
+  margin: 0;
+  max-width: none;
+  border-radius: 0;
+  overflow: hidden;
+  line-height: 0;
+  box-shadow: none;
+}
+
+.guest-landing__hero-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: top;
+  object-fit: cover;
+  object-position: center top;
+  max-height: min(52vh, 420px);
+}
+
+.guest-landing__claim-banner,
+.guest-landing__signup-wide {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 900;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 45%, #1d4ed8 100%);
+  box-shadow:
+    0 4px 0 #1e3a8a,
+    0 6px 20px rgb(0 0 0 / 35%);
+  transition: filter 0.15s ease;
+}
+
+/* 壓在 banner 圖底部中央（見未登入稿，較小一號） */
+.guest-landing__claim-banner {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(0.5rem, 2dvw, 0.95rem);
+  z-index: 2;
+  width: min(17.5rem, calc(100% - 2 * var(--page-pad-inline)));
+  min-height: 2.35rem;
+  padding-inline: var(--space-3);
+  font-size: 0.68rem;
+  letter-spacing: 0.055em;
+  transform: translate(-50%, 0.25rem);
+  box-sizing: border-box;
+  box-shadow:
+    0 3px 0 #1e3a8a,
+    0 4px 14px rgb(0 0 0 / 32%);
+}
+
+.guest-landing__signup-wide {
+  width: min(16.25rem, 100%);
+  max-width: none;
+  min-height: 2.55rem;
+  padding: 0 var(--space-4);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  box-shadow:
+    0 3px 0 #1e3a8a,
+    0 4px 16px rgb(0 0 0 / 32%);
+}
+
+.guest-landing__claim-banner:hover,
+.guest-landing__signup-wide:hover {
+  filter: brightness(1.06);
+}
+
+.guest-landing__games-block {
+  padding-top: var(--space-6);
+}
+
+.guest-landing__row-title {
+  margin: 0 0 var(--space-4);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  color: rgb(255 255 255 / 92%);
+  line-height: 1.35;
+}
+
+.guest-landing__row-title--demo {
+  text-transform: none;
+  letter-spacing: 0.08em;
+}
+
+.guest-landing__row-title--demo .guest-landing__accent {
+  text-transform: uppercase;
+}
+
+.guest-landing__accent {
+  color: #4ade80;
+  font-weight: 900;
+}
+
+.guest-landing__signup-cta {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--space-6) var(--space-8);
+}
+
+.guest-landing__sticky-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--page-pad-inline);
+  padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%);
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  box-shadow: 0 -8px 24px rgb(0 0 0 / 35%);
+  pointer-events: auto;
+}
+
+.guest-landing__sticky-gift {
+  flex-shrink: 0;
+  width: 3.25rem;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgb(0 0 0 / 40%));
+  pointer-events: none;
+}
+
+.guest-landing__sticky-btn {
+  flex: 1;
+  max-width: 11.5rem;
+  margin-left: auto;
+  min-height: var(--min-tap);
+  padding: 0.3rem 0.55rem;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.5rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+  box-shadow: 0 2px 0 #1e3a8a;
+  transition: filter 0.15s ease;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.guest-landing__sticky-btn:hover {
+  filter: brightness(1.06);
+}
+
+.guest-landing__chat-fab {
   position: fixed;
   right: max(var(--page-pad-inline), var(--safe-right));
-  bottom: calc(var(--nav-bottom-h) + var(--space-4));
-  z-index: 40;
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+  width: 3.25rem;
+  height: 3.25rem;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  width: 5.5rem;
-  pointer-events: none;
-}
-
-/* 登入後五格 footer 較高，浮動 CTA 需避開 */
-.lobby-landing--session .lobby-floating-cta {
-  bottom: calc(var(--session-footer-h) + var(--space-4));
-}
-
-@media (min-width: 48rem) {
-  .lobby-floating-cta {
-    bottom: var(--space-6);
-  }
-
-  .lobby-landing--session .lobby-floating-cta {
-    bottom: calc(var(--session-footer-h) + var(--space-4));
-  }
-}
-
-.lobby-floating-cta__bg {
-  position: absolute;
-  inset: 20% -10% -5% -10%;
+  justify-content: center;
+  padding: 0;
+  border: none;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(255 198 0 / 25%) 0%, transparent 70%);
-  pointer-events: none;
+  cursor: pointer;
+  color: #fff;
+  background: #111827;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 45%);
+  transition:
+    transform 0.08s ease,
+    filter 0.15s ease;
 }
 
-.lobby-floating-cta__img {
-  position: relative;
-  width: 4.5rem;
-  height: auto;
-  filter: drop-shadow(0 6px 12px rgb(0 0 0 / 45%));
-  pointer-events: none;
+.guest-landing__chat-fab:hover {
+  filter: brightness(1.12);
 }
 
-.lobby-floating-cta__btn {
-  position: relative;
-  margin-top: -0.25rem;
-  padding-inline: 0.65rem;
-  font-size: 0.65rem;
-  pointer-events: auto;
-  text-decoration: none;
-  text-align: center;
-  line-height: 1.2;
+.guest-landing__chat-fab:active {
+  transform: scale(0.96);
+}
+
+.guest-landing__chat-icon {
+  display: block;
+  flex-shrink: 0;
 }
