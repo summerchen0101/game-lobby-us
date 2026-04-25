@@ -1,3 +1,4 @@
+import { DEFAULT_REDEEM_PILL_MESSAGES } from '../../features/lobby/redeemPillMessages'
 import { MOCK_GAMES } from '../mockGames'
 import type {
   AuthResponse,
@@ -71,6 +72,10 @@ export async function mockGetGames(): Promise<GamesResponse> {
     embedHeightPercent: 85,
   }))
   return delay({ items })
+}
+
+export async function mockGetRedeemPillMessages(): Promise<string[]> {
+  return delay([...DEFAULT_REDEEM_PILL_MESSAGES], 200)
 }
 
 export async function mockDeposit(returnUrl: string): Promise<DepositResponse> {
