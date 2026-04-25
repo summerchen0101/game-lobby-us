@@ -58,7 +58,7 @@
 
 .my-profile-modal__id {
   margin: 0 0 var(--space-2);
-  font-size: 1.75rem;
+  font-size: 1.3rem;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: 0.04em;
@@ -75,7 +75,7 @@
 }
 
 .my-profile-modal__level-label {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--color-text);
   letter-spacing: 0.02em;
