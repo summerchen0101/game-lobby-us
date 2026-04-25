@@ -146,6 +146,28 @@
   text-overflow: ellipsis;
 }
 
+.lobby-jackpot-strip__amount.is-scrambling {
+  animation: lobby-jackpot-amount-tick 0.12s ease-in-out infinite;
+  filter: brightness(1.15);
+}
+
+@keyframes lobby-jackpot-amount-tick {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  40% {
+    transform: translateY(-0.5px);
+    filter: brightness(1.2);
+  }
+
+  60% {
+    transform: translateY(0.5px);
+  }
+}
+
 @media (min-width: 30rem) {
   .lobby-jackpot-strip__cluster {
     max-width: 22rem;
