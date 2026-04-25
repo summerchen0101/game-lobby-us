@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Copy, Crown, Info, Volume2 } from "lucide-react";
+import { HiPencil } from "react-icons/hi2";
 import { useAuth } from "../../auth/useAuth";
 import "./ProfilePage.css";
 import "./SessionPageDecor.css";
@@ -130,7 +131,11 @@ export function ProfilePage() {
                 title="Edit (preview)"
                 aria-label="Edit (preview)"
                 tabIndex={-1}>
-                ✎
+                <HiPencil
+                  className="profile-page__edit-icon"
+                  aria-hidden
+                  size={15}
+                />
               </button>
             </div>
           </div>
