@@ -31,8 +31,8 @@ export function SessionHeader() {
             src={BRAND_LOGO}
             alt=""
             className="session-header__logo"
-            width={32}
-            height={32}
+            width={44}
+            height={44}
             decoding="async"
           />
           <div className="session-header__avatar" aria-hidden>
