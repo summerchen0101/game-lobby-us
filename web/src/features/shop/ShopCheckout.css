@@ -1,108 +1,24 @@
-.shop-checkout-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 5000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: max(var(--page-pad), var(--safe-top)) var(--page-pad-inline)
-    max(var(--page-pad), var(--safe-bottom));
-  background: rgb(0 0 0 / 72%);
-  backdrop-filter: blur(6px);
-}
-
-.shop-checkout {
+/* 外殼在 AppModal.css（app-modal*） */
+.app-modal.shop-checkout {
   width: 100%;
   max-width: min(26rem, 100%);
   max-height: min(92dvh, 700px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: 1.1rem;
-  background: #1e2337;
   color: var(--color-text);
-  box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 55%);
-  border: 1px solid rgb(255 255 255 / 10%);
 }
 
-.shop-checkout__head {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 3rem;
-  padding: 0.65rem 0.5rem 0.5rem;
-  flex-shrink: 0;
-}
+/* 標題字級與全站 app-modal 一致（--modal-title-size） */
 
-.shop-checkout__back {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  padding: 0;
-  border: none;
-  border-radius: 0.4rem;
-  background: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.shop-checkout__back:hover {
-  background: rgb(255 255 255 / 8%);
-}
-
-.shop-checkout__close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  padding: 0;
-  border: none;
-  border-radius: 0.4rem;
-  background: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.shop-checkout__close:hover {
-  background: rgb(255 255 255 / 8%);
-}
-
-.shop-checkout__back-icon,
-.shop-checkout__close-icon {
+.shop-checkout__back-icon {
   display: block;
   flex-shrink: 0;
 }
 
-.shop-checkout__title {
-  margin: 0;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: calc(100% - 5rem);
-  font-size: 0.9rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-align: center;
-  text-transform: uppercase;
-  pointer-events: none;
-}
-
-/* Long heading: one line, scale down slightly on narrow viewports so it still fits. */
-.shop-checkout__head--protect .shop-checkout__title {
+/* 長標題單行；字級與其他彈窗相同 */
+.shop-checkout__head--protect .app-modal__title--abs-center {
   white-space: nowrap;
-  max-width: calc(100% - 5.5rem);
-  font-size: clamp(0.78rem, 3.2vw, 1.08rem);
-}
-
-.shop-checkout__head-spacer {
-  width: 2.5rem;
-  flex-shrink: 0;
+  max-width: calc(100% - 6.5rem);
+  font-size: var(--modal-title-size);
+  letter-spacing: var(--modal-title-tracking);
 }
 
 /* ---- Order summary ---- */
@@ -232,11 +148,8 @@
 
 /* ---- Card form ---- */
 .shop-checkout__head-rule {
-  height: 1px;
-  margin: 0 1.15rem;
-  border: none;
-  background: rgb(0 0 0 / 35%);
-  flex-shrink: 0;
+  margin-left: 1.15rem;
+  margin-right: 1.15rem;
 }
 
 .shop-checkout__card-form {

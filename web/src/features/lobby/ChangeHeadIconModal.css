@@ -1,80 +1,7 @@
-/* Change head icon — 深藍/紫、網格選取、參考 Invite Friends overlay 層級 */
-.change-head-icon-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 5000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: max(var(--page-pad), var(--safe-top));
-  padding-bottom: max(var(--page-pad), var(--safe-bottom));
-  padding-left: var(--page-pad-inline);
-  padding-right: var(--page-pad-inline);
-  background: rgb(0 0 0 / 70%);
-  backdrop-filter: blur(5px);
-}
-
-.change-head-icon-modal {
-  width: 100%;
+/* Change head icon — 外殼在 AppModal.css；內容網格與底色 */
+.app-modal.change-head-icon-modal {
   max-width: 20.5rem;
   max-height: min(90dvh, 540px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: 0.9rem;
-  background: #1a2038;
-  color: #fff;
-  box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 55%);
-  border: 1px solid rgb(255 255 255 / 9%);
-}
-
-.change-head-icon-modal__header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.9rem;
-  padding: 0.85rem 2.5rem 0.85rem var(--space-3);
-  background: #14182c;
-  border-radius: 0.9rem 0.9rem 0 0;
-  flex-shrink: 0;
-}
-
-.change-head-icon-modal__title {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  line-height: 1.2;
-  text-align: center;
-  color: rgb(255 255 255 / 96%);
-}
-
-.change-head-icon-modal__close {
-  position: absolute;
-  right: var(--space-2);
-  top: 50%;
-  transform: translateY(-50%);
-  width: 2.65rem;
-  height: 2.65rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: #fff;
-  font-size: 1.65rem;
-  line-height: 1;
-  font-weight: 500;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.change-head-icon-modal__close:hover {
-  background: rgb(255 255 255 / 8%);
 }
 
 .change-head-icon-modal__body {
@@ -118,7 +45,7 @@
 
 .change-head-icon-modal__footer {
   padding: 0 var(--space-3) var(--space-4);
-  background: #1a2038;
+  background: var(--modal-panel-bg);
   flex-shrink: 0;
 }
 

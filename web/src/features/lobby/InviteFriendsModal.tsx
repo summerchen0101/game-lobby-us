@@ -55,15 +55,15 @@ export function InviteFriendsModal({ open, onClose }: Props) {
   if (!open) return null
 
   return createPortal(
-    <div className="invite-friends-modal-overlay" role="presentation" onClick={onClose}>
+    <div className="app-modal-overlay" role="presentation" onClick={onClose}>
       <div
-        className="invite-friends-modal"
+        className="app-modal app-modal--scroll-y invite-friends-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="invite-friends-modal__header">
+        <div className="app-modal__header app-modal__header--with-start">
           <InfoPopover
             align="start"
             panelClassName="invite-friends-modal__info-popover-wrap"
@@ -86,19 +86,19 @@ export function InviteFriendsModal({ open, onClose }: Props) {
               </button>
             )}
           </InfoPopover>
-          <h2 id={titleId} className="invite-friends-modal__title">
+          <h2 id={titleId} className="app-modal__title">
             INVITE FRIENDS
           </h2>
           <button
             type="button"
-            className="invite-friends-modal__close"
+            className="app-modal__close"
             onClick={onClose}
             aria-label="Close"
           >
             ×
           </button>
         </div>
-        <hr className="invite-friends-modal__rule" />
+        <hr className="app-modal__rule app-modal__rule--flush" />
         <div className="invite-friends-modal__body">
           <p className="invite-friends-modal__reward-head">Invite Friends and Get</p>
           <div className="invite-friends-modal__reward-row">

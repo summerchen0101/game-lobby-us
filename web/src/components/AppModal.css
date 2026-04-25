@@ -1,0 +1,196 @@
+/**
+ * 全站彈窗共用外殼（與 web/src/styles/theme-palette.css 的 --modal-* 搭配）
+ */
+
+.app-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--modal-z-index);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: max(var(--page-pad), var(--safe-top));
+  padding-bottom: max(var(--page-pad), var(--safe-bottom));
+  padding-left: var(--page-pad-inline);
+  padding-right: var(--page-pad-inline);
+  background: var(--modal-overlay-scrim);
+  backdrop-filter: blur(var(--modal-overlay-blur));
+}
+
+.app-modal {
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--color-text);
+  background: var(--modal-panel-bg);
+  border-radius: var(--modal-radius);
+  box-shadow: var(--modal-shadow);
+  border: var(--modal-panel-border);
+}
+
+.app-modal--scroll-y {
+  max-height: min(90dvh, 640px);
+  overflow-y: auto;
+}
+
+.app-modal--col {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-modal__header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--modal-header-min-height);
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  text-align: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.app-modal__header--with-start {
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
+
+.app-modal__title {
+  margin: 0;
+  max-width: 100%;
+  font-size: var(--modal-title-size);
+  font-weight: 800;
+  letter-spacing: var(--modal-title-tracking);
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+.app-modal__close {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  transform: translateY(-50%);
+  width: var(--modal-close-size);
+  height: var(--modal-close-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--modal-close-glyph-size);
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.9;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-modal__close:hover {
+  opacity: 1;
+  background: rgb(255 255 255 / 8%);
+}
+
+/* 列式標題列（Shop）：關閉鈕為 flex 子項，不佔用絕對定位 */
+.app-modal__head-row > .app-modal__close {
+  position: static;
+  right: auto;
+  top: auto;
+  transform: none;
+}
+
+.app-modal__rule {
+  display: block;
+  height: 1px;
+  margin: 0 var(--modal-rule-inset);
+  background: var(--modal-rule-color);
+  border: none;
+  flex-shrink: 0;
+}
+
+.app-modal__rule--flush {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.app-modal__body {
+  padding: var(--space-5);
+  box-sizing: border-box;
+}
+
+/* Shop：左返回／右關閉＋置中標題 */
+.app-modal__head-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--modal-header-min-height);
+  padding: 0.65rem 0.5rem 0.5rem;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.app-modal__head-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--modal-close-size);
+  height: var(--modal-close-size);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-modal__head-btn:hover {
+  background: rgb(255 255 255 / 8%);
+}
+
+.app-modal__head-spacer {
+  width: var(--modal-close-size);
+  height: var(--modal-close-size);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.app-modal__title--abs-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  max-width: calc(100% - 2 * var(--modal-close-size) - 0.5rem);
+  transform: translate(-50%, -50%);
+  font-size: var(--modal-title-size);
+  font-weight: 800;
+  letter-spacing: var(--modal-title-tracking);
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--color-text);
+  pointer-events: none;
+}
+
+/* Profile `<dialog>` 外殼與內層重設 */
+.profile-page__dialog {
+  max-width: 20rem;
+  width: calc(100vw - 2 * var(--page-pad-inline));
+  margin: auto;
+  padding: 0;
+  color: var(--color-text);
+  background: var(--modal-panel-bg);
+  border-radius: var(--modal-radius);
+  box-shadow: var(--modal-shadow);
+  border: var(--modal-panel-border);
+  box-sizing: border-box;
+}
+
+.profile-page__dialog::backdrop {
+  background: var(--modal-backdrop-scrim);
+  backdrop-filter: blur(var(--modal-overlay-blur));
+}

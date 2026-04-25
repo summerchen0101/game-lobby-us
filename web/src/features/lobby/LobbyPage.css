@@ -335,7 +335,8 @@
 }
 
 .lobby-games-panel-swap .lobby-games-group-title {
-  animation: lobby-games-group-title-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: lobby-games-group-title-in 0.38s cubic-bezier(0.22, 1, 0.36, 1)
+    both;
   will-change: transform, opacity;
 }
 
@@ -655,6 +656,8 @@ html.guest-lobby-page body::-webkit-scrollbar {
   overflow: hidden;
   line-height: 0;
   box-shadow: none;
+  padding: 3.5rem 0;
+  background: #000;
 }
 
 .guest-landing__hero-img {
@@ -665,6 +668,7 @@ html.guest-lobby-page body::-webkit-scrollbar {
   object-fit: cover;
   object-position: center top;
   max-height: min(52vh, 420px);
+  scale: 1.35;
 }
 
 .guest-landing__claim-banner,
@@ -773,7 +777,7 @@ html.guest-lobby-page body::-webkit-scrollbar {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-2) var(--page-pad-inline);
+  padding: var(--space-2) var(--space-2);
   padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
   background: linear-gradient(180deg, #2a3154 0%, #242946 100%);
   border-top: 1px solid rgb(255 255 255 / 12%);
@@ -783,23 +787,26 @@ html.guest-lobby-page body::-webkit-scrollbar {
 
 .guest-landing__sticky-gift {
   flex-shrink: 0;
-  width: 3.25rem;
+  width: 9rem;
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 2px 6px rgb(0 0 0 / 40%));
   pointer-events: none;
+  position: absolute;
+  transform-origin: bottom;
+  transform: translate(-0.5rem, -0.5rem);
 }
 
 .guest-landing__sticky-btn {
   flex: 1;
-  max-width: 11.5rem;
+  max-width: 14rem;
   margin-left: auto;
   min-height: var(--min-tap);
   padding: 0.3rem 0.55rem;
   border-radius: 999px;
   font: inherit;
   font-weight: 800;
-  font-size: 0.5rem;
+  font-size: 0.8rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;

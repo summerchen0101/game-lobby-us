@@ -75,24 +75,24 @@ export function RegisterModal({
   if (!open) return null
 
   return createPortal(
-    <div className="auth-modal-overlay" role="presentation" onClick={onClose}>
+    <div className="app-modal-overlay" role="presentation" onClick={onClose}>
       <div
-        className="auth-modal"
+        className="app-modal app-modal--scroll-y auth-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="register-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="auth-modal__header">
-          <button type="button" className="auth-modal__close" onClick={onClose} aria-label="Close">
+        <div className="app-modal__header">
+          <button type="button" className="app-modal__close" onClick={onClose} aria-label="Close">
             ×
           </button>
-          <h2 id="register-modal-title" className="auth-modal__title">
+          <h2 id="register-modal-title" className="app-modal__title">
             CREATE ACCOUNT
           </h2>
         </div>
-        <hr className="auth-modal__rule" />
-        <div className="auth-modal__body">
+        <hr className="app-modal__rule" />
+        <div className="app-modal__body">
           {!showEmailForm ? (
             <div className="auth-modal__social-stack">
               <button

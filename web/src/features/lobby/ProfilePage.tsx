@@ -302,18 +302,29 @@ export function ProfilePage() {
         className="profile-page__dialog"
         onClose={closeFunds}
         aria-labelledby="funds-title">
-        <h2 id="funds-title" className="profile-page__dialog-title">
-          Funds history
-        </h2>
-        <p className="profile-page__dialog-text">
-          Transaction history will appear here when connected to the backend.
-        </p>
-        <button
-          type="button"
-          className="btn-crown-primary profile-page__dialog-close"
-          onClick={closeFunds}>
-          OK
-        </button>
+        <div className="app-modal__header">
+          <h2 id="funds-title" className="app-modal__title">
+            Funds history
+          </h2>
+          <button
+            type="button"
+            className="app-modal__close"
+            onClick={closeFunds}
+            aria-label="Close">
+            ×
+          </button>
+        </div>
+        <div className="app-modal__body">
+          <p className="profile-page__dialog-text">
+            Transaction history will appear here when connected to the backend.
+          </p>
+          <button
+            type="button"
+            className="btn-crown-primary profile-page__dialog-close"
+            onClick={closeFunds}>
+            OK
+          </button>
+        </div>
       </dialog>
     </section>
   );

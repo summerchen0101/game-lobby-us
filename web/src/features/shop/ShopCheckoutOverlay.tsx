@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { FaApple, FaRegCreditCard } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { IoClose, IoChevronBack } from "react-icons/io5";
+import { IoChevronBack } from "react-icons/io5";
 import { SiCashapp } from "react-icons/si";
 import "./ShopCheckout.css";
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
@@ -30,10 +30,6 @@ function BackIcon() {
   return <IoChevronBack className="shop-checkout__back-icon" size={24} aria-hidden />;
 }
 
-function CloseIcon() {
-  return <IoClose className="shop-checkout__close-icon" size={24} aria-hidden />;
-}
-
 function OrderSummaryView({
   pack,
   onClose,
@@ -45,20 +41,22 @@ function OrderSummaryView({
 }) {
   return (
     <>
-      <header className="shop-checkout__head">
+      <header className="app-modal__head-row">
         <button
           type="button"
-          className="shop-checkout__back"
+          className="app-modal__head-btn"
           onClick={onClose}
           aria-label="Close">
           <BackIcon />
         </button>
-        <h2 className="shop-checkout__title" id="shop-checkout-dialog-title">
+        <h2
+          className="app-modal__title--abs-center shop-checkout__title"
+          id="shop-checkout-dialog-title">
           ORDER SUMMARY
         </h2>
-        <span className="shop-checkout__head-spacer" aria-hidden />
+        <span className="app-modal__head-spacer" aria-hidden />
       </header>
-      <hr className="shop-checkout__head-rule" />
+      <hr className="app-modal__rule shop-checkout__head-rule" />
       <div className="shop-checkout__summary-body">
         <p className="shop-checkout__price">{pack.price}</p>
         <p className="shop-checkout__line">
@@ -195,20 +193,22 @@ function ProtectAccountView({
 
   return (
     <>
-      <header className="shop-checkout__head shop-checkout__head--protect">
-        <span className="shop-checkout__head-spacer" aria-hidden />
-        <h2 className="shop-checkout__title" id="shop-checkout-dialog-title">
+      <header className="app-modal__head-row shop-checkout__head--protect">
+        <span className="app-modal__head-spacer" aria-hidden />
+        <h2
+          className="app-modal__title--abs-center shop-checkout__title"
+          id="shop-checkout-dialog-title">
           PROTECT YOUR ACCOUNT
         </h2>
         <button
           type="button"
-          className="shop-checkout__close"
+          className="app-modal__close"
           onClick={onClose}
           aria-label="Close and return to order summary">
-          <CloseIcon />
+          ×
         </button>
       </header>
-      <hr className="shop-checkout__head-rule" />
+      <hr className="app-modal__rule shop-checkout__head-rule" />
       <form
         className="shop-checkout__card-form shop-checkout__protect-form"
         onSubmit={handleSubmit}
@@ -504,20 +504,22 @@ function CardDetailsView({
 
   return (
     <>
-      <header className="shop-checkout__head">
+      <header className="app-modal__head-row">
         <button
           type="button"
-          className="shop-checkout__back"
+          className="app-modal__head-btn"
           onClick={onBack}
           aria-label="Back to protect your account">
           <BackIcon />
         </button>
-        <h2 className="shop-checkout__title" id="shop-checkout-dialog-title">
+        <h2
+          className="app-modal__title--abs-center shop-checkout__title"
+          id="shop-checkout-dialog-title">
           CARD DETAILS
         </h2>
-        <span className="shop-checkout__head-spacer" aria-hidden />
+        <span className="app-modal__head-spacer" aria-hidden />
       </header>
-      <hr className="shop-checkout__head-rule" />
+      <hr className="app-modal__rule shop-checkout__head-rule" />
       <form
         className="shop-checkout__card-form"
         onSubmit={handleSubmit}
@@ -697,11 +699,11 @@ export function ShopCheckoutOverlay({
 
   return createPortal(
     <div
-      className="shop-checkout-overlay"
+      className="app-modal-overlay"
       role="presentation"
       onClick={handleBackdrop}>
       <div
-        className="shop-checkout"
+        className="app-modal app-modal--col shop-checkout"
         role="dialog"
         aria-modal="true"
         aria-labelledby="shop-checkout-dialog-title"

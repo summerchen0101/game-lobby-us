@@ -65,4 +65,23 @@
   --theme-radial-gold-body: rgb(253 226 1 / 6%);
   --theme-radial-green-lobby: rgb(36 41 70 / 7%);
   --theme-radial-gold-lobby: rgb(253 226 1 / 8%);
+
+  /* —— 彈窗外殼（與 AppModal.css 共用） —— */
+  --modal-overlay-scrim: rgb(0 0 0 / 72%);
+  --modal-overlay-blur: 6px;
+  --modal-z-index: 5000;
+  --modal-radius: 1.1rem;
+  --modal-shadow: 0 1.5rem 3rem rgb(0 0 0 / 55%);
+  --modal-panel-bg: var(--color-elevated);
+  --modal-panel-border: 1px solid var(--color-border);
+  --modal-header-min-height: 3.25rem;
+  /* 全站彈窗標題同字級 */
+  --modal-title-size: 1rem;
+  --modal-title-tracking: 0.06em;
+  /* 關閉鈕外圈與 × 字級 */
+  --modal-close-size: 2.65rem;
+  --modal-close-glyph-size: 1.75rem;
+  --modal-rule-inset: var(--space-5);
+  --modal-rule-color: rgb(0 0 0 / 35%);
+  --modal-backdrop-scrim: var(--modal-overlay-scrim);
 }

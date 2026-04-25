@@ -51,24 +51,24 @@ export function ChangeHeadIconModal({
 
   return createPortal(
     <div
-      className="change-head-icon-overlay"
+      className="app-modal-overlay"
       role="presentation"
       onClick={onClose}
     >
       <div
-        className="change-head-icon-modal"
+        className="app-modal app-modal--col change-head-icon-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="change-head-icon-modal__header">
-          <h2 id={titleId} className="change-head-icon-modal__title">
+        <div className="app-modal__header">
+          <h2 id={titleId} className="app-modal__title">
             Change the head icon
           </h2>
           <button
             type="button"
-            className="change-head-icon-modal__close"
+            className="app-modal__close"
             onClick={onClose}
             aria-label="Close"
           >

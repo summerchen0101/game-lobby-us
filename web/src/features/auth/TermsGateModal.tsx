@@ -21,24 +21,24 @@ export function TermsGateModal({ open, onClose, onAccept }: Props) {
   if (!open) return null
 
   return createPortal(
-    <div className="auth-modal-overlay" role="presentation" onClick={onClose}>
+    <div className="app-modal-overlay" role="presentation" onClick={onClose}>
       <div
-        className="auth-modal"
+        className="app-modal app-modal--scroll-y auth-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="terms-gate-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="auth-modal__header">
-          <button type="button" className="auth-modal__close" onClick={onClose} aria-label="Close">
+        <div className="app-modal__header">
+          <button type="button" className="app-modal__close" onClick={onClose} aria-label="Close">
             ×
           </button>
-          <h2 id="terms-gate-title" className="auth-modal__title">
+          <h2 id="terms-gate-title" className="app-modal__title">
             YOU ARE ALMOST THERE
           </h2>
         </div>
-        <hr className="auth-modal__rule" />
-        <div className="auth-modal__body">
+        <hr className="app-modal__rule" />
+        <div className="app-modal__body">
           <p className="auth-modal__text">
             To start playing, you need to accept our{' '}
             <a className="auth-modal__link" href="#terms" onClick={(e) => e.preventDefault()}>

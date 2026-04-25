@@ -490,26 +490,7 @@
   color: color-mix(in srgb, var(--crown-locale-green) 78%, #ffffff 22%);
 }
 
-.profile-page__dialog {
-  max-width: 20rem;
-  margin: 0;
-  padding: var(--space-4);
-  border: none;
-  border-radius: 0.75rem;
-  background: var(--crown-surface-card-bg);
-  color: var(--color-text);
-  box-shadow: var(--crown-surface-card-shadow);
-}
-
-.profile-page__dialog::backdrop {
-  background: rgb(0 0 0 / 0.55);
-}
-
-.profile-page__dialog-title {
-  margin: 0 0 var(--space-2);
-  font-size: 1rem;
-  font-weight: 800;
-}
+/* profile-page__dialog 外殼與 ::backdrop 在 AppModal.css */
 
 .profile-page__dialog-text {
   margin: 0 0 var(--space-3);
