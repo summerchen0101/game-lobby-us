@@ -3,6 +3,9 @@ import { Copy, Crown, Info, Volume2 } from "lucide-react";
 import { HiPencil } from "react-icons/hi2";
 import { InfoPopover } from "../../components/InfoPopover";
 import { useAuth } from "../../auth/useAuth";
+import { ChangeHeadIconModal } from "./ChangeHeadIconModal";
+import { getProfileAvatarById } from "./profileAvatars";
+import { useProfileAvatarId } from "./profileAvatarStorage";
 import "./ProfilePage.css";
 import "./SessionPageDecor.css";
 
@@ -13,6 +16,9 @@ const RANK_PCT = 0;
 
 export function ProfilePage() {
   const { user, refreshUser, logout } = useAuth();
+  const { avatarId, setAvatarId } = useProfileAvatarId();
+  const [headIconOpen, setHeadIconOpen] = useState(false);
+  const [avatarImgFailed, setAvatarImgFailed] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const [uidCopied, setUidCopied] = useState(false);
   const fundsRef = useRef<HTMLDialogElement>(null);
@@ -83,6 +89,15 @@ export function ProfilePage() {
     "?"
   ).toUpperCase();
 
+  const pickedAvatar = getProfileAvatarById(avatarId);
+  const showAvatarImage = Boolean(
+    pickedAvatar && !avatarImgFailed,
+  );
+
+  useEffect(() => {
+    setAvatarImgFailed(false);
+  }, [avatarId]);
+
   const displayHandle = user?.displayName?.trim() || user?.id?.trim() || "—";
 
   function toggleSound() {
@@ -124,21 +139,35 @@ export function ProfilePage() {
       <div className="profile-page__card">
         <div className="profile-page__hero">
           <div className="profile-page__avatar-stack">
-            <div className="profile-page__avatar" aria-hidden>
-              {initial}
-              <button
-                type="button"
-                className="profile-page__edit"
-                title="Edit (preview)"
-                aria-label="Edit (preview)"
-                tabIndex={-1}>
+            <button
+              type="button"
+              className={
+                "profile-page__avatar" +
+                (showAvatarImage ? " profile-page__avatar--has-image" : "")
+              }
+              onClick={() => setHeadIconOpen(true)}
+              aria-label="Change head icon"
+              title="Change head icon">
+              <span className="profile-page__avatar-media">
+                {showAvatarImage && pickedAvatar ? (
+                  <img
+                    className="profile-page__avatar-img"
+                    src={pickedAvatar.imageSrc}
+                    alt=""
+                    onError={() => setAvatarImgFailed(true)}
+                  />
+                ) : (
+                  <span className="profile-page__avatar-initial">{initial}</span>
+                )}
+              </span>
+              <span className="profile-page__edit" aria-hidden>
                 <HiPencil
                   className="profile-page__edit-icon"
                   aria-hidden
                   size={15}
                 />
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
           <p className="profile-page__display-name">{displayHandle}</p>
           <div className="profile-page__uid-inline">
@@ -260,6 +289,13 @@ export function ProfilePage() {
           Privacy Policy
         </a>
       </div>
+
+      <ChangeHeadIconModal
+        open={headIconOpen}
+        onClose={() => setHeadIconOpen(false)}
+        currentAvatarId={avatarId}
+        onConfirm={setAvatarId}
+      />
 
       <dialog
         ref={fundsRef}

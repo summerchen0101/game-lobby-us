@@ -126,6 +126,7 @@
 }
 
 .session-header__avatar {
+  position: relative;
   width: var(--hdr-avatar-size);
   height: var(--hdr-avatar-size);
   border-radius: 50%;
@@ -138,6 +139,22 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.session-header__avatar--has-image {
+  color: transparent;
+  background: #12181f;
+}
+
+.session-header__avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
 }
 
 .session-header__center {

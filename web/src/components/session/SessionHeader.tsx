@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
+import { getProfileAvatarById } from '../../features/lobby/profileAvatars'
+import { useProfileAvatarId } from '../../features/lobby/profileAvatarStorage'
 import { getCurrencyIconUrl } from '../../lib/currencyIcons'
 import { getWalletDisplay } from '../../wallet/formatWalletAmount'
 import { useWallet } from '../../wallet/walletContext'
@@ -10,11 +13,20 @@ const BRAND_LOGO = '/imgs/brand-logo.webp'
 
 export function SessionHeader() {
   const { user } = useAuth()
+  const { avatarId } = useProfileAvatarId()
+  const [avatarImgFailed, setAvatarImgFailed] = useState(false)
   const { activeWallet, setActiveWallet } = useWallet()
   const { label, amount } = getWalletDisplay(user ?? undefined, activeWallet)
 
   const initial =
     (user?.displayName?.trim()?.[0] ?? user?.id?.[0] ?? '?').toUpperCase()
+
+  const picked = getProfileAvatarById(avatarId)
+  const showAvatarImage = Boolean(picked && !avatarImgFailed)
+
+  useEffect(() => {
+    setAvatarImgFailed(false)
+  }, [avatarId])
 
   function toggleWallet() {
     setActiveWallet(activeWallet === 'GC' ? 'SC' : 'GC')
@@ -35,8 +47,24 @@ export function SessionHeader() {
             height={44}
             decoding="async"
           />
-          <div className="session-header__avatar" aria-hidden>
-            {initial}
+          <div
+            className={
+              'session-header__avatar' +
+              (showAvatarImage ? ' session-header__avatar--has-image' : '')
+            }
+            aria-hidden
+          >
+            {showAvatarImage && picked ? (
+              <img
+                className="session-header__avatar-img"
+                src={picked.imageSrc}
+                alt=""
+                onError={() => setAvatarImgFailed(true)}
+                decoding="async"
+              />
+            ) : (
+              initial
+            )}
           </div>
         </div>
         <div className="session-header__center">
