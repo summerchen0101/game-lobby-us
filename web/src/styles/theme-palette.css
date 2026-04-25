@@ -1,5 +1,5 @@
 /**
- * 全站配色與品牌色票（#242946 底、主按鈕為藍→紫漸層／#6b4cff 單色基準、#ffffff 文、#fde201 強調、#14db75 局部綠：switch／頭像／Shop 副標）。
+ * 全站配色與品牌色票（#242946 底、主按鈕為藍→紫漸層／#6b4cff 單色基準、#ffffff 文、#fde201 強調、局部 accent 見 --crown-locale-green：switch／頭像／Shop 副標等）。
  *
  * 檔期換色：
  * 1. 在 theme-seasonal.css 新增 [data-theme="檔名"] { … } 覆寫下方變數
@@ -34,10 +34,14 @@
   --crown-gold-shadow: color-mix(in srgb, #000000 42%, #6b4cff);
   --crown-primary-gradient-end: #1a1f35;
 
-  /* 局部綠：Profile switch、頭像、Shop 副標等 */
-  --crown-locale-green: #14db75;
+  /* 局部 accent（舊稱局部綠）：Profile switch、頭像、Shop 副標等 */
+  --crown-locale-green: #7b6dfd;
   --crown-mint: var(--crown-locale-green);
-  --crown-mint-shadow: color-mix(in srgb, #000000 45%, #14db75);
+  --crown-mint-shadow: color-mix(
+    in srgb,
+    #000000 45%,
+    var(--crown-locale-green)
+  );
 
   /* 次按鈕階：亮黃漸層＋深字 */
   --crown-purple: #fde201;
@@ -51,8 +55,7 @@
   --crown-surface-card-bg: #242946;
   --crown-surface-card-border: transparent;
   --crown-surface-card-shadow:
-    0 14px 44px rgb(0 0 0 / 0.38),
-    inset 0 1px 0 rgb(0 0 0 / 22%);
+    0 14px 44px rgb(0 0 0 / 0.38), inset 0 1px 0 rgb(0 0 0 / 22%);
 
   --crown-benefit-card-bg: var(--crown-surface-card-bg);
   --crown-benefit-card-border: var(--crown-surface-card-border);

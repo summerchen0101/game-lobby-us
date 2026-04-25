@@ -210,12 +210,12 @@
   border-radius: 50%;
   background: transparent;
   /* 局部綠（與 Profile / Shop 副標等一致） */
-  color: var(--crown-locale-green, #14db75);
+  color: var(--crown-locale-green);
   cursor: pointer;
 }
 
 .invite-friends-modal__copy:hover {
-  color: color-mix(in srgb, var(--crown-locale-green, #14db75) 88%, #ffffff 12%);
+  color: color-mix(in srgb, var(--crown-locale-green) 88%, #ffffff 12%);
   filter: brightness(1.06);
 }
 
@@ -277,7 +277,7 @@
   margin: var(--space-3) 0 0;
   font-size: 0.7rem;
   line-height: 1.4;
-  color: color-mix(in srgb, var(--crown-locale-green, #5ecf8a) 92%, #fff 8%);
+  color: color-mix(in srgb, var(--crown-locale-green) 92%, #fff 8%);
 }
 
 /* One frame only; opaque panel — match default .info-popover (Profile) */

@@ -1,6 +1,6 @@
 .lobby-comp {
-  /* Scoped green accent for this footer only; global --crown-gold unchanged */
-  --lobby-comp-accent: #4ade80;
+  /* Scoped accent for this footer only; global --crown-gold unchanged */
+  --lobby-comp-accent: var(--crown-locale-green);
   --lobby-comp-btn-shadow: color-mix(in srgb, #000000 42%, #6b4cff);
   padding-block: var(--space-8) var(--space-10);
   margin-top: var(--space-4);
