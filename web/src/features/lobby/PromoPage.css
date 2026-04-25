@@ -165,23 +165,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.4rem;
-  height: 1.4rem;
-  border-radius: 50%;
-  background: linear-gradient(
-    180deg,
-    var(--crown-gold-hover) 0%,
-    var(--crown-gold) 55%,
-    var(--crown-purple-deep) 100%
-  );
-  box-shadow: inset 0 1px 0 rgb(0 0 0 / 22%);
   flex-shrink: 0;
 }
 
 .promo-page__btn-sc-icon {
   display: block;
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 1.15rem;
+  height: 1.15rem;
   object-fit: contain;
 }
 

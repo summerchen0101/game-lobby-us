@@ -1,5 +1,6 @@
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { CURRENCY_ICON_SC } from '../../lib/currencyIcons'
+import { InviteFriendsModal } from './InviteFriendsModal'
 import './PromoPage.css'
 import './SessionPageDecor.css'
 
@@ -8,7 +9,7 @@ const PROMOS: {
   title: string
   desc: string
   artSrc: string
-  cta: 'view' | 'shop'
+  cta: 'view' | 'invite'
 }[] = [
   {
     id: '1',
@@ -22,12 +23,12 @@ const PROMOS: {
     title: 'Invite Friends',
     desc: 'Refer friends to earn free sweepstakes coins in the store.',
     artSrc: '/imgs/panel/Panel_Promo/icon_invite.png',
-    cta: 'shop',
+    cta: 'invite',
   },
 ]
 
 export function PromoPage() {
-  const nav = useNavigate()
+  const [inviteOpen, setInviteOpen] = useState(false)
 
   return (
     <section className="promo-page page-container session-page session-page--pattern">
@@ -67,9 +68,9 @@ export function PromoPage() {
                     type="button"
                     className="promo-page__btn promo-page__btn--light"
                     onClick={() => {
-                      void nav('/shop')
+                      setInviteOpen(true)
                     }}
-                    aria-label="Get 20 SC in the shop"
+                    aria-label="Invite friends, get 20 SC"
                   >
                     <span className="promo-page__btn-label">GET+20</span>
                     <span className="promo-page__btn-sc" aria-hidden>
@@ -93,6 +94,7 @@ export function PromoPage() {
       <p className="promo-page__hint promo-page__sr-only">
         Promo details and eligibility connect to your backend when ready.
       </p>
+      <InviteFriendsModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
     </section>
   )
 }
