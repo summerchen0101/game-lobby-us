@@ -2,10 +2,21 @@
 body {
   background-color: var(--color-bg);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -15%, var(--theme-radial-green-body), transparent 55%),
-    radial-gradient(ellipse 45% 35% at 100% 35%, var(--theme-radial-gold-body), transparent 50%),
-    url('/imgs/panel/Panel_VerticalLobby/bg/Pattern_bg.png');
+    radial-gradient(
+      ellipse 80% 50% at 50% -15%,
+      var(--theme-radial-green-body),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 45% 35% at 100% 35%,
+      var(--theme-radial-gold-body),
+      transparent 50%
+    ),
+    url("/imgs/panel/Panel_VerticalLobby/bg/Pattern_bg.png");
   background-repeat: no-repeat, no-repeat, repeat;
-  background-size: auto, auto, 200px 200px;
+  background-size:
+    auto,
+    auto,
+    250px 250px;
   background-attachment: fixed, fixed, scroll;
 }
