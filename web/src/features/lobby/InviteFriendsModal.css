@@ -280,6 +280,21 @@
   color: color-mix(in srgb, var(--crown-locale-green, #5ecf8a) 92%, #fff 8%);
 }
 
+/* One frame only; opaque panel — match default .info-popover (Profile) */
+.info-popover.invite-friends-modal__info-popover-wrap {
+  padding: var(--space-3);
+  max-width: min(20rem, calc(100vw - 1rem));
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 88%);
+  background: #1e2438;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 12%);
+  box-shadow:
+    0 0.5rem 1.5rem rgb(0 0 0 / 45%),
+    0 0 0 1px rgb(0 0 0 / 20%);
+}
+
 .invite-friends-modal__qualified {
   margin: 0 0 var(--space-3);
   padding: var(--space-3);
@@ -290,4 +305,13 @@
   background: rgb(0 0 0 / 28%);
   border-radius: 0.5rem;
   border: 1px solid rgb(255 255 255 / 8%);
+}
+
+.invite-friends-modal__qualified--popover {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }

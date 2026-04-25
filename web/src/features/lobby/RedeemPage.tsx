@@ -1,5 +1,5 @@
-import { useId, useState } from "react";
 import { Link } from "react-router-dom";
+import { InfoPopover } from "../../components/InfoPopover";
 import { useAuth } from "../../auth/useAuth";
 import { CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import { formatWalletPillAmount } from "../../wallet/formatWalletAmount";
@@ -26,8 +26,6 @@ export const MIN_REDEEM_SC = 50;
 
 export function RedeemPage() {
   const { user } = useAuth();
-  const [infoOpen, setInfoOpen] = useState(false);
-  const infoId = useId();
   const pillMessages = useRedeemPillMessages();
 
   const sc = user?.sweepstakesBalance ?? 0;
@@ -50,41 +48,44 @@ export function RedeemPage() {
             ‹
           </Link>
           <h2 className="redeem-page__row-title">Redeemable Balance:</h2>
-          <button
-            type="button"
-            className="redeem-page__info"
-            aria-expanded={infoOpen}
-            aria-controls={infoId}
-            onClick={() => setInfoOpen((v) => !v)}
-            title="Prize redemption info">
-            i
-          </button>
+          <InfoPopover
+            align="end"
+            panelClassName="redeem-page__info-popover"
+            content={
+              <div className="redeem-page__info-panel">
+                <p>
+                  <strong>Your Sweeps Coins Balance:</strong>{" "}
+                  {formatWalletPillAmount(sc)} <ScInlineIcon />
+                </p>
+                <p>
+                  <strong>Redeemable Sweeps Coins:</strong>{" "}
+                  {formatWalletPillAmount(redeemableSc)} <ScInlineIcon />
+                </p>
+                <p>
+                  <strong>Unplayed Sweeps Coins Balance:</strong>{" "}
+                  {formatWalletPillAmount(unplayedSc)} <ScInlineIcon />
+                </p>
+                <p>
+                  <ScInlineIcon /> 1 Sweeps Coin = $1
+                </p>
+                <p>
+                  Unplayed Sweeps Coins from purchases and bonuses can be used to
+                  play in games, but cannot be redeemed. Sweeps Coins gained by
+                  winnings can be redeemed.
+                </p>
+              </div>
+            }>
+            {(p, triggerRef) => (
+              <button
+                ref={triggerRef}
+                {...p}
+                className="redeem-page__info"
+                aria-label="Prize redemption info">
+                i
+              </button>
+            )}
+          </InfoPopover>
         </div>
-
-        {infoOpen ? (
-          <div id={infoId} className="redeem-page__info-panel">
-            <p>
-              <strong>Your Sweeps Coins Balance:</strong>{" "}
-              {formatWalletPillAmount(sc)} <ScInlineIcon />
-            </p>
-            <p>
-              <strong>Redeemable Sweeps Coins:</strong>{" "}
-              {formatWalletPillAmount(redeemableSc)} <ScInlineIcon />
-            </p>
-            <p>
-              <strong>Unplayed Sweeps Coins Balance:</strong>{" "}
-              {formatWalletPillAmount(unplayedSc)} <ScInlineIcon />
-            </p>
-            <p>
-              <ScInlineIcon /> 1 Sweeps Coin = $1
-            </p>
-            <p>
-              Unplayed Sweeps Coins from purchases and bonuses can be used to
-              play in games, but cannot be redeemed. Sweeps Coins gained by
-              winnings can be redeemed.
-            </p>
-          </div>
-        ) : null}
 
         <div className="redeem-page__balance-row">
           <span className="redeem-page__sc-badge" aria-hidden>

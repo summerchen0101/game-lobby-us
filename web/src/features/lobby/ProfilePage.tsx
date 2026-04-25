@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Copy, Crown, Info, Volume2 } from "lucide-react";
 import { HiPencil } from "react-icons/hi2";
+import { InfoPopover } from "../../components/InfoPopover";
 import { useAuth } from "../../auth/useAuth";
 import "./ProfilePage.css";
 import "./SessionPageDecor.css";
@@ -162,13 +163,24 @@ export function ProfilePage() {
           ) : null}
           <div className="profile-page__level-row">
             <span className="profile-page__level-label">Entry level</span>
-            <button
-              type="button"
-              className="profile-page__info-btn"
-              title="Level details will be available when your account is connected to the loyalty system."
-              aria-label="Level info">
-              <Info size={18} strokeWidth={2.5} aria-hidden />
-            </button>
+            <InfoPopover
+              align="end"
+              content={
+                <p className="profile-page__info-popover-text">
+                  Level details will be available when your account is connected
+                  to the loyalty system.
+                </p>
+              }>
+              {(p, triggerRef) => (
+                <button
+                  ref={triggerRef}
+                  {...p}
+                  className="profile-page__info-btn"
+                  aria-label="Level info">
+                  <Info size={18} strokeWidth={2.5} aria-hidden />
+                </button>
+              )}
+            </InfoPopover>
           </div>
         </div>
         <div className="profile-page__progress">

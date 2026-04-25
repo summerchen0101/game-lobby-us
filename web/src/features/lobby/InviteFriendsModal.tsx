@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { Copy } from 'lucide-react'
+import { InfoPopover } from '../../components/InfoPopover'
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from '../../lib/currencyIcons'
 import './InviteFriendsModal.css'
 
@@ -20,9 +21,7 @@ function getReferralUrl() {
 export function InviteFriendsModal({ open, onClose }: Props) {
   const friendsRegistered = 0
   const friendsQualified = 0
-  const [showQualified, setShowQualified] = useState(false)
   const titleId = useId()
-  const qualifiedId = useId()
 
   const referralUrl = getReferralUrl()
 
@@ -53,10 +52,6 @@ export function InviteFriendsModal({ open, onClose }: Props) {
     return () => document.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
-  useEffect(() => {
-    if (!open) setShowQualified(false)
-  }, [open])
-
   if (!open) return null
 
   return createPortal(
@@ -69,16 +64,28 @@ export function InviteFriendsModal({ open, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="invite-friends-modal__header">
-          <button
-            type="button"
-            className="invite-friends-modal__info"
-            aria-label="What qualified means"
-            aria-expanded={showQualified}
-            aria-controls={qualifiedId}
-            onClick={() => setShowQualified((v) => !v)}
+          <InfoPopover
+            align="start"
+            panelClassName="invite-friends-modal__info-popover-wrap"
+            content={
+              <p className="invite-friends-modal__qualified invite-friends-modal__qualified--popover">
+                *Friends qualify by signing up with your referral link, purchasing Crown Coin packages
+                worth $14.90 int total and not with an exisition account with STI group. Promotion Terms
+                Apply.
+              </p>
+            }
           >
-            i
-          </button>
+            {(p, triggerRef) => (
+              <button
+                ref={triggerRef}
+                {...p}
+                className="invite-friends-modal__info"
+                aria-label="What qualified means"
+              >
+                i
+              </button>
+            )}
+          </InfoPopover>
           <h2 id={titleId} className="invite-friends-modal__title">
             INVITE FRIENDS
           </h2>
@@ -93,14 +100,6 @@ export function InviteFriendsModal({ open, onClose }: Props) {
         </div>
         <hr className="invite-friends-modal__rule" />
         <div className="invite-friends-modal__body">
-          {showQualified ? (
-            <p id={qualifiedId} className="invite-friends-modal__qualified">
-              *Friends qualify by signing up with your referral link, purchasing Crown Coin packages
-              worth $14.90 int total and not with an exisition account with STI group. Promotion Terms
-              Apply.
-            </p>
-          ) : null}
-
           <p className="invite-friends-modal__reward-head">Invite Friends and Get</p>
           <div className="invite-friends-modal__reward-row">
             <img className="invite-friends-modal__coin" src={CURRENCY_ICON_GC} alt="" width={22} height={22} />

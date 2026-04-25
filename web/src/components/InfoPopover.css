@@ -1,0 +1,24 @@
+.info-popover {
+  position: fixed;
+  z-index: 6200;
+  box-sizing: border-box;
+  margin: 0;
+  max-width: min(22rem, calc(100vw - 1rem));
+  max-height: min(70dvh, 24rem);
+  overflow-y: auto;
+  padding: var(--space-3, 0.75rem);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 88%);
+  background: #1e2438;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 0.5rem;
+  box-shadow:
+    0 0.5rem 1.5rem rgb(0 0 0 / 45%),
+    0 0 0 1px rgb(0 0 0 / 20%);
+}
+
+.info-popover:focus-visible {
+  outline: 2px solid var(--crown-gold, #fde201);
+  outline-offset: 2px;
+}

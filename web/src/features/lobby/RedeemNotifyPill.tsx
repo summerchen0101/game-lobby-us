@@ -21,15 +21,13 @@ export function RedeemNotifyPill({ messages }: Props) {
   const n = messages.length;
   const reduced = usePrefersReducedMotion();
   const labelId = useId();
-  if (n === 0) return null;
-
   const shouldLoop = n > 1 && !reduced;
   const slides = shouldLoop ? [...messages, messages[0]!] : messages;
   const [index, setIndex] = useState(0);
   const [noTransition, setNoTransition] = useState(false);
 
   useEffect(() => {
-    if (!shouldLoop) {
+    if (n === 0 || !shouldLoop) {
       setIndex(0);
       return;
     }
@@ -41,6 +39,8 @@ export function RedeemNotifyPill({ messages }: Props) {
     }, PILL_CAROUSEL_INTERVAL_MS);
     return () => window.clearInterval(id);
   }, [n, shouldLoop]);
+
+  if (n === 0) return null;
 
   const baseLabel = "Recent redemptions and prizes";
 

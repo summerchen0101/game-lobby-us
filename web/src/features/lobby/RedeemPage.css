@@ -166,14 +166,26 @@
   cursor: help;
 }
 
-.redeem-page__info-panel {
-  margin: 0 0 var(--space-4);
+/* Opaque single panel — match default .info-popover (Profile) */
+.info-popover.redeem-page__info-popover {
   padding: var(--space-3);
+  background: #1e2438;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 0.5rem;
+  box-shadow:
+    0 0.5rem 1.5rem rgb(0 0 0 / 45%),
+    0 0 0 1px rgb(0 0 0 / 20%);
+  max-height: min(70dvh, 26rem);
+}
+
+.redeem-page__info-panel {
+  margin: 0;
+  padding: 0;
   font-size: 0.8rem;
   line-height: 1.5;
   color: rgb(255 255 255 / 85%);
-  background: rgb(0 0 0 / 25%);
-  border-radius: 0.5rem;
+  background: transparent;
+  border-radius: 0;
 }
 
 /* Line inline SC with adjacent text (replaced elements default to baseline; looks superscript) */
