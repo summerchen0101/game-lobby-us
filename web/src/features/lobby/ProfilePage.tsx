@@ -4,6 +4,7 @@ import { HiPencil } from "react-icons/hi2";
 import { InfoPopover } from "../../components/InfoPopover";
 import { useAuth } from "../../auth/useAuth";
 import { ChangeHeadIconModal } from "./ChangeHeadIconModal";
+import { MyProfileModal } from "./MyProfileModal";
 import { getProfileAvatarById } from "./profileAvatars";
 import { useProfileAvatarId } from "./profileAvatarStorage";
 import "./ProfilePage.css";
@@ -18,6 +19,7 @@ export function ProfilePage() {
   const { user, refreshUser, logout } = useAuth();
   const { avatarId, setAvatarId } = useProfileAvatarId();
   const [headIconOpen, setHeadIconOpen] = useState(false);
+  const [myProfileOpen, setMyProfileOpen] = useState(false);
   const [avatarImgFailed, setAvatarImgFailed] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const [uidCopied, setUidCopied] = useState(false);
@@ -113,7 +115,7 @@ export function ProfilePage() {
   }
 
   function onMyProfile() {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setMyProfileOpen(true);
   }
 
   function onSupport() {
@@ -289,6 +291,14 @@ export function ProfilePage() {
           Privacy Policy
         </a>
       </div>
+
+      <MyProfileModal
+        open={myProfileOpen}
+        onClose={() => setMyProfileOpen(false)}
+        userId={user?.id}
+        displayName={user?.displayName}
+        avatarId={avatarId}
+      />
 
       <ChangeHeadIconModal
         open={headIconOpen}

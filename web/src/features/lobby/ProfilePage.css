@@ -54,9 +54,8 @@
   width: 5.25rem;
   height: 5.25rem;
   border-radius: 50%;
-  background: linear-gradient(145deg, #2d3358 0%, #1a1f35 100%);
-  border: 2px solid
-    color-mix(in srgb, var(--crown-locale-green) 65%, transparent);
+  background: #14182a;
+  border: none;
   color: var(--crown-locale-green);
   font-size: 2rem;
   font-weight: 900;
