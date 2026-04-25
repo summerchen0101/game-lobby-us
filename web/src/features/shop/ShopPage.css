@@ -121,7 +121,7 @@
 .shop-page__gc-amount {
   font-weight: 900;
   font-size: clamp(0.82rem, 2.5vw, 1.1rem);
-  color: var(--crown-gold);
+  color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -135,7 +135,8 @@
   justify-content: center;
   width: 100%;
   height: 80px;
-  margin-bottom: 0.3rem;
+  margin-top: -0.3rem;
+  margin-bottom: -0.8rem;
   background: transparent;
   overflow: hidden;
 }
