@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { LandingHeader } from '../../components/LandingHeader'
@@ -40,6 +40,13 @@ const LOBBY_FILTER_TABS: { id: LobbyFilterTab; label: string }[] = [
 
 const LOBBY_FILTER_ORDER: LobbyFilterTab[] = LOBBY_FILTER_TABS.map((t) => t.id)
 
+/** 已登入「ALL」分頁內小節順序（與分類 tab 名稱對應，不含 ALL） */
+const LOBBY_ALL_SUBSECTIONS: Array<Exclude<LobbyFilterTab, 'all'>> = [
+  'hot',
+  'providers',
+  'slots',
+]
+
 function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
   if (f === 'all') {
     return displayGames
@@ -79,10 +86,6 @@ export function LandingPage() {
   const [error, setError] = useState<string | null>(null)
   const [registerEmailForm, setRegisterEmailForm] = useState(false)
   const [lobbyFilter, setLobbyFilter] = useState<LobbyFilterTab>('all')
-  const lobbyFilterRef = useRef(lobbyFilter)
-  const panelsRef = useRef<HTMLDivElement | null>(null)
-  const programmaticPanelScrollRef = useRef(false)
-  const scrollRafRef = useRef<number | null>(null)
 
   const tpId = trustpilotBusinessUnitId()
   const sessionHeroSrc = useMemo(
@@ -105,89 +108,11 @@ export function LandingPage() {
     return out
   }, [displayGames])
 
-  const scrollPanelsToIndex = useCallback(
-    (index: number, behavior: ScrollBehavior = 'smooth') => {
-      const el = panelsRef.current
-      if (!el) return
-      const w = el.clientWidth
-      if (w === 0) return
-      programmaticPanelScrollRef.current = behavior === 'smooth'
-      const clamped = Math.max(0, Math.min(LOBBY_FILTER_ORDER.length - 1, index))
-      el.scrollTo({ left: clamped * w, behavior })
-      if (behavior === 'auto') {
-        programmaticPanelScrollRef.current = false
-      } else {
-        window.setTimeout(() => {
-          programmaticPanelScrollRef.current = false
-        }, 450)
-      }
-    },
-    [],
-  )
-
-  const onTabClick = useCallback(
-    (id: LobbyFilterTab) => {
-      const index = LOBBY_FILTER_ORDER.indexOf(id)
-      if (index < 0) return
-      setLobbyFilter(id)
-      scrollPanelsToIndex(index, 'smooth')
-    },
-    [scrollPanelsToIndex],
-  )
-
-  const onPanelsScroll = useCallback(() => {
-    if (programmaticPanelScrollRef.current) return
-    if (scrollRafRef.current !== null) {
-      cancelAnimationFrame(scrollRafRef.current)
-    }
-    scrollRafRef.current = requestAnimationFrame(() => {
-      scrollRafRef.current = null
-      const el = panelsRef.current
-      if (!el) return
-      const w = el.clientWidth
-      if (w === 0) return
-      const i = Math.round(el.scrollLeft / w)
-      const id = LOBBY_FILTER_ORDER[Math.max(0, Math.min(LOBBY_FILTER_ORDER.length - 1, i))]
-      if (id) {
-        setLobbyFilter((prev) => (id !== prev ? id : prev))
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    if (!token) return
-    const el = panelsRef.current
-    if (!el) return
-    const ro = new ResizeObserver(() => {
-      const i = LOBBY_FILTER_ORDER.indexOf(lobbyFilterRef.current)
-      if (i < 0) return
-      programmaticPanelScrollRef.current = true
-      el.scrollLeft = i * el.clientWidth
-      programmaticPanelScrollRef.current = false
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [token])
-
   useEffect(() => {
     if (!token) return
     const el = document.getElementById(`lobby-tab-${lobbyFilter}`)
     el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
   }, [token, lobbyFilter])
-
-  useEffect(() => {
-    const el = panelsRef.current
-    if (!el) return
-    const onEnd = () => {
-      programmaticPanelScrollRef.current = false
-    }
-    el.addEventListener('scrollend', onEnd)
-    return () => el.removeEventListener('scrollend', onEnd)
-  }, [token])
-
-  useEffect(() => {
-    lobbyFilterRef.current = lobbyFilter
-  }, [lobbyFilter])
 
   useEffect(() => {
     if (!registerOpen) setRegisterEmailForm(false)
@@ -280,34 +205,57 @@ export function LandingPage() {
     if (u) window.open(u, '_blank', 'noopener,noreferrer')
   }
 
-  function renderGameTrack(games: Game[], thumbOffset = 0) {
+  function gameCard(g: Game, index: number, thumbBase: number, showTextLabels = true) {
+    const thumb = gameEntryThumbnail(thumbBase + index, g.thumbnailUrl)
+    return (
+      <button
+        type="button"
+        className={'lobby-game-card' + (showTextLabels ? '' : ' lobby-game-card--thumb-only')}
+        onClick={() => onPlayGame(g)}
+        disabled={!!token && !g.launchUrl}
+        aria-label={showTextLabels ? undefined : g.title}
+      >
+        <div
+          className="lobby-game-card__thumb"
+          style={thumb ? { backgroundImage: `url("${thumb}")` } : undefined}
+        >
+          {!thumb ? <span className="lobby-game-card__fallback">{g.title}</span> : null}
+        </div>
+        {showTextLabels ? (
+          <>
+            <span className="lobby-game-card__title">{g.title}</span>
+            {g.subtitle ? <span className="lobby-game-card__sub">{g.subtitle}</span> : null}
+          </>
+        ) : null}
+      </button>
+    )
+  }
+
+  function renderGameTrack(
+    games: Game[],
+    thumbOffset = 0,
+    showTextLabels = true,
+  ) {
     return (
       <div className="lobby-games-scroller">
         <ul className="lobby-games-track" role="list">
-          {games.map((g, index) => {
-            const thumb = gameEntryThumbnail(thumbOffset + index, g.thumbnailUrl)
-            return (
-              <li key={g.id}>
-                <button
-                  type="button"
-                  className="lobby-game-card"
-                  onClick={() => onPlayGame(g)}
-                  disabled={!!token && !g.launchUrl}
-                >
-                  <div
-                    className="lobby-game-card__thumb"
-                    style={thumb ? { backgroundImage: `url("${thumb}")` } : undefined}
-                  >
-                    {!thumb ? <span className="lobby-game-card__fallback">{g.title}</span> : null}
-                  </div>
-                  <span className="lobby-game-card__title">{g.title}</span>
-                  {g.subtitle ? <span className="lobby-game-card__sub">{g.subtitle}</span> : null}
-                </button>
-              </li>
-            )
-          })}
+          {games.map((g, index) => (
+            <li key={g.id}>{gameCard(g, index, thumbOffset, showTextLabels)}</li>
+          ))}
         </ul>
       </div>
+    )
+  }
+
+  function renderGameGrid(games: Game[], thumbOffset = 0) {
+    return (
+      <ul className="lobby-games-grid" role="list">
+        {games.map((g, index) => (
+          <li key={g.id} className="lobby-games-grid__item">
+            {gameCard(g, index, thumbOffset, false)}
+          </li>
+        ))}
+      </ul>
     )
   }
 
@@ -418,10 +366,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="lobby-games-section page-container" aria-labelledby="lobby-games-heading">
-          <h2 id="lobby-games-heading" className="lobby-section-title">
-            Our Top Games
-          </h2>
+        <section className="lobby-games-section page-container" aria-label="Games">
           {token ? (
             <div className="lobby-game-filter" role="tablist" aria-label="Game categories (demo)">
               {LOBBY_FILTER_TABS.map(({ id, label }) => (
@@ -432,9 +377,9 @@ export function LandingPage() {
                   className={'lobby-game-filter__tab' + (lobbyFilter === id ? ' is-active' : '')}
                   role="tab"
                   aria-selected={lobbyFilter === id}
-                  aria-controls={`lobby-panel-${id}`}
+                  aria-controls="lobby-games-panel"
                   tabIndex={lobbyFilter === id ? 0 : -1}
-                  onClick={() => onTabClick(id)}
+                  onClick={() => setLobbyFilter(id)}
                 >
                   {label}
                 </button>
@@ -450,22 +395,33 @@ export function LandingPage() {
           ) : null}
           {token ? (
             <div
-              ref={panelsRef}
-              className="lobby-games-panels"
-              onScroll={onPanelsScroll}
+              id="lobby-games-panel"
+              className="lobby-games-panel-host"
+              role="tabpanel"
+              aria-labelledby={`lobby-tab-${lobbyFilter}`}
             >
-              {LOBBY_FILTER_ORDER.map((panelId) => (
-                <div
-                  key={panelId}
-                  id={`lobby-panel-${panelId}`}
-                  className="lobby-games-panel"
-                  role="tabpanel"
-                  aria-labelledby={`lobby-tab-${panelId}`}
-                  aria-hidden={lobbyFilter !== panelId}
-                >
-                  {renderGameTrack(gamesByFilter[panelId], 0)}
-                </div>
-              ))}
+              <div key={lobbyFilter} className="lobby-games-panel-swap">
+                {lobbyFilter === 'all'
+                  ? (() => {
+                      let thumbBase = 0
+                      return LOBBY_ALL_SUBSECTIONS.map((subId) => {
+                        const games = gamesByFilter[subId]
+                        if (games.length === 0) return null
+                        const off = thumbBase
+                        thumbBase += games.length
+                        const subLabel = LOBBY_FILTER_TABS.find((t) => t.id === subId)?.label ?? subId
+                        return (
+                          <div key={subId} className="lobby-games-group">
+                            <h3 className="lobby-games-group-title" id={`lobby-group-${subId}`}>
+                              {subLabel}
+                            </h3>
+                            {renderGameTrack(games, off, false)}
+                          </div>
+                        )
+                      })
+                    })()
+                  : renderGameGrid(gamesByFilter[lobbyFilter], 0)}
+              </div>
             </div>
           ) : null}
         </section>

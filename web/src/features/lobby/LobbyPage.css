@@ -110,6 +110,11 @@
   text-transform: uppercase;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.18s ease;
 }
 
 .lobby-game-filter__tab:hover {
@@ -120,6 +125,10 @@
   border-color: #eab308;
   color: #eab308;
   box-shadow: none;
+}
+
+.lobby-game-filter__tab:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .lobby-games-error {
@@ -134,31 +143,278 @@
   font-size: var(--text-small);
 }
 
-/* 分類分頁：全寬橫向捲＋捲動對齊（與分類 tab 聯動） */
-.lobby-games-panels {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
+/* 已登入：分類切換後單一內容區（直向格狀） */
+.lobby-games-panel-host {
   min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  touch-action: pan-x;
+  perspective: 1000px;
 }
 
-.lobby-games-panels::-webkit-scrollbar {
-  height: 4px;
+@keyframes lobby-games-tab-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(0.5rem) rotateX(2.5deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotateX(0);
+  }
 }
 
-.lobby-games-panel {
+/* 寬螢幕加輕度模糊，減少小螢幕 filter 壓力 */
+@keyframes lobby-games-tab-in-desk {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(0.5rem) rotateX(2.5deg);
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotateX(0);
+    filter: blur(0);
+  }
+}
+
+.lobby-games-panel-swap {
+  transform-origin: center top;
+  transform-style: preserve-3d;
+  animation: lobby-games-tab-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+@media (min-width: 48rem) {
+  .lobby-games-panel-swap {
+    animation-name: lobby-games-tab-in-desk;
+  }
+}
+
+/* 格狀卡片錯落進場（與外層疊加；nth-child 重設於每個 ul） */
+@keyframes lobby-grid-item-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(0.45rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.lobby-games-panel-swap .lobby-games-grid__item {
+  animation: lobby-grid-item-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(1) {
+  animation-delay: 0s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(5) {
+  animation-delay: 0.16s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(6) {
+  animation-delay: 0.2s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(7) {
+  animation-delay: 0.24s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(8) {
+  animation-delay: 0.28s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(9) {
+  animation-delay: 0.32s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(10) {
+  animation-delay: 0.36s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(11) {
+  animation-delay: 0.4s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(12) {
+  animation-delay: 0.44s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(13) {
+  animation-delay: 0.48s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(14) {
+  animation-delay: 0.52s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(15) {
+  animation-delay: 0.56s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(16) {
+  animation-delay: 0.6s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(17) {
+  animation-delay: 0.64s;
+}
+.lobby-games-panel-swap .lobby-games-grid__item:nth-child(18) {
+  animation-delay: 0.68s;
+}
+
+.lobby-games-panel-swap .lobby-games-track > li {
+  animation: lobby-grid-item-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(1) {
+  animation-delay: 0s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(5) {
+  animation-delay: 0.16s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(6) {
+  animation-delay: 0.2s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(7) {
+  animation-delay: 0.24s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(8) {
+  animation-delay: 0.28s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(9) {
+  animation-delay: 0.32s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(10) {
+  animation-delay: 0.36s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(11) {
+  animation-delay: 0.4s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(12) {
+  animation-delay: 0.44s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(13) {
+  animation-delay: 0.48s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(14) {
+  animation-delay: 0.52s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(15) {
+  animation-delay: 0.56s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(16) {
+  animation-delay: 0.6s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(17) {
+  animation-delay: 0.64s;
+}
+.lobby-games-panel-swap .lobby-games-track > li:nth-child(18) {
+  animation-delay: 0.68s;
+}
+
+@keyframes lobby-games-group-title-in {
+  from {
+    opacity: 0;
+    transform: translateX(-0.4rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.lobby-games-panel-swap .lobby-games-group-title {
+  animation: lobby-games-group-title-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lobby-games-panel-swap {
+    animation: none;
+    will-change: auto;
+  }
+
+  .lobby-games-panel-swap .lobby-games-grid__item {
+    animation: none;
+    will-change: auto;
+  }
+
+  .lobby-games-panel-swap .lobby-games-track > li {
+    animation: none;
+    will-change: auto;
+  }
+
+  .lobby-games-panel-swap .lobby-games-group-title {
+    animation: none;
+    will-change: auto;
+  }
+
+  .lobby-game-filter__tab {
+    transition: none;
+  }
+}
+
+.lobby-games-group {
+  margin-bottom: var(--space-6);
+}
+
+.lobby-games-group:last-child {
+  margin-bottom: 0;
+}
+
+.lobby-games-group-title {
+  margin: 0 0 var(--space-4);
+  font-size: clamp(0.95rem, 0.85rem + 0.5vw, 1.1rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ALL 橫列與其他 tab 的 3 欄格狀同寬：一欄 = (容器寬 − 2 個 row-gap) / 3 */
+.lobby-landing--session .lobby-games-group {
+  container-type: inline-size;
+}
+
+.lobby-landing--session .lobby-games-group .lobby-game-card {
+  width: calc((100cqi - 2 * var(--space-3)) / 3);
   box-sizing: border-box;
-  flex: 0 0 100%;
-  min-width: 100%;
+}
+
+.lobby-games-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lobby-games-grid__item {
+  min-width: 0;
+}
+
+.lobby-games-grid .lobby-game-card {
   width: 100%;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  max-width: 100%;
+  flex-shrink: 1;
+  box-sizing: border-box;
+}
+
+.lobby-game-card--thumb-only {
+  /* 格狀只顯示圖，不留標題佔位 */
+  gap: 0;
 }
 
 .lobby-games-scroller {
@@ -170,6 +426,19 @@
   scrollbar-width: thin;
   overscroll-behavior-x: contain;
   touch-action: pan-x;
+}
+
+/* 已登入大廳橫向列：隱藏捲軸，仍可用觸控／滾輪捲動 */
+.lobby-landing--session .lobby-games-scroller {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lobby-landing--session .lobby-games-scroller::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
 }
 
 .lobby-games-track {
