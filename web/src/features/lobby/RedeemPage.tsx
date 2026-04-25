@@ -8,8 +8,7 @@ import './SessionPageDecor.css'
 
 export const MIN_REDEEM_SC = 50
 
-const TICKER_TEXT =
-  'User won withdrew $300  ·  SWEEPSTAKES PRIZE POOL  ·  Redeemable balance shown in SC'
+const NOTIFY_PILL_TEXT = 'will withdrew $300'
 
 export function RedeemPage() {
   const { user } = useAuth()
@@ -22,14 +21,13 @@ export function RedeemPage() {
 
   return (
     <section className="redeem-page page-container session-page session-page--pattern">
-      <h1 className="redeem-page__title">REDEEM</h1>
-      <div className="redeem-page__ticker-outer" aria-hidden>
-        <div className="redeem-page__ticker-track">
-          <span>{TICKER_TEXT}</span>
-          <span>{TICKER_TEXT}</span>
-        </div>
+      <div className="redeem-page__hero">
+        <h1 className="redeem-page__title">REDEEM</h1>
+        <p className="redeem-page__notify-pill" aria-live="polite">
+          {NOTIFY_PILL_TEXT}
+        </p>
+        <p className="redeem-page__sub">SWEEPSTAKES PRIZE REDEMPTION</p>
       </div>
-      <p className="redeem-page__sub">SWEEPSTAKES PRIZE REDEMPTION</p>
 
       <div className="redeem-page__card">
         <div className="redeem-page__row">
@@ -63,19 +61,23 @@ export function RedeemPage() {
           <p className="redeem-page__amount">{scDisplay}</p>
         </div>
 
-        {!canRedeem ? (
-          <div className="redeem-page__panel redeem-page__panel--warn">
-            <h3 className="redeem-page__panel-title">Insufficient SC.</h3>
-            <p className="redeem-page__panel-text">Win a minimum of 50 SC to redeem.</p>
-            <p className="redeem-page__accent">Keep playing!</p>
-            <Link to="/" className="redeem-page__to-lobby">
-              Back to lobby
-            </Link>
-          </div>
-        ) : (
+        {canRedeem ? (
           <p className="redeem-page__ok">You meet the minimum balance for redemption (preview).</p>
-        )}
+        ) : null}
       </div>
+
+      {!canRedeem ? (
+        <div className="redeem-page__insufficient-card">
+          <h3 className="redeem-page__insufficient-title">Insufficient SC</h3>
+          <p className="redeem-page__insufficient-text">
+            Win a minimum of {MIN_REDEEM_SC} SC to redeem.
+          </p>
+          <p className="redeem-page__insufficient-accent">Keep playing!</p>
+          <Link to="/" className="redeem-page__to-lobby">
+            Back to lobby
+          </Link>
+        </div>
+      ) : null}
     </section>
   )
 }

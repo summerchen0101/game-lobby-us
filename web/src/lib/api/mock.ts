@@ -26,7 +26,8 @@ const mockUser: User = {
   displayName: 'Test player',
   balance: 89800,
   currency: 'GC',
-  sweepstakesBalance: 507780,
+  /** 低於 Redeem 門檻，Redeem 頁可顯示 insufficient 卡片（對齊 UI 稿） */
+  sweepstakesBalance: 2,
 }
 
 let mockState = { ...mockUser }
