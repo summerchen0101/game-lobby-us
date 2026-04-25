@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useId, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
+import { FaApple, FaRegCreditCard } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
+import { IoChevronBack } from "react-icons/io5";
+import { SiCashapp } from "react-icons/si";
 import "./ShopCheckout.css";
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import type { Pack } from "./types";
@@ -17,23 +21,7 @@ type Props = {
 };
 
 function BackIcon() {
-  return (
-    <svg
-      className="shop-checkout__back-icon"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden>
-      <path
-        d="M15 6l-6 6 6 6"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  return <IoChevronBack className="shop-checkout__back-icon" size={24} aria-hidden />;
 }
 
 function OrderSummaryView({
@@ -45,7 +33,7 @@ function OrderSummaryView({
   pack: Pack;
   onClose: () => void;
   onSelectCreditCard: () => void;
-  onSelectOther: (id: "skrill" | "apple") => void;
+  onSelectOther: (id: "google" | "apple" | "cashapp") => void;
 }) {
   return (
     <>
@@ -62,10 +50,11 @@ function OrderSummaryView({
         </h2>
         <span className="shop-checkout__head-spacer" aria-hidden />
       </header>
+      <hr className="shop-checkout__head-rule" />
       <div className="shop-checkout__summary-body">
         <p className="shop-checkout__price">{pack.price}</p>
         <p className="shop-checkout__line">
-          <span>Get</span>{" "}
+          <span className="shop-checkout__line-muted">Get</span>{" "}
           <span className="shop-checkout__line-gc">
             <span className="shop-page__chip shop-page__chip--gc">
               <img src={CURRENCY_ICON_GC} alt="" width={24} height={24} />
@@ -74,7 +63,7 @@ function OrderSummaryView({
               {pack.gcLabel}
             </span>
           </span>{" "}
-          <span>+ Free</span>{" "}
+          <span className="shop-checkout__line-muted">+ Free</span>{" "}
           <span className="shop-checkout__line-sc">
             <span className="shop-page__chip shop-page__chip--sc">
               <img src={CURRENCY_ICON_SC} alt="" width={24} height={24} />
@@ -84,43 +73,65 @@ function OrderSummaryView({
             </span>
           </span>
         </p>
-        <p className="shop-checkout__pay-label">PAY WITH</p>
         <ul className="shop-checkout__pay-list">
           <li>
             <button
               type="button"
-              className="shop-checkout__pay-btn"
-              onClick={onSelectCreditCard}>
-              <img
-                src={`${PANEL}/icon_card.png`}
-                alt=""
-                className="shop-checkout__pay-icon"
-              />
-              <span>Credit Card</span>
-            </button>
-          </li>
-          <li>
-            <button
-              type="button"
-              className="shop-checkout__pay-btn"
-              onClick={() => onSelectOther("skrill")}>
-              <span className="shop-checkout__pay-skrill" aria-hidden>
-                S
+              className="shop-checkout__pay-btn shop-checkout__pay-btn--pill"
+              onClick={() => onSelectOther("google")}>
+              <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
+                <FcGoogle
+                  className="shop-checkout__pay-ri shop-checkout__pay-ri--google"
+                  size={18}
+                />
               </span>
-              <span>Skrill</span>
+              <span className="shop-checkout__pay-btn-label">Google Pay</span>
+              <span className="shop-checkout__pay-btn-balance" aria-hidden />
             </button>
           </li>
           <li>
             <button
               type="button"
-              className="shop-checkout__pay-btn"
+              className="shop-checkout__pay-btn shop-checkout__pay-btn--pill"
               onClick={() => onSelectOther("apple")}>
-              <img
-                src={`${PANEL}/icon_apple.png`}
-                alt=""
-                className="shop-checkout__pay-icon"
-              />
-              <span>Apple Pay</span>
+              <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
+                <FaApple
+                  className="shop-checkout__pay-ri shop-checkout__pay-ri--apple"
+                  size={17}
+                />
+              </span>
+              <span className="shop-checkout__pay-btn-label">Apple Pay</span>
+              <span className="shop-checkout__pay-btn-balance" aria-hidden />
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              className="shop-checkout__pay-btn shop-checkout__pay-btn--pill"
+              onClick={onSelectCreditCard}>
+              <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
+                <FaRegCreditCard
+                  className="shop-checkout__pay-ri"
+                  size={17}
+                />
+              </span>
+              <span className="shop-checkout__pay-btn-label">Credit Card</span>
+              <span className="shop-checkout__pay-btn-balance" aria-hidden />
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              className="shop-checkout__pay-btn shop-checkout__pay-btn--pill"
+              onClick={() => onSelectOther("cashapp")}>
+              <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
+                <SiCashapp
+                  className="shop-checkout__pay-ri shop-checkout__pay-ri--cashapp"
+                  size={17}
+                />
+              </span>
+              <span className="shop-checkout__pay-btn-label">Cash APP</span>
+              <span className="shop-checkout__pay-btn-balance" aria-hidden />
             </button>
           </li>
         </ul>
@@ -302,9 +313,12 @@ export function ShopCheckoutOverlay({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, handleKeyDown]);
 
-  const onSelectOther = useCallback((id: "skrill" | "apple") => {
-    console.warn(`[shop checkout] ${id} not available yet`);
-  }, []);
+  const onSelectOther = useCallback(
+    (id: "google" | "apple" | "cashapp") => {
+      console.warn(`[shop checkout] ${id} not available yet`);
+    },
+    [],
+  );
 
   if (!open) return null;
 
