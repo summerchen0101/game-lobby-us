@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { FaApple, FaRegCreditCard } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { IoChevronBack } from "react-icons/io5";
+import { IoClose, IoChevronBack } from "react-icons/io5";
 import { SiCashapp } from "react-icons/si";
 import "./ShopCheckout.css";
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
@@ -11,6 +11,8 @@ import type { Pack } from "./types";
 const PANEL = "/imgs/panel/Panel_Shop";
 
 type Step = "summary" | "protect" | "card";
+
+type PendingPayment = "credit" | "google" | "apple" | "cashapp" | null;
 
 const US_STATE_CODES = "AL,AK,AZ,AR,CA,CO,CT,DE,FL,GA,HI,ID,IL,IN,IA,KS,KY,LA,ME,MD,MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,OH,OK,OR,PA,RI,SC,SD,TN,TX,UT,VT,VA,WA,WV,WI,WY,DC".split(
   ",",
@@ -28,16 +30,18 @@ function BackIcon() {
   return <IoChevronBack className="shop-checkout__back-icon" size={24} aria-hidden />;
 }
 
+function CloseIcon() {
+  return <IoClose className="shop-checkout__close-icon" size={24} aria-hidden />;
+}
+
 function OrderSummaryView({
   pack,
   onClose,
-  onSelectCreditCard,
-  onSelectOther,
+  onSelectPayment,
 }: {
   pack: Pack;
   onClose: () => void;
-  onSelectCreditCard: () => void;
-  onSelectOther: (id: "google" | "apple" | "cashapp") => void;
+  onSelectPayment: (id: "credit" | "google" | "apple" | "cashapp") => void;
 }) {
   return (
     <>
@@ -82,7 +86,7 @@ function OrderSummaryView({
             <button
               type="button"
               className="shop-checkout__pay-btn shop-checkout__pay-btn--pill"
-              onClick={() => onSelectOther("google")}>
+              onClick={() => onSelectPayment("google")}>
               <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
                 <FcGoogle
                   className="shop-checkout__pay-ri shop-checkout__pay-ri--google"
@@ -97,7 +101,7 @@ function OrderSummaryView({
             <button
               type="button"
               className="shop-checkout__pay-btn shop-checkout__pay-btn--pill"
-              onClick={() => onSelectOther("apple")}>
+              onClick={() => onSelectPayment("apple")}>
               <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
                 <FaApple
                   className="shop-checkout__pay-ri shop-checkout__pay-ri--apple"
@@ -112,7 +116,7 @@ function OrderSummaryView({
             <button
               type="button"
               className="shop-checkout__pay-btn shop-checkout__pay-btn--pill"
-              onClick={onSelectCreditCard}>
+              onClick={() => onSelectPayment("credit")}>
               <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
                 <FaRegCreditCard
                   className="shop-checkout__pay-ri"
@@ -127,7 +131,7 @@ function OrderSummaryView({
             <button
               type="button"
               className="shop-checkout__pay-btn shop-checkout__pay-btn--pill"
-              onClick={() => onSelectOther("cashapp")}>
+              onClick={() => onSelectPayment("cashapp")}>
               <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
                 <SiCashapp
                   className="shop-checkout__pay-ri shop-checkout__pay-ri--cashapp"
@@ -145,10 +149,10 @@ function OrderSummaryView({
 }
 
 function ProtectAccountView({
-  onBack,
+  onClose,
   onContinue,
 }: {
-  onBack: () => void;
+  onClose: () => void;
   onContinue: () => void;
 }) {
   const idPrefix = useId();
@@ -191,18 +195,18 @@ function ProtectAccountView({
 
   return (
     <>
-      <header className="shop-checkout__head">
-        <button
-          type="button"
-          className="shop-checkout__back"
-          onClick={onBack}
-          aria-label="Back to order summary">
-          <BackIcon />
-        </button>
+      <header className="shop-checkout__head shop-checkout__head--protect">
+        <span className="shop-checkout__head-spacer" aria-hidden />
         <h2 className="shop-checkout__title" id="shop-checkout-dialog-title">
           PROTECT YOUR ACCOUNT
         </h2>
-        <span className="shop-checkout__head-spacer" aria-hidden />
+        <button
+          type="button"
+          className="shop-checkout__close"
+          onClick={onClose}
+          aria-label="Close and return to order summary">
+          <CloseIcon />
+        </button>
       </header>
       <hr className="shop-checkout__head-rule" />
       <form
@@ -624,20 +628,63 @@ export function ShopCheckoutOverlay({
   onClose,
   onStepChange,
 }: Props) {
+  const [pendingPayment, setPendingPayment] = useState<PendingPayment>(null);
+
+  useEffect(() => {
+    setPendingPayment(null);
+  }, [open, pack.id]);
+
+  const closeOverlay = useCallback(() => {
+    setPendingPayment(null);
+    onClose();
+  }, [onClose]);
+
+  const leaveProtectToSummary = useCallback(() => {
+    setPendingPayment(null);
+    onStepChange("summary");
+  }, [onStepChange]);
+
+  const handleProtectContinue = useCallback(() => {
+    if (pendingPayment === "credit") {
+      onStepChange("card");
+      return;
+    }
+    if (
+      pendingPayment === "google" ||
+      pendingPayment === "apple" ||
+      pendingPayment === "cashapp"
+    ) {
+      console.warn(`[shop checkout] ${pendingPayment} not available yet`);
+      setPendingPayment(null);
+      onStepChange("summary");
+      return;
+    }
+    setPendingPayment(null);
+    onStepChange("summary");
+  }, [pendingPayment, onStepChange]);
+
+  const handleSelectPayment = useCallback(
+    (id: NonNullable<Exclude<PendingPayment, null>>) => {
+      setPendingPayment(id);
+      onStepChange("protect");
+    },
+    [onStepChange],
+  );
+
   const handleBackdrop = useCallback(() => {
     if (step === "card") onStepChange("protect");
-    else if (step === "protect") onStepChange("summary");
-    else onClose();
-  }, [step, onClose, onStepChange]);
+    else if (step === "protect") leaveProtectToSummary();
+    else closeOverlay();
+  }, [step, onStepChange, leaveProtectToSummary, closeOverlay]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       if (step === "card") onStepChange("protect");
-      else if (step === "protect") onStepChange("summary");
-      else onClose();
+      else if (step === "protect") leaveProtectToSummary();
+      else closeOverlay();
     },
-    [step, onClose, onStepChange],
+    [step, onStepChange, leaveProtectToSummary, closeOverlay],
   );
 
   useEffect(() => {
@@ -645,13 +692,6 @@ export function ShopCheckoutOverlay({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, handleKeyDown]);
-
-  const onSelectOther = useCallback(
-    (id: "google" | "apple" | "cashapp") => {
-      console.warn(`[shop checkout] ${id} not available yet`);
-    },
-    [],
-  );
 
   if (!open) return null;
 
@@ -669,22 +709,21 @@ export function ShopCheckoutOverlay({
         {step === "summary" ? (
           <OrderSummaryView
             pack={pack}
-            onClose={onClose}
-            onSelectCreditCard={() => onStepChange("protect")}
-            onSelectOther={onSelectOther}
+            onClose={closeOverlay}
+            onSelectPayment={handleSelectPayment}
           />
         ) : step === "protect" ? (
           <ProtectAccountView
             key={pack.id}
-            onBack={() => onStepChange("summary")}
-            onContinue={() => onStepChange("card")}
+            onClose={leaveProtectToSummary}
+            onContinue={handleProtectContinue}
           />
         ) : (
           <CardDetailsView
             key={pack.id}
             pack={pack}
             onBack={() => onStepChange("protect")}
-            onComplete={onClose}
+            onComplete={closeOverlay}
           />
         )}
       </div>

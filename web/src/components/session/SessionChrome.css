@@ -30,7 +30,7 @@
   min-height: 0;
   width: 100%;
   padding-top: calc(var(--safe-top) + var(--session-header-stripe-h));
-  padding-bottom: var(--session-footer-h, calc(4.25rem + var(--safe-bottom)));
+  padding-bottom: var(--session-footer-h, calc(3.6rem + var(--safe-bottom)));
 }
 
 .session-layout--hero-overlay .session-layout__main {
@@ -70,7 +70,7 @@
   --hdr-pill-plus-fg: #0a0a0a;
   --hdr-focus: #eab308;
   /* 右欄 switch 軌道內底：與黃色框線 (#eab308) 同色半透明 */
-  --hdr-wallet-track-bg: rgb(234 179 8 / 0.2);
+  --hdr-wallet-track-bg: rgba(149, 115, 21, 0.4);
 
   position: fixed;
   left: 0;
@@ -94,7 +94,7 @@
   --hdr-pill-plus-fg: #fff;
   --hdr-focus: #4ade80;
   /* 右欄 switch 軌道內底：與綠色框線 (#4ade80) 同色半透明 */
-  --hdr-wallet-track-bg: rgb(74 222 128 / 0.2);
+  --hdr-wallet-track-bg: rgba(11, 141, 59, 0.4);
 
   backdrop-filter: blur(10px);
 }
@@ -341,7 +341,7 @@
   grid-template-columns: repeat(5, 1fr);
   list-style: none;
   margin: 0;
-  padding: var(--space-2) var(--page-pad) var(--space-3);
+  padding: var(--space-2) var(--page-pad) var(--space-1);
   max-width: var(--content-max);
   margin-inline: auto;
   gap: 0;
@@ -353,8 +353,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
-  min-height: 3.25rem;
-  padding: var(--space-1);
+  min-height: 2.85rem;
+  padding: 0.15rem var(--space-1);
   border-radius: 0.5rem;
   text-decoration: none;
   color: rgb(255 255 255 / 65%);
@@ -388,7 +388,7 @@
   position: fixed;
   right: max(var(--page-pad-inline), var(--safe-right));
   bottom: calc(
-    var(--session-footer-h, 4.25rem) + var(--safe-bottom) + var(--space-3)
+    var(--session-footer-h, calc(3.6rem + var(--safe-bottom))) + var(--space-3)
   );
   z-index: 180;
   width: 3rem;

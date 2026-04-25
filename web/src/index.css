@@ -22,8 +22,8 @@
   --min-tap: 44px;
   --header-h: clamp(3.25rem, 8dvh, 3.75rem);
   --nav-bottom-h: calc(var(--min-tap) + var(--space-3) + var(--safe-bottom));
-  /* 五格 session footer（與 SessionFooter padding 一致） */
-  --session-footer-h: calc(3.75rem + var(--space-3) + var(--safe-bottom));
+  /* 五格 session footer（與 SessionFooter padding / min-height 一致） */
+  --session-footer-h: calc(3.6rem + var(--safe-bottom));
 
   /* 斷點（用於 container / media；語意化命名） */
   --bp-narrow: 30rem;   /* 480 */
