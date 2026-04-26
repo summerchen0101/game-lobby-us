@@ -76,6 +76,36 @@ export const GUEST_TOP_GAMES: Game[] = [
     launchUrl: '',
     thumbnailUrl: `${G}/koala/kg_5009-cutThumbnailShortHr-FAQcd.webp`,
   },
+  {
+    id: 'guest-top-5',
+    title: 'Crown Jewels',
+    launchUrl: '',
+    thumbnailUrl: `${G}/playson-infin/pls_coin_strike_xxl-cutThumbnailHr-bUafU.webp`,
+  },
+  {
+    id: 'guest-top-6',
+    title: 'Neon Reels',
+    launchUrl: '',
+    thumbnailUrl: `${G}/koala/kg_5009-cutThumbnailShortHr-FAQcd.webp`,
+  },
+  {
+    id: 'guest-top-7',
+    title: 'Jungle Gold',
+    launchUrl: '',
+    thumbnailUrl: `${G}/booming/68b705d3800528273b1057c8-cutThumbnailShortHr-rBBMl.webp`,
+  },
+  {
+    id: 'guest-top-8',
+    title: 'Midas Riches',
+    launchUrl: '',
+    thumbnailUrl: `${G}/crownslots/olympics-alternate-all-KXkAo.webp`,
+  },
+  {
+    id: 'guest-top-9',
+    title: 'Star Fortune',
+    launchUrl: '',
+    thumbnailUrl: `${G}/playson-infin/pls_coin_strike_xxl-cutThumbnailHr-bUafU.webp`,
+  },
 ]
 
 /** 未登入首頁 — 第二列（DEMO here） */

@@ -289,7 +289,7 @@ export function LandingPage() {
         </section>
 
         <section
-          className="guest-landing__games-block page-container"
+          className="guest-landing__games-block guest-landing__games-block--demo-row page-container"
           aria-labelledby="guest-demo-games-heading"
         >
           <h2 id="guest-demo-games-heading" className="guest-landing__row-title guest-landing__row-title--demo">

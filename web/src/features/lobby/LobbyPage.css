@@ -762,6 +762,21 @@ html.guest-lobby-page body::-webkit-scrollbar {
   box-sizing: border-box;
 }
 
+@media (min-width: 64rem) {
+  .lobby-landing--guest .guest-landing__games-block .lobby-game-card {
+    width: calc((100cqi - 3 * var(--space-3)) / 4);
+  }
+}
+
+/* 第二列三張未佔滿橫寬時置中（不影響大廳；第一列不帶此修飾） */
+.lobby-landing--guest .guest-landing__games-block--demo-row .lobby-games-scroller {
+  text-align: center;
+}
+
+.lobby-landing--guest .guest-landing__games-block--demo-row .lobby-games-track {
+  display: inline-flex;
+}
+
 .guest-landing__row-title {
   margin: 0 0 var(--space-4);
   font-size: 0.68rem;
