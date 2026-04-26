@@ -125,8 +125,8 @@
 
 .invite-friends-modal__copy {
   flex-shrink: 0;
-  width: 2.1rem;
-  height: 2.1rem;
+  width: clamp(1.85rem, 1.6rem + 0.7vw, 2.35rem);
+  height: clamp(1.85rem, 1.6rem + 0.7vw, 2.35rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,6 +137,12 @@
   /* 局部綠（與 Profile / Shop 副標等一致） */
   color: var(--crown-locale-green);
   cursor: pointer;
+}
+
+.invite-friends-modal__copy-icon {
+  flex-shrink: 0;
+  width: var(--icon-rwd-md);
+  height: var(--icon-rwd-md);
 }
 
 .invite-friends-modal__copy:hover {
@@ -247,15 +253,5 @@
   .app-modal.invite-friends-modal {
     max-width: min(30rem, calc(100vw - 2 * var(--page-pad-inline)));
     max-height: var(--modal-scroll-max-height);
-  }
-
-  .invite-friends-modal__copy {
-    width: 2rem;
-    height: 2rem;
-  }
-
-  .invite-friends-modal__copy svg {
-    width: 1.4rem;
-    height: 1.4rem;
   }
 }

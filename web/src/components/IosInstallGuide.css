@@ -59,6 +59,8 @@
 .ios-guide__share {
   display: block;
   flex-shrink: 0;
+  width: var(--icon-rwd-md);
+  height: var(--icon-rwd-md);
 }
 
 .ios-guide__dismiss {

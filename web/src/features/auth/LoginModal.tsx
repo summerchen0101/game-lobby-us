@@ -154,7 +154,7 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
             className="app-modal__head-btn"
             onClick={handleBack}
             aria-label={screen === "forgot" ? "Back to sign in" : "Close"}>
-            <IoChevronBack size={24} aria-hidden />
+            <IoChevronBack aria-hidden />
           </button>
           <h2 id={titleId} className="app-modal__title--abs-center">
             {title}

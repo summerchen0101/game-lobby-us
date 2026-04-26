@@ -122,7 +122,11 @@ export function MyProfileModal({
                   className="my-profile-modal__info-btn"
                   aria-label="Level info"
                 >
-                  <Info size={14} strokeWidth={2.75} aria-hidden />
+                  <Info
+                    className="my-profile-modal__info-icon"
+                    strokeWidth={2.75}
+                    aria-hidden
+                  />
                 </button>
               )}
             </InfoPopover>

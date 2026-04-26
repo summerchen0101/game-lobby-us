@@ -35,6 +35,13 @@
   /* 內容區左右：在 page-pad 上再加一層，與 /shop 一致、全站共用 */
   --page-pad-inline: calc(var(--page-pad) + clamp(0.5rem, 3vw, 1.25rem));
   --content-max: 75rem;
+
+  /* 外掛圖示（lucide / react-icons）：以 clamp 隨視窗變化，勿在 TSX 寫死 size px */
+  --icon-rwd-xs: clamp(0.8125rem, 0.72rem + 0.35vw, 0.9375rem);
+  --icon-rwd-sm: clamp(0.875rem, 0.8rem + 0.4vw, 1.0625rem);
+  --icon-rwd-md: clamp(0.9375rem, 0.85rem + 0.5vw, 1.125rem);
+  --icon-rwd-lg: clamp(1.25rem, 1.05rem + 0.75vw, 1.5rem);
+  --icon-rwd-nav: clamp(1.1rem, 0.95rem + 0.5vw, 1.45rem);
 }
 
 *,

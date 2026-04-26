@@ -163,11 +163,7 @@ export function ProfilePage() {
                 )}
               </span>
               <span className="profile-page__edit" aria-hidden>
-                <HiPencil
-                  className="profile-page__edit-icon"
-                  aria-hidden
-                  size={15}
-                />
+                <HiPencil className="profile-page__edit-icon" aria-hidden />
               </span>
             </button>
           </div>
@@ -184,7 +180,11 @@ export function ProfilePage() {
               disabled={!user?.id}
               aria-label="Copy UID"
               title="Copy UID">
-              <Copy size={16} strokeWidth={2.25} aria-hidden />
+              <Copy
+                className="profile-page__uid-copy-icon"
+                strokeWidth={2.25}
+                aria-hidden
+              />
             </button>
           </div>
           {uidCopied ? (
@@ -208,7 +208,11 @@ export function ProfilePage() {
                   {...p}
                   className="profile-page__info-btn"
                   aria-label="Level info">
-                  <Info size={18} strokeWidth={2.5} aria-hidden />
+                  <Info
+                    className="profile-page__level-info-icon"
+                    strokeWidth={2.5}
+                    aria-hidden
+                  />
                 </button>
               )}
             </InfoPopover>
@@ -231,7 +235,10 @@ export function ProfilePage() {
                 {rankCurrent}/{RANK_MAX}
               </span>
               <div className="profile-page__bar-cap" aria-hidden>
-                <Crown size={14} strokeWidth={2.5} />
+                <Crown
+                  className="profile-page__bar-crown-icon"
+                  strokeWidth={2.5}
+                />
               </div>
             </div>
           </div>
@@ -242,7 +249,6 @@ export function ProfilePage() {
             <span className="profile-page__setting-label" id={soundLabelId}>
               <Volume2
                 className="profile-page__setting-icon"
-                size={18}
                 strokeWidth={2}
                 aria-hidden
               />

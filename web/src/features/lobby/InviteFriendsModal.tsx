@@ -130,7 +130,11 @@ export function InviteFriendsModal({ open, onClose }: Props) {
               onClick={copyUrl}
               aria-label="Copy"
             >
-              <Copy size={20} strokeWidth={2.25} aria-hidden />
+              <Copy
+                className="invite-friends-modal__copy-icon"
+                strokeWidth={2.25}
+                aria-hidden
+              />
             </button>
           </div>
 

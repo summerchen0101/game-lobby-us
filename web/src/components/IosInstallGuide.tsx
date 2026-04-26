@@ -49,7 +49,7 @@ export function IosInstallGuide() {
           <p>
             1. Tap the <b>Share</b> button in the browser bar{" "}
             <span className="ios-guide__share-wrap" aria-hidden="true">
-              <MdIosShare className="ios-guide__share" size={20} />
+              <MdIosShare className="ios-guide__share" />
             </span>
             .
           </p>

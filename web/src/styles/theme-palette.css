@@ -94,6 +94,6 @@
 
 @media (min-width: 48rem) {
   :root {
-    --modal-scroll-max-height: min(90dvh, 800px);
+    --modal-scroll-max-height: min(90dvh, 40rem);
   }
 }

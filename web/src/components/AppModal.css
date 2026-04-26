@@ -148,6 +148,13 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.app-modal__head-btn > svg {
+  display: block;
+  flex-shrink: 0;
+  width: var(--icon-rwd-lg);
+  height: var(--icon-rwd-lg);
+}
+
 .app-modal__head-btn:hover {
   background: rgb(255 255 255 / 8%);
 }

@@ -251,6 +251,8 @@
 .session-header__pill-plus-icon {
   display: block;
   flex-shrink: 0;
+  width: var(--icon-rwd-sm);
+  height: var(--icon-rwd-sm);
 }
 
 .session-header__right {
@@ -390,8 +392,8 @@
 }
 
 .session-footer__icon {
-  width: 1.35rem;
-  height: 1.35rem;
+  width: var(--icon-rwd-nav);
+  height: var(--icon-rwd-nav);
   opacity: 0.85;
 }
 

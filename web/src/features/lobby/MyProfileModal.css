@@ -102,6 +102,12 @@
   filter: brightness(1.05);
 }
 
+.my-profile-modal__info-icon {
+  flex-shrink: 0;
+  width: var(--icon-rwd-xs);
+  height: var(--icon-rwd-xs);
+}
+
 .my-profile-modal__info-popover-text {
   margin: 0;
   text-align: left;

@@ -27,7 +27,7 @@ type Props = {
 };
 
 function BackIcon() {
-  return <IoChevronBack className="shop-checkout__back-icon" size={24} aria-hidden />;
+  return <IoChevronBack className="shop-checkout__back-icon" aria-hidden />;
 }
 
 function OrderSummaryView({
@@ -63,7 +63,7 @@ function OrderSummaryView({
           <span className="shop-checkout__line-muted">Get</span>{" "}
           <span className="shop-checkout__line-gc">
             <span className="shop-page__chip shop-page__chip--gc">
-              <img src={CURRENCY_ICON_GC} alt="" width={24} height={24} />
+              <img src={CURRENCY_ICON_GC} alt="" />
             </span>
             <span className="shop-checkout__line-amt shop-checkout__line-amt--gc">
               {pack.gcLabel}
@@ -72,7 +72,7 @@ function OrderSummaryView({
           <span className="shop-checkout__line-muted">+ Free</span>{" "}
           <span className="shop-checkout__line-sc">
             <span className="shop-page__chip shop-page__chip--sc">
-              <img src={CURRENCY_ICON_SC} alt="" width={24} height={24} />
+              <img src={CURRENCY_ICON_SC} alt="" />
             </span>
             <span className="shop-checkout__line-amt shop-checkout__line-amt--sc">
               {pack.bonusSc}
@@ -88,7 +88,6 @@ function OrderSummaryView({
               <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
                 <FcGoogle
                   className="shop-checkout__pay-ri shop-checkout__pay-ri--google"
-                  size={18}
                 />
               </span>
               <span className="shop-checkout__pay-btn-label">Google Pay</span>
@@ -103,7 +102,6 @@ function OrderSummaryView({
               <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
                 <FaApple
                   className="shop-checkout__pay-ri shop-checkout__pay-ri--apple"
-                  size={17}
                 />
               </span>
               <span className="shop-checkout__pay-btn-label">Apple Pay</span>
@@ -116,10 +114,7 @@ function OrderSummaryView({
               className="shop-checkout__pay-btn shop-checkout__pay-btn--pill"
               onClick={() => onSelectPayment("credit")}>
               <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
-                <FaRegCreditCard
-                  className="shop-checkout__pay-ri"
-                  size={17}
-                />
+                <FaRegCreditCard className="shop-checkout__pay-ri" />
               </span>
               <span className="shop-checkout__pay-btn-label">Credit Card</span>
               <span className="shop-checkout__pay-btn-balance" aria-hidden />
@@ -133,7 +128,6 @@ function OrderSummaryView({
               <span className="shop-checkout__pay-btn-icon-slot" aria-hidden>
                 <SiCashapp
                   className="shop-checkout__pay-ri shop-checkout__pay-ri--cashapp"
-                  size={17}
                 />
               </span>
               <span className="shop-checkout__pay-btn-label">Cash APP</span>

@@ -131,6 +131,26 @@
 .profile-page__edit-icon {
   display: block;
   flex-shrink: 0;
+  width: var(--icon-rwd-sm);
+  height: var(--icon-rwd-sm);
+}
+
+.profile-page__uid-copy-icon {
+  flex-shrink: 0;
+  width: var(--icon-rwd-sm);
+  height: var(--icon-rwd-sm);
+}
+
+.profile-page__level-info-icon {
+  flex-shrink: 0;
+  width: var(--icon-rwd-md);
+  height: var(--icon-rwd-md);
+}
+
+.profile-page__bar-crown-icon {
+  flex-shrink: 0;
+  width: var(--icon-rwd-xs);
+  height: var(--icon-rwd-xs);
 }
 
 .profile-page__display-name {
@@ -386,6 +406,8 @@
 
 .profile-page__setting-icon {
   flex-shrink: 0;
+  width: var(--icon-rwd-md);
+  height: var(--icon-rwd-md);
   color: rgb(255 255 255 / 92%);
 }
 

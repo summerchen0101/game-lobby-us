@@ -21,7 +21,11 @@ export function GameOverlay({ url, isPayment, onClose }: GameOverlayProps) {
         onClick={onClose}
         aria-label="Return to lobby"
       >
-        <Home className="game-overlay__close-icon" size={22} strokeWidth={2} aria-hidden />
+        <Home
+          className="game-overlay__close-icon"
+          strokeWidth={2}
+          aria-hidden
+        />
       </button>
       <iframe
         className="game-overlay__frame"

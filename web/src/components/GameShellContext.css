@@ -49,5 +49,7 @@
 
 .game-overlay__close-icon {
   flex-shrink: 0;
+  width: var(--icon-rwd-lg);
+  height: var(--icon-rwd-lg);
   pointer-events: none;
 }
