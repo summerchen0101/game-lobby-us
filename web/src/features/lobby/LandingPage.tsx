@@ -13,7 +13,18 @@ import { LoginModal } from "../auth/LoginModal";
 import { PhoneVerificationModal } from "../auth/PhoneVerificationModal";
 import { RegisterModal } from "../auth/RegisterModal";
 import { TermsGateModal } from "../auth/TermsGateModal";
-import { trustpilotBusinessUnitId } from "../../lib/env";
+import {
+  getGatewayWsUrl,
+  trustpilotBusinessUnitId,
+  unityWebEntryDefaultGameId,
+  isSlotWebEntryEnabled,
+} from "../../lib/env";
+import { useGatewayWs } from "../../realtime/useGatewayWs";
+import {
+  activeWalletToSlotMode,
+  amountForActiveWallet,
+  buildSlotLaunchUrl,
+} from "../../lib/slotLaunchUrl";
 import { ApiError } from "../../lib/api/client";
 import { fetchGames } from "../../lib/api/games";
 import type { Game } from "../../lib/api/types";
@@ -50,6 +61,12 @@ const LOBBY_ALL_SUBSECTIONS: Array<Exclude<LobbyFilterTab, "all">> = [
   "slots",
 ];
 
+function slotGameIdFromCard(g: Game, fallback: number): number {
+  const n = Number.parseInt(g.id, 10);
+  if (Number.isFinite(n) && n > 0) return n;
+  return fallback;
+}
+
 function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
   if (f === "all") {
     return displayGames;
@@ -66,10 +83,37 @@ function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
   return displayGames;
 }
 
+function devGatewayWsProbeEnabled(): boolean {
+  if (!import.meta.env.DEV) return false;
+  return import.meta.env.VITE_DEV_GATEWAY_WS !== "false";
+}
+
 export function LandingPage() {
   const { token, user, refreshUser } = useAuth();
   const { activeWallet } = useWallet();
   const { open: openShell } = useGameShell();
+
+  useGatewayWs({
+    enabled: devGatewayWsProbeEnabled(),
+    wsToken: token ?? "",
+    onState: (s) => {
+      console.info(
+        "[gateway-ws][dev] state:",
+        s,
+        "url:",
+        getGatewayWsUrl({ token: token ?? "" }),
+      );
+    },
+    onResponse: (msg) => {
+      console.info("[gateway-ws][dev] response:", msg);
+    },
+    onSocketError: (ev) => {
+      console.warn("[gateway-ws][dev] WebSocket error:", ev);
+    },
+    onGatewayError: (msg) => {
+      console.warn("[gateway-ws][dev] non-success code:", msg);
+    },
+  });
   const {
     termsOpen,
     loginOpen,
@@ -188,14 +232,29 @@ export function LandingPage() {
     };
   }, [user]);
 
-  function onPlayGame() {
-    const d = UNITY_DEMO_LOBBY_GAME;
+  function onPlayGame(g?: Game) {
+    const card = g ?? UNITY_DEMO_LOBBY_GAME;
+    let url: string;
+    if (isSlotWebEntryEnabled()) {
+      const gameId = slotGameIdFromCard(card, unityWebEntryDefaultGameId());
+      url = buildSlotLaunchUrl({
+        gameId,
+        mode: activeWalletToSlotMode(activeWallet),
+        amount: amountForActiveWallet(user, activeWallet),
+        vipLevel: user?.vipLevel ?? 0,
+        token: token ?? undefined,
+      });
+    } else if (card.launchUrl?.trim()) {
+      url = card.launchUrl.trim();
+    } else {
+      url = unityDemoGameUrl();
+    }
     openShell({
-      url: unityDemoGameUrl(),
-      widthPercent: d.embedWidthPercent,
-      heightPercent: d.embedHeightPercent,
+      url,
+      widthPercent: card.embedWidthPercent,
+      heightPercent: card.embedHeightPercent,
       isPayment: false,
-      openInNewWindow: d.openInNewWindow,
+      openInNewWindow: card.openInNewWindow,
     });
   }
 
@@ -217,7 +276,7 @@ export function LandingPage() {
           "lobby-game-card" +
           (showTextLabels ? "" : " lobby-game-card--thumb-only")
         }
-        onClick={() => onPlayGame()}
+        onClick={() => onPlayGame(g)}
         aria-label={showTextLabels ? undefined : g.title}>
         <div
           className="lobby-game-card__thumb"

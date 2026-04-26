@@ -17,6 +17,21 @@ interface ImportMetaEnv {
   readonly VITE_DEV_PROXY: string
   /** 大廳「Single1 (Alpha)」內嵌試玩 URL（可覆寫預設 alpha 站） */
   readonly VITE_UNITY_DEMO_URL?: string
+  /** Gateway WebSocket 基底（建議不含 query；`token`/`deviceid` 由程式組裝） */
+  readonly VITE_WS_URL?: string
+  /** WebSocket query `deviceid`；不設則用 alpha 內建預設 UUID */
+  readonly VITE_WS_DEVICE_ID?: string
+  /** Unity WebGL WebEntry（slot）；預設 alpha WebEntry 路徑 */
+  readonly VITE_UNITY_WEBENTRY_URL?: string
+  /** 設為 "true" 時大廳試玩改走 WebEntry 並帶 game_id／mode／amount／vip_lv／token */
+  readonly VITE_USE_SLOT_WEBENTRY?: string
+  /** WebEntry 預設 slot 編號（預設 85） */
+  readonly VITE_UNITY_WEBENTRY_GAME_ID?: string
+  /**
+   * 僅 dev：`LandingPage` 是否自動連 Gateway WS 並 `console` 記錄。
+   * 設為 `"false"` 可關閉；production build 一律不連線。
+   */
+  readonly VITE_DEV_GATEWAY_WS?: string
   /** 大廳主視覺圖 URL（可覆寫預設 sample 圖） */
   readonly VITE_LOBBY_HERO_IMAGE?: string
   /** 訪客首頁 hero 圖；未設則沿用 VITE_LOBBY_HERO_IMAGE／預設 */

@@ -5,6 +5,8 @@ export type User = {
   currency?: string
   /** Sweepstakes / SC coin balance（可選，API 未回傳時前端可顯示 0） */
   sweepstakesBalance?: number
+  /** VIP 等級（WebEntry `vip_lv`；API 未回傳時前端可視為 0） */
+  vipLevel?: number
 }
 
 export type AuthResponse = {

@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package gateway;
+
+// 與 repo 根目錄 proto/gateway/gateway.proto 之 RequestBasic、ResponseBasic、Request、Response
+// 欄位編號保持一致；若主檔變更請同步更新此檔並執行 npm run proto:generate。
+
+message RequestBasic {
+  uint64 userID = 1;
+  int64 timestamp = 2;
+  string clientVer = 3;
+  string requestID = 4;
+  uint64 gameID = 5;
+  string roomID = 6;
+  string host = 7;
+  string token = 8;
+}
+
+message ResponseBasic {
+  string requestID = 1;
+  int64 timestamp = 2;
+  string serverVer = 3;
+}
+
+message Request {
+  RequestBasic basic = 1;
+  int64 type = 2;
+  bytes data = 3;
+}
+
+message Response {
+  ResponseBasic basic = 1;
+  int64 type = 2;
+  string code = 3;
+  string errMessage = 4;
+  bytes data = 5;
+  uint64 gameID = 6;
+}
