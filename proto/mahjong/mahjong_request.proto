@@ -1,0 +1,20 @@
+syntax = "proto3";
+package mahjong;
+option go_package       = "gitlab.ffglobaltech.com/us888/pluto/protos/mahjong";
+option csharp_namespace = "MahjongProto";
+
+import "proto/mahjong/mahjong_model.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+// tileRequest 我懶
+message TileRequest {
+    TileType tile                  = 1;  // 哪張牌
+    Action action                  = 2;  // 哪個動作
+    repeated TileType pair         = 3;
+    yesno.YesNo isDeclareReadyHand = 4;
+}
+
+// ExchangeTileRequest 換三張請求
+message ExchangeTileRequest {
+    Tiles to_be_exchanged_tiles = 1;
+}

@@ -1,0 +1,414 @@
+syntax = "proto3";
+package baccarat;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/baccarat";
+
+// 遊戲桌回合階段
+enum GameRoundStage {
+  UNKNOWN_GAME_ROUND_STAGE = 0;
+  SHUFFLING                = 1; // 洗牌階段
+  PLACE_BET                = 2; // 下注階段，一局遊戲開始
+  OPEN_CARD                = 3; // 開牌階段
+  SETTLEMENT               = 4; // 派彩階段
+  EXCEPTION                = 5; // 異常階段
+}
+
+// 下注區
+enum BetArea {
+  UNKNOWN_BET_AREA                  = 0;
+  BET_AREA_BANKER_WIN               = 1; // 莊贏
+  BET_AREA_PLAYER_WIN               = 2; // 閒贏
+  BET_AREA_TIE_WIN                  = 3; // 和贏
+  BET_AREA_BANKER_PAIR              = 4; // 莊對
+  BET_AREA_PLAYER_PAIR              = 5; // 閒對
+  BET_AREA_SUPER_SIX                = 6; // 超級六
+  BET_AREA_NO_COMMISSION_BANKER_WIN = 7; // 免傭莊贏
+}
+
+// 自動下注回合數
+enum AutoBetGameRoundNumber {
+  UNKNOWN_AUTO_BET_GAME_ROUND_NUMBER = 0;
+  TEN                                = 10;
+  FIFTY                              = 50;
+  ONE_HUNDRED                        = 100;
+  THREE_THOUSAND                     = 3000;
+  INFINITE                           = 2147483647; // Max Int32
+}
+
+// 自動下注金額模式
+enum AutoBetMode {
+  UNKNOWN_AUTO_BET_MODE = 0;
+  REPEAT                = 1; // 重複下注金額模式
+  BREAK_EVEN            = 2; // 回本下注金額模式
+}
+
+// 自動下注位置輪換策略
+enum AutoBetSwitchBetAreaMode {
+  UNKNOWN_AUTO_BET_SWITCH_BET_AREA_MODE = 0;
+  FIXED                                 = 1; // 固定
+  ROUND_ROBIN                           = 2; // 輪換
+}
+
+// 獎金獎項
+enum PrizeMoneyAward {
+  UNKNOWN_PRIZE_MONEY_AWARD = 0;
+  ONE_OVER_KILL             = 1;   // 1點絕殺 - 玩家下注的那一家以1點獲勝
+  TRIPLE_ONE                = 2;   // 3條1 - 玩家下注的那一家以3張1獲勝
+  TRIPLE_TWO                = 3;   // 3條2 - 玩家下注的那一家以3張2獲勝
+  TRIPLE_FIVE               = 4;   // 3條5 - 玩家下注的那一家以3張5獲勝
+  TRIPLE_SIX                = 5;   // 3條6 - 玩家下注的那一家以3張6獲勝
+  QUADRUPLE_EIGHT           = 6;   // 4條8 - 玩家押和，且莊閒各只拿2張8，總共4張8開和(無補牌)
+  QUADRUPLE_NINE            = 7;   // 4條9 - 玩家押和，且莊閒各只拿2張9，總共4張9開和(無補牌)
+  TIGER_10_WIN              = 100; // 虎(10連勝) - 押注額 5000 ~ 49999
+  TIGER_12_WIN              = 102; // 虎(12連勝) - 押注額 5000 ~ 49999
+  TIGER_15_WIN              = 105; // 虎(15連勝) - 押注額 5000 ~ 49999
+  PHOENIX_10_WIN            = 200; // 鳳(10連勝) - 押注額 50000 ~ 499999
+  PHOENIX_12_WIN            = 202; // 鳳(12連勝) - 押注額 50000 ~ 499999
+  PHOENIX_15_WIN            = 205; // 鳳(15連勝) - 押注額 50000 ~ 499999
+  DRAGON_10_WIN             = 300; // 龍(10連勝) - 押注額 > 500000
+  DRAGON_12_WIN             = 302; // 龍(12連勝) - 押注額 > 500000
+  DRAGON_15_WIN             = 305; // 龍(15連勝) - 押注額 > 500000
+}
+
+enum MessageType {
+  PingPong = 0;
+  JoinGame = 1; // 加入一百家樂遊戲桌
+
+  // [RPC] Game
+  ListGames = 11; // 取得百家樂大廳遊戲桌列表
+  GetGame   = 12; // 取得一筆百家樂遊戲桌詳情
+  LeaveGame = 13; // 離開一百家樂遊戲桌
+
+  // [RPC] Bet
+  PlaceBet         = 21; // 下注
+  PlaceBets        = 22; // 批次下注 先保留
+  AutoPlaceBet     = 23; // 自動下注
+  StopAutoPlaceBet = 24; // 停止自動下注
+
+  // [RPC] Player
+  ListGamePlayers = 31; // 取得在遊戲桌裡的玩家列表
+
+  // [RPC] PrizeMoney
+  GetPrizeMoneyPool        = 41; // 取得一筆獎金池
+  ListPrizeMoneyWinRecords = 42; // 取得獎金中獎紀錄列表
+
+  // [Push] GameInfo
+  GameInfo = 1011;   // 推送百家樂遊戲桌詳情
+  GameClosed = 1012; // 推送百家樂遊戲桌關閉
+
+  // [Push] BetOrder
+  BetOrderCreated  = 1021; // 推送玩家下注消息
+  BetOrderSetteled = 1022; // 推送玩家下注派彩結果消息
+
+  // [Push] Player
+  PlayerBalance = 1031; // 推送玩家金幣餘額
+  KickPlayer    = 1032; // 遊戲桌剔除玩家
+
+  // [Push] Bet
+  AutoPlaceBetStopped = 1041; // 推送自動下注已停止
+
+  // [Push] PrizeMoney
+  PrizeMoneyWin = 1051; // 推送玩家贏得獎金訊息
+}
+
+// [RPC] ListGames 取得百家樂大廳遊戲桌列表
+message ListGamesRequest {}
+message ListGamesResponse {
+  int32 total                          = 1;
+  repeated ListGamesResponseGame games = 2;
+}
+message ListGamesResponseGame {
+  string gameID                                                     = 1;  // 遊戲桌名
+  GameRoundStage gameRoundStage                                     = 2;  // 當前遊戲局階段
+  string dealerName                                                 = 3;  // 荷官名稱
+  string dealerPhotoURL                                             = 4;  // 荷官照片 URL
+  int64 betEndAt                                                    = 5;  // 結束下注時間戳，單位毫秒
+  int32 playerCount                                                 = 10; // 遊戲桌玩家數
+  int32 bankerWinCount                                              = 11; // 當前靴莊贏次數
+  int32 playerWinCount                                              = 12; // 當前靴閒贏次數
+  int32 tieWinCount                                                 = 13; // 當前靴和贏次數
+  repeated ListGamesResponseGameRoundResult historyGameRoundResults = 14; // 當前靴歷史遊戲局結果列表
+  ListGamesResponseRequesterInfo requesterInfo                      = 15; // 請求者資訊
+  ListGamesResponseGameRoundResult gameRoundResult                  = 16; // 當前遊戲局結果
+}
+message ListGamesResponseGameRoundResult {
+  string gameRoundID = 1; // 遊戲局號
+  bool isBankerWin   = 2; // 莊贏
+	bool isPlayerWin   = 3; // 閒贏
+	bool isTieWin      = 4; // 和贏
+	bool isBankerPair  = 5; // 莊對
+	bool isPlayerPair  = 6; // 閒對
+	bool isSuperSixWin = 7; // 莊家以 6 點獲勝
+}
+message ListGamesResponseRequesterInfo {
+  bool isAutoBetting                                                        = 1; // 請求者是否正在此遊戲桌自動下注
+  int32 remainAutoBetGameRoundNumber                                        = 2; // 剩餘自動下注局數
+  repeated ListGamesResponseRequesterInfoBetOrder currentGameRoundBetOrders = 3; // 當前遊戲局下的注單
+}
+message ListGamesResponseRequesterInfoBetOrder {
+  BetArea betArea = 1; // 押注區
+  int64 betAmount = 2; // 注額
+}
+
+
+// [RPC] GetGameRequest 取得一筆百家樂遊戲桌詳情
+message GetGameRequest {
+  string gameID = 1;
+}
+message GetGameResponse {
+  GetGameResponseGame game = 1;
+}
+message GetGameResponseGame {
+  string gameID                                                   = 1;  // 遊戲桌名
+  GameRoundStage gameRoundStage                                   = 2;  // 當前遊戲局階段
+  string dealerName                                               = 3;  // 荷官名稱
+  string dealerPhotoURL                                           = 4;  // 荷官照片 URL
+  int64 betEndAt                                                  = 5;  // 結束下注時間戳，單位毫秒
+  repeated int32 bankerCards                                      = 6;  // 莊家牌
+  repeated int32 playerCards                                      = 7;  // 閒家牌
+  int32 bankerCardPoint                                           = 8;  // 莊家牌點數
+  int32 playerCardPoint                                           = 9;  // 閒家牌點數
+  map<int32, int64> betAreaTotalAmounts                           = 10; // 押注區金額 
+  int32 playerCount                                               = 11; // 遊戲桌玩家數
+  int32 bankerWinCount                                            = 12; // 當前靴莊贏次數
+  int32 playerWinCount                                            = 13; // 當前靴閒贏次數
+  int32 tieWinCount                                               = 14; // 當前靴和贏次數
+  GetGameResponseGameRoundResult gameRoundResult                  = 15; // 當前遊戲局結果
+  repeated GetGameResponseGameRoundResult historyGameRoundResults = 16; // 當前靴歷史遊戲局結果列表
+  // 初版 proto 後添加的欄位
+  repeated string videoURLs                                       = 17; // 視訊源 URL 列表
+  int64 betStartAt                                                = 18; // 開始下注時間戳，單位毫秒
+  GetGameResponseRequesterInfo requesterInfo                      = 19; // 請求者資訊
+}
+message GetGameResponseGameRoundResult {
+  string gameRoundID = 1; // 遊戲局號
+  bool isBankerWin   = 2; // 莊贏
+  bool isPlayerWin   = 3; // 閒贏
+  bool isTieWin      = 4; // 和贏
+  bool isBankerPair  = 5; // 莊對
+  bool isPlayerPair  = 6; // 閒對
+  bool isSuperSixWin = 7; // 莊家以 6 點獲勝
+}
+message GetGameResponseRequesterInfo {
+  bool isAutoBetting                                                      = 1; // 請求者是否正在此遊戲桌自動下注
+  int32 remainAutoBetGameRoundNumber                                      = 2; // 剩餘自動下注局數
+  repeated GetGameResponseRequesterInfoBetOrder currentGameRoundBetOrders = 3; // 當前遊戲局下的注單
+}
+message GetGameResponseRequesterInfoBetOrder {
+  BetArea betArea = 1; // 押注區
+  int64 betAmount = 2; // 注額
+}
+
+
+// [RPC] JoinGame 加入遊戲桌
+// !!! 淺規則 !!!
+// 前端要用 megaman 的 JoinGameRoomRequest 才能和 kumo 整合加入遊戲桌的功能
+message JoinGameRequest {
+  string gameID = 1; // 遊戲桌名
+}
+message JoinGameResponse {}
+
+
+// [RPC] LeaveGame 離開遊戲桌
+message LeaveGameRequest {
+  string gameID = 1; // 遊戲桌名
+}
+message LeaveGameResponse {}
+
+
+// [RPC] PlaceBet 下注
+message PlaceBetRequest {
+  string gameID      = 1; // 遊戲桌名
+  string gameRoundID = 2; // [Deprecated][不用帶] 遊戲局號
+  int64 betAmount    = 3; // 注額
+  BetArea betArea    = 4; // 押注區
+  bool noCommission  = 5; // 是否開啟免傭
+}
+message PlaceBetResponse {
+  string gameBetOrderID = 1; // 注單 ID
+  string gameID         = 2; // 遊戲桌名
+}
+
+
+// // [RPC] PlaceBets 批次下注
+// message PlaceBetsRequest {
+// }
+// message PlaceBetsResponse {
+// }
+
+
+// [RPC] AutoPlaceBet 自動下注
+message AutoPlaceBetRequest {
+  string gameID                                     = 1; // 遊戲桌名
+  int64 toTokenAmount                               = 2; // 想轉換成代幣的數量
+  AutoBetGameRoundNumber autoBetGameRoundNumber     = 3; // 下注局數
+  AutoBetMode autoBetMode                           = 4; // 下注模式
+  int64 initialBetAmount                            = 5; // 起始下注代幣
+  AutoBetSwitchBetAreaMode autoBetSwitchBetAreaMode = 6; // 自動下注位置輪換策略
+  repeated BetArea betAreas                         = 7; // 押注區
+}
+message AutoPlaceBetResponse {
+}
+
+
+// [RPC] StopAutoPlaceBet 停止自動下注
+message StopAutoPlaceBetRequest {
+  string gameID = 1; // 遊戲桌名
+}
+message StopAutoPlaceBetResponse {
+}
+
+
+// [RPC] ListGamePlayers 取得在遊戲桌裡的玩家列表
+message ListGamePlayersRequest {
+  string gameID = 1; // 遊戲桌名
+}
+message ListGamePlayersResponse {
+  repeated ListGamePlayersResponsePlayer gamePlayers = 1;
+}
+message ListGamePlayersResponsePlayer {
+  int64 playerUserID = 1; // 玩家 UserID
+  string avatarURL   = 2; // 頭像 URL
+  string name        = 3; // 名稱
+  uint64 vipLevel    = 4; // VIP 等級
+}
+
+
+// [RPC] GetPrizeMoneyPool 取得一筆獎金池
+message GetPrizeMoneyPoolRequest {
+  int64 gameManagerGameID = 1; // 遊戲 ID
+}
+message GetPrizeMoneyPoolResponse {
+  GetPrizeMoneyPoolResponsePrizeMoneyPool prizeMoneyPool = 1;
+}
+message GetPrizeMoneyPoolResponsePrizeMoneyPool {
+  int64 gameManagerGameID = 1; // 遊戲 ID
+  int64 balance           = 2; // 獎金餘額
+}
+
+
+// [RPC] ListPrizeMoneyWinRecords 取得獎金中獎紀錄列表
+message ListPrizeMoneyWinRecordsRequest {
+  int64 gameManagerGameID = 1;  // 遊戲 ID
+  int64 page              = 11; // 第幾頁
+  int64 perPage           = 12; // 一頁幾筆
+  int64 startedAt         = 13; // 開始時間
+  int64 endedAt           = 14; // 結束時間
+}
+message ListPrizeMoneyWinRecordsResponse {
+  int32 total                                                                       = 1;
+  repeated ListPrizeMoneyWinRecordsResponsePrizeMoneyWinRecord prizeMoneyWinRecords = 2;
+}
+message ListPrizeMoneyWinRecordsResponsePrizeMoneyWinRecord {
+  int64 gameManagerGameID         = 1; // 遊戲 ID
+  int64 playerUserID              = 2; // 玩家 UserID
+  string avatarURL                = 3; // 頭像 URL
+  string name                     = 4; // 名稱
+  uint64 vipLevel                 = 5; // VIP 等級
+  PrizeMoneyAward prizeMoneyAward = 6; // 獎項
+  int64 amount                    = 7; // 獎金
+  int64 timestamp                 = 8; // 中獎時間戳，單位毫秒
+  string gameRoundID              = 9; // 局號
+  int64 balanceBefore             = 10; // 彩池原始金額
+  int64 balanceAfter              = 11; // 彩池剩餘金額
+}
+
+
+// [Push] GameInfo 推送百家樂遊戲桌詳情
+message GameInfoMessage {
+  string gameID                                                   = 1;  // 遊戲桌名
+  GameRoundStage gameRoundStage                                   = 2;  // 當前遊戲局階段
+  string dealerName                                               = 3;  // 荷官名稱
+  string dealerPhotoURL                                           = 4;  // 荷官照片 URL
+  int64 betEndAt                                                  = 5;  // 結束下注時間戳，單位毫秒
+  repeated int32 bankerCards                                      = 6;  // 莊家牌
+  repeated int32 playerCards                                      = 7;  // 閒家牌
+  int32 bankerCardPoint                                           = 8;  // 莊家牌點數
+  int32 playerCardPoint                                           = 9;  // 閒家牌點數
+  map<int32, int64> betAreaTotalAmounts                           = 10; // 押注區金額 
+  int32 playerCount                                               = 11; // 遊戲桌玩家數
+  int32 bankerWinCount                                            = 12; // 當前靴莊贏次數
+  int32 playerWinCount                                            = 13; // 當前靴閒贏次數
+  int32 tieWinCount                                               = 14; // 當前靴和贏次數
+  GetGameResponseGameRoundResult gameRoundResult                  = 15; // 當前遊戲局結果
+  repeated GetGameResponseGameRoundResult historyGameRoundResults = 16; // 當前靴歷史遊戲局結果列表
+  // 初版 proto 後添加的欄位
+  int64 betStartAt                                                = 18; // 開始下注時間戳，單位毫秒
+}
+
+
+// [Push] BetOrderCreated 推送玩家下注消息
+message BetOrderCreatedMessage {
+  string gameID                         = 1; // 遊戲桌名
+  string gameRoundID                    = 2; // 遊戲局號
+  BetArea betArea                       = 3; // 押注區
+  int64 betAmount                       = 4; // 注額
+  // 初版 proto 後添加的欄位
+  int64 playerUserID                    = 5; // 下注的玩家 UserID
+  map<int32, int64> betAreaTotalAmounts = 6; // 押注區金額
+}
+
+
+// [Push] BetOrderSetteled 推送玩家下注派彩結果消息
+// #暫時不發送
+message BetOrderSetteledMessage {
+  string gameID         = 1; // 遊戲桌名
+  string gameRoundID    = 2; // 遊戲局號
+  string gameBetOrderID = 3; // 注單 ID 
+  int64 betAmount       = 4; // 注額
+  int64 gainAmount      = 5; // 收益
+}
+
+
+// [Push] PlayerBalance 推送玩家金幣餘額 
+message PlayerBalanceMessage {
+  int64 playerUserID = 1; // 玩家 UserID
+  uint64 balance     = 2; // 玩家當前金幣餘額
+  string gameID      = 3; // 遊戲桌名
+}
+
+
+// [Push] KickPlayerMessage 推送遊戲桌踢除玩家訊息
+message KickPlayerMessage {
+  string gameID      = 1; // 遊戲桌名
+  int64 playerUserID = 2; // 玩家 UserID
+}
+
+
+// [Push] GameClosedMessage 推送遊戲桌關閉訊息
+message GameClosedMessage {
+  string gameID = 1; // 遊戲桌名
+}
+
+
+// [Push] AutoPlaceBetStoppedMessage 推送自動下注已停止
+message AutoPlaceBetStoppedMessage {
+  string gameID                         = 1; // 遊戲桌名
+  int64 playerUserID                    = 2; // 玩家 UserID
+  map<int32, int64> betAreaTotalAmounts = 3; // 押注區金額
+}
+
+// [Push] PrizeMoneyWinMessage 推送玩家贏得獎金訊息
+message PrizeMoneyWinMessage {
+  string gameID                         = 1; // 遊戲桌名
+  int64 playerUserID                    = 2; // 玩家 UserID
+  PrizeMoneyAward prizeMoneyAward       = 3; // 獎項
+  int64 amount                          = 4; // 獎金
+}
+
+
+// [Tape] GameTape 用來將遊戲桌資料序列化後儲存
+message GameTape {
+  string gameID              = 1;  // 遊戲桌名
+  string gameRoundID         = 2;  // 遊戲局號
+  repeated int32 bankerCards = 3;  // 莊家牌
+  repeated int32 playerCards = 4;  // 閒家牌
+  int32 bankerCardPoint      = 5;  // 莊家牌點數
+  int32 playerCardPoint      = 6;  // 閒家牌點數
+  bool isBankerWin           = 7;  // 莊贏
+  bool isPlayerWin           = 8;  // 閒贏
+  bool isTieWin              = 9;  // 和贏
+  bool isBankerPair          = 10; // 莊對
+  bool isPlayerPair          = 11; // 閒對
+  bool isSuperSixWin         = 12; // 莊家以 6 點獲勝
+  BetArea betArea            = 13; // 押注區
+}

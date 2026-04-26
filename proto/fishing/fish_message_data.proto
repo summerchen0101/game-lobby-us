@@ -1,0 +1,183 @@
+/*
+Fish Messsage Proto  version: v1.1
+場景:服務器向客戶端傳送的 事件資料同步資訊
+此類為 sever 主動 push 的資料，類型為 gateway/gateway.proto response type = `ServerPushMsg`
+-----------------------------------------------------------------------
+fish_message.proto      定義了捕魚遊戲 srever push 的通用格式
+fish_message_data.proto 定義了事件類型的 Data結構
+-----------------------------------------------------------------------
+*/
+
+syntax = "proto3";
+package fish;
+
+option go_package       = 'gitlab.ffglobaltech.com/us888/pluto/protos/fishing;fishpb';
+option csharp_namespace = "FishingProto";
+
+import "proto/fishing/fish_common.proto";
+import "proto/fishing/fish_response_data.proto";
+
+message EventPlayerInOutData {
+    repeated PlayerInOutInfo data = 1;
+}
+
+message PlayerInOutInfo {
+    int64 timestamp = 1;  // millisecond
+    enum PlayerInOutType {
+        IN         = 0;  //玩家進場
+        OUT        = 1;  //玩家離開
+        ConnLost   = 2;  //玩家斷線
+        ConnResume = 3;  //玩家連線恢復
+    }
+    int64 userID = 2;
+    string name  = 3;
+    uint64 site  = 5;  //座位資訊
+
+    PlayerInOutType type = 4;
+}
+
+message EventFireData {
+    repeated FireBullet bullets        = 2;  // 普通子彈
+    repeated FireBullet specailWeapons = 3;  //特殊武器
+}
+
+message FireBullet {
+    Bullet bullet  = 1;
+    string fishUID = 2;  //魚的uuid 瞄準與自動攻擊使用
+}
+
+message EventGetWeaponData {
+    int64 timestamp       = 1;  // millisecond
+    Bullet specailWeapons = 2;
+    uint64 playerID       = 3;  //獲得玩家
+}
+
+message EventHitData {
+    repeated HitFish targets = 2;
+}
+
+message HitFish {
+    Fish fish          = 1;
+    int64 hitTimestamp = 2;  // millisecond
+}
+
+message EventBoundsData {
+    int64 timestamp = 1;  // millisecond
+
+    enum BoundType {
+        BoundTypePrize     = 0;  //一般獎(小獎)
+        BoundTypeKill      = 1;  //擊殺獎
+        BoundTypeLogo      = 2;  // logo獎
+        BoundTypeSolt      = 3;  //拉霸獎
+        BoundTypeWeapon    = 4;  //得到武器
+        BoundTypeTigger    = 5;  //觸發
+        BoundTypeMiniPrize = 6;  //小小得分
+    }
+
+    BoundType type = 2;
+
+    uint64 point        = 3;   //得到分數
+    uint64 playerID     = 4;   //獲獎玩家
+    string bulletUID    = 11;  //子彈UID
+    Posistion posistion = 12;  //中獎位置 魚當前位置
+
+    FishBasic fishInfo = 5;  // 魚的基本資料
+    bool needAck       = 6;  //是否需要ack = ture ; 發送ack request 後服務器才會廣播給其他玩家
+
+    int64 ackExpire = 7;  // ack 期限 若超過 服務器視為ack
+    string ackID    = 8;
+
+    float boundOdd                = 9;   //獎勵倍率
+    repeated BoundTape boundTapes = 10;  //盤面 (slot 抽獎 使用)
+}
+
+message BoundTape {
+    repeated string tape = 1;
+}
+
+message EventPlayerStatusData {
+    repeated PlayerInfo players = 2;
+}
+
+message EventNoticeData {
+    int64 timestamp = 1;  // millisecond
+
+    enum FishInType {
+        FishInTypeNormal      = 0;
+        FishInTypeSpecialTime = 1;  // 特殊時間
+    }
+
+    repeated Fish fishIn  = 2;   //魚 進場
+    int64 fishInTime      = 3;   //預計進場時間
+    FishInType fishInType = 12;  //魚 進場提示類型
+
+    repeated Fish fishOut = 4;  //魚離場
+    int64 fishOutTime     = 5;  //預計離場時間
+
+    Fish boosIn       = 6;  // boss 進場
+    int64 bossInTime  = 7;  //預計boos進場時間
+    Fish boosOut      = 8;  // boss 離場
+    int64 bossOutTime = 9;  //預計boos進場時間
+
+    int64 stageChangeID   = 10;  //場景id
+    int64 stageChangeTime = 11;  //生效時間
+}
+
+message EventForceLeaveData {
+    uint64 playerID = 1;
+    string code     = 2;
+}
+
+message EventServerShoutDownData {
+    int64 shoutDownAt = 1;
+    string code       = 2;
+    string rawMsg     = 3;
+}
+
+message EventRoomCloseData {
+    int64 closeAt = 1;
+    string code   = 2;
+    string rawMsg = 3;
+}
+
+message EventIdleConfirmData {
+    int64 timeoutAt = 1;
+    string code     = 2;
+    string rawMsg   = 3;
+}
+
+message EventSettleData {
+    enum SettleType {
+        Subtotal   = 0;  //小計
+        Settlement = 1;  //結算
+    }
+    SettleType type                            = 1;
+    repeated SettlePlayerInfo playerSettleData = 2;
+}
+
+message SettlePlayerInfo {
+    int64 timestamp                 = 1;  // millisecond
+    repeated SettlePoint userPoints = 2;
+}
+
+message SettlePoint {
+    uint64 userID    = 1;
+    string name      = 2;
+    uint64 point     = 3;  //累計分數
+    string avatarURL = 4;
+    uint64 level     = 5;
+    uint64 vipLevel  = 6;
+}
+
+message EventSyncGameData {
+    Room roomInfo                     = 1;
+    SyncPoolInfoResponseData poolInfo = 2;
+}
+
+message EventBulletPointData {
+    int64 timestamp       = 1;  //統計時間 millisecond
+    uint64 points         = 2;  //得分累計
+    string bulletUID      = 3;  //子彈uid
+    WeaponType bulletType = 4;  //武器類型
+    uint64 playerID       = 5;  //玩家id
+}

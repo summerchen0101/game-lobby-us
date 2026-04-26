@@ -1,0 +1,66 @@
+syntax = "proto3";
+package sms;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/sms";
+
+import "google/protobuf/empty.proto";
+
+service SMSService {
+    rpc SendSMS(SendSMSRequest) returns (google.protobuf.Empty);
+    rpc VerifySMS(VerifySMSRequest) returns (google.protobuf.Empty);
+
+    rpc SendEmail(SendEmailRequest) returns (google.protobuf.Empty);
+    rpc VerifyEmail(VerifyEmailRequest) returns (google.protobuf.Empty);
+
+    rpc GetSMSAuthCoolDownTime(GetAuthCoolDownTimeRequest) returns (GetAuthCoolDownTimeResp);
+}
+
+message SendSMSRequest {
+    string countryCode  = 1; // 國家區碼(example: 886)
+    string phoneNum     = 2; // 手機號(example: 915107036, 不帶0)
+    SMSType type        = 3; // 簡訊類型
+    string actionName   = 4; // 操作名稱 會顯示在簡訊的開頭
+    string msg          = 5; // sms type = 4 短信內容
+    string userIdentity = 6; // 用來計算冷卻 跟每日上限 根據業務場景 區別可以是用 userID or cellphone
+    string actionSuffix = 7; // 操作名稱 會顯示在簡訊的後綴
+}
+
+message VerifySMSRequest {
+    string countryCode = 1; // 國家區碼
+    string phoneNum    = 2; // 手機號
+    string digitCode   = 3; // 六位數驗證碼
+    SMSType type       = 4; // 簡訊類型
+}
+
+message  SendEmailRequest  {
+    string emailTo           = 1;
+    string emailSubject      = 2;
+    string emailPlainContent = 3;
+    string emailHtmlContent  = 4;
+    SMSType type             = 5; // 簡訊類型
+}
+
+message VerifyEmailRequest {
+    string emailTo   = 1;
+    string digitCode = 2; // 六位數驗證碼
+    SMSType type     = 3; // 簡訊類型
+}
+  
+message GetAuthCoolDownTimeRequest {
+    string  countryCode = 1; // 國家區碼
+    string  phoneNum    = 2; // 手機號
+    SMSType type        = 3; // 簡訊類型
+}
+
+message GetAuthCoolDownTimeResp {
+    int64 coolDownUntilTime = 1; // 冷卻到期時間
+}
+
+enum SMSType {
+    UNKNOWN_SMS               = 0;
+    SIGNUP                    = 1; // 註冊
+    VERIFY                    = 2; // 身份確認
+    SECONDARY_PASSWORD_FORGOT = 3; // 二次密碼重置專用
+    Debug                     = 99; // for 測試用，不送簡訊
+    SMSPush                   = 4; // 短信推播
+    DigitCodePush             = 5; // 驗證碼發送
+}

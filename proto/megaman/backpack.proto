@@ -1,0 +1,50 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+import "proto/virtualgood/virtualgood.proto";
+
+message ListBackpackInfoResponse {
+    repeated BackpackData backpackData = 1;
+}
+message BackpackData {
+    uint64 itemID    = 1;
+    int64 expireTime = 2;  // 過期時間
+    int64 getTime    = 3;  // 拿到時間
+    int64 amount     = 4;  // 數量
+}
+message UseItemRequest {
+    uint64 itemID = 1;
+}
+
+message UseItemResponse {
+    int64 balance = 1;  //使用現金券會塞值
+}
+message ExchangeCardCollectionRequest {
+    uint64 user_id                     = 1;
+    virtualgood.CardType collection_id = 2;  // 對照 virtual good 的 card_type
+    int64 amount                       = 3;  // 兌換數量
+}
+
+message ExchangeCardCollectionResponse {
+    int64 reward = 1;
+}
+message ListUserCollectionRecordsRequest {
+    uint64 user_id = 1;
+}
+
+message ListUserCollectionRecordsResponse {
+    repeated CollectionRecord collection_records = 1;
+}
+
+message CollectionRecord {
+    uint64 user_id                                      = 1;
+    virtualgood.CardType cardType                       = 2;
+    int64 amount                                        = 3;
+    repeated CollectionRecordInfo cardCollectRecordInfo = 4;
+    int64 money                                         = 5;  // 金額
+}
+
+message CollectionRecordInfo {
+    uint64 itemID = 1;
+    int64 amount  = 2;
+}

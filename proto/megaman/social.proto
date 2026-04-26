@@ -1,0 +1,151 @@
+syntax = "proto3";
+package megaman;
+
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "proto/social/social.proto";
+import "proto/playerinfo/model.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+message CreateChatRoomRequest {
+    string name        = 1;
+    string profile     = 2;
+    uint64 amountLimit = 3;
+    uint64 userID      = 4;
+}
+
+message CreateChatRoomResponse {
+    ChatRoom chatRoom = 1;
+    int64 balance     = 2;
+}
+
+message ChatRoom {
+    string roomID                                   = 1;
+    string name                                     = 2;
+    uint64 director                                 = 3;
+    repeated uint64 viceDirector                    = 4;
+    yesno.YesNo openSearch                          = 5;
+    yesno.YesNo needConfirm                         = 6;
+    string profile                                  = 7;
+    string announcement                             = 8;
+    uint64 amountLimit                              = 9;
+    repeated Member pendingMembers                  = 10;
+    repeated Member invitingMembers                 = 13;
+    repeated Member members                         = 11;
+    repeated social.RoomAmountLimit roomAmountLimit = 12;
+}
+
+message GetChatRoomRequest {
+    string roomID = 1;
+}
+
+message GetChatRoomResponse {
+    ChatRoom chatRoom = 1;
+}
+
+message Member {
+    playerinfo.PlayerInfo playerInfo = 1;
+    yesno.YesNo isOnline             = 2;
+    int64 offlineTimeMs              = 3;
+}
+
+message GetAmountCoinRequest {
+    uint64 previousAmount = 1;
+    uint64 amount         = 2;
+}
+
+message GetAmountCoinResponse {
+    social.GetAmountCoinResponse resp = 1;
+}
+
+message ListChatRoomRequest {
+    string roomID  = 1;
+    string name    = 2;
+    uint32 page    = 3;
+    uint32 perPage = 4;
+    uint64 userID  = 5;
+}
+
+message ListChatRoomResponse {
+    repeated ChatRoomInfo chatRooms = 1;
+    pagination.Pagination page      = 2;
+}
+
+message ChatRoomInfo {
+    social.ChatRoom chatRoom       = 1;
+    playerinfo.PlayerInfo director = 2;
+}
+
+message UpdateChatRoomRequest {
+    string roomID           = 1;
+    string name             = 2;
+    string profile          = 3;
+    string announcement     = 4;
+    yesno.YesNo openSearch  = 5;
+    yesno.YesNo needConfirm = 6;
+    uint64 amountLimit      = 7;
+}
+
+message AddToChatRoomRequest {
+    string roomID = 1;
+    uint64 userID = 2;
+}
+
+message InviteToChatRoomRequest {
+    string roomID          = 1;
+    repeated uint64 userID = 2;
+}
+
+message ConfirmAddMemberRequest {
+    string roomID    = 1;
+    uint64 userID    = 2;
+    yesno.YesNo join = 3;
+}
+
+message ConfirmInviteMemberRequest {
+    string roomID    = 1;
+    uint64 userID    = 2;
+    yesno.YesNo join = 3;
+}
+
+message UpdatePositionRequest {
+    string roomID            = 1;
+    uint64 userID            = 2;
+    social.Position position = 3;
+}
+message LeaveRequest {
+    string roomID = 1;
+    uint64 userID = 2;
+}
+
+message ListRoomAmountLimitResponse {
+    repeated social.RoomAmountLimit roomAmountLimit = 1;
+}
+
+message ListRecommendRoomResp {
+    repeated ChatRoomInfo chatRooms = 1;
+}
+
+//------------------------------serverPush專區-----------------------------------------
+
+message InviteToChatRoomResponse {  //會廣播給Req指定的每一位
+    string roomID       = 1;
+    string chatRoomName = 2;
+}
+
+message NewMemberPushResponse {
+    social.NewMemberPush newMemberPush = 1;
+    playerinfo.PlayerInfo newMember    = 2;
+}
+
+message UpdateChatRoomResponse {
+    string previousName = 1;
+    string Name         = 2;
+    string roomID       = 3;
+}
+
+message memberLeaveResponse {
+    string leaveMemberNickname             = 2;
+    social.MemberLeavePush memberLeavePush = 1;
+}

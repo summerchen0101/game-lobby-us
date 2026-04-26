@@ -1,0 +1,280 @@
+syntax = "proto3";
+package pinocchio;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/pinocchio";
+
+import "google/protobuf/empty.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+import "proto/pinocchio/model.proto";
+
+service PinocchioService {
+    // Login
+    rpc Login(LoginRequest) returns (LoginResponse);
+
+    // Token
+    rpc CreateTokenPair(CreateTokenPairRequest) returns (CreateTokenPairResponse);  //用來產 一組 token &refresh token
+    rpc CreateTempToken(CreateTempTokenRequest) returns (CreateTempTokenResponse);  //用來產生臨時令牌
+
+    // rpc RenewToken(RenewTokenRequest) returns (google.protobuf.Empty);
+    rpc GetToken(GetTokenRequest) returns (GetTokenResponse);
+    rpc DeleteToken(DeleteTokenRequest) returns (google.protobuf.Empty);
+
+    rpc DeleteTokenByAccount(DeleteTokenByAccountRequest) returns (google.protobuf.Empty);
+    rpc DeleteTokenByRole(DeleteTokenByRoleRequest) returns (google.protobuf.Empty);
+    rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+
+    // OTP
+    rpc VerifyOTP(VerifyOTPRequest) returns (VerifyOTPResponse);
+    rpc ClearOTP(ClearOTPRequest) returns (google.protobuf.Empty);
+    rpc GenerateOTP(GenerateOTPRequest) returns (GenerateOTPResponse);
+
+    // Account
+    rpc CreateAccount(CreateAccountRequest) returns (google.protobuf.Empty);
+    rpc UpdateAccount(UpdateAccountRequest) returns (google.protobuf.Empty);
+    rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+    rpc GetAccount(GetAccountRequest) returns (GetAccountResponse);
+    rpc UnblockAccount(UnblockAccountRequest) returns (google.protobuf.Empty);
+    rpc UpdateAccountPassword(UpdateAccountPasswordRequest) returns (google.protobuf.Empty);
+
+    // Role
+    rpc CreateRole(CreateRoleRequest) returns (google.protobuf.Empty);
+    rpc UpdateRole(UpdateRoleRequest) returns (google.protobuf.Empty);
+    rpc ListRoles(ListRolesRequest) returns (ListRolesResponse);
+    rpc GetRole(GetRoleRequest) returns (GetRoleResponse);
+
+    // Menu
+    rpc ListAllMenus(google.protobuf.Empty) returns (ListAllMenusResponse);
+
+    // Organization
+    rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
+    rpc CreateOrganization(CreateOrganizationRequest) returns (google.protobuf.Empty);
+    rpc GetOrganization(GetOrganizationRequest) returns (Organization);
+    rpc UpdateOrganization(UpdateOrganizationRequest) returns (google.protobuf.Empty);
+}
+
+message UpdateAccountPasswordRequest {
+    uint64 accountID   = 1;
+    string newPassword = 2;
+    uint64 updaterID   = 3;
+}
+
+message RefreshTokenRequest {
+    string tokenStr = 1;
+}
+
+message RefreshTokenResponse {
+    string token                  = 1;
+    int64 tokenExpiresAtMs        = 2;
+    string refreshToken           = 3;
+    int64 refreshTokenExpiresAtMs = 4;
+}
+
+message UnblockAccountRequest {
+    uint64 accountID = 1;
+    uint64 updaterID = 2;
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+    string ip       = 3;
+}
+
+message LoginResponse {
+    Account account = 1;
+}
+
+enum TokenType {
+    AccessToken   = 0;
+    RefreshToken  = 1;
+    ResetPassword = 2;
+    OTVerify      = 3;
+}
+
+message CreateTokenPairRequest {
+    uint64 accountID                  = 1;
+    TokenType type                    = 2;
+    int64 tokenExpiresDuration        = 3;  // ms
+    int64 refreshTokenExpiresDuration = 4;  // ms
+    yesno.YesNo noNeedClaims          = 5;
+    map<string, string> meta          = 6;
+}
+
+message CreateTokenPairResponse {
+    string token                  = 1;
+    int64 tokenExpiresAtMs        = 2;
+    string refreshToken           = 3;
+    int64 refreshTokenExpiresAtMs = 4;
+}
+
+message CreateTempTokenRequest {
+    int64 tokenExpiresDuration = 1;  // ms
+    map<string, string> meta   = 2;
+}
+
+message CreateTempTokenResponse {
+    string token           = 1;
+    int64 tokenExpiresAtMs = 2;
+}
+
+message GetTokenRequest {
+    string tokenKey = 1;
+    TokenType type  = 2;
+}
+
+message GetTokenResponse {
+    Token token = 1;
+}
+
+message DeleteTokenByAccountRequest {
+    uint64 accountID = 1;
+}
+
+message DeleteTokenByRoleRequest {
+    uint64 roleID = 1;
+}
+
+message VerifyOTPRequest {
+    uint64 accountID = 1;
+    string otpCode   = 2;
+}
+
+message VerifyOTPResponse {
+    Account account = 1;
+}
+
+message ClearOTPRequest {
+    uint64 accountID        = 1;
+    uint64 lastResetOTPID   = 2;
+    string lastResetOtpName = 3;
+}
+
+message GenerateOTPRequest {
+    uint64 accountID = 1;
+}
+
+message GenerateOTPResponse {
+    string otpToken  = 1;
+    string qrCodeURL = 2;
+}
+
+message ListAccountsRequest {
+    string usernameLike  = 1;
+    AccountStatus status = 2;
+    uint64 roleID        = 3;
+    uint32 page          = 4;
+    uint32 perPage       = 5;
+
+    repeated uint64 accountIDs = 6;
+}
+
+message ListAccountsResponse {
+    repeated Account accounts        = 1;
+    pagination.Pagination pagination = 2;
+}
+
+message GetAccountRequest {
+    uint64 accountID = 1;
+    string username  = 2;
+}
+
+message GetAccountResponse {
+    Account account = 1;
+}
+
+message CreateAccountRequest {
+    string username      = 1;
+    string password      = 2;
+    AccountStatus status = 3;
+    uint64 roleID        = 4;
+    uint64 creatorID     = 5;
+}
+
+message UpdateAccountRequest {
+    uint64 accountID           = 1;
+    UpdateAccountParams params = 2;
+    uint64 updaterID           = 3;
+}
+
+message CreateRoleRequest {
+    string name                         = 1;
+    repeated MenuPermission permissions = 2;
+    uint64 creatorID                    = 3;
+    uint64 organizationID               = 4;  // 組織id
+    RoleLevel roleLevel                 = 5;  // 權限等級
+}
+
+message UpdateRoleRequest {
+    uint64 ID               = 1;
+    UpdateRoleParams params = 2;
+    uint64 updaterID        = 3;
+    uint64 organizationID   = 4;  // 組織id
+}
+
+message ListRolesRequest {
+    repeated uint64 IDs = 1;
+    uint32 Page         = 2;
+    uint32 PerPage      = 3;
+}
+
+message ListRolesResponse {
+    repeated Role roles              = 1;
+    pagination.Pagination pagination = 2;
+}
+
+message GetRoleRequest {
+    uint64 ID = 1;
+}
+
+message GetRoleResponse {
+    Role role = 1;
+}
+
+message ListAllMenusResponse {
+    repeated Menu menus = 1;
+}
+
+message DeleteTokenRequest {
+    uint64 accountID = 1;
+    string token     = 2;
+}
+
+message ListOrganizationsRequest {
+    yesno.YesNo enable = 1;
+}
+
+message ListOrganizationsResponse {
+    repeated Organization data = 1;
+}
+
+message CreateOrganizationRequest {
+    uint64 parentID  = 1;
+    string name      = 2;
+    int32 status     = 3;
+    uint64 creatorID = 4;
+}
+
+message GetOrganizationRequest {
+    uint64 id = 1;
+}
+
+message Organization {
+    uint64 id         = 1;
+    int32 level       = 2;
+    uint64 parentID   = 3;
+    string name       = 4;
+    int32 status      = 5;
+    uint64 creatorID  = 6;
+    int64 createdAtMs = 7;
+    uint64 updaterID  = 8;
+    int64 updateaAtMs = 9;
+}
+
+message UpdateOrganizationRequest {
+    uint64 id        = 1;
+    uint64 parentID  = 2;
+    string name      = 3;
+    int32 status     = 4;
+    uint64 updaterID = 5;
+}

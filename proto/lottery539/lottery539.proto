@@ -1,0 +1,200 @@
+syntax = "proto3";
+package lottery539;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/lottery539";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+enum LotteryType {
+    PING_PONG     = 0;
+    JOIN_ROOM     = 1;  // 進入房間
+    KICK_USER     = 2;  // 踢除玩家
+    SERVER_UPDATE = 3;
+
+    LEAVE                       = 11;  // 離開。 resp: LeaveResp
+    BET                         = 12;  // 下注。 req: BetReq， resp: BetResp
+    GET_ROOM                    = 13;  // 房間資訊。 resp: RoomInfo
+    GET_PLAYER                  = 14;  // 玩家資訊。 resp: PlayerInfo
+    PLAYER_BET_HISTORY          = 15;  // 戰績列表。 req: PlayerBetHistoryReq， resp: PlayerBetHistoryResp
+    LOTTERY_RESULT_HISTORY      = 16;  // 歷史紀錄 - 開獎結果。 req: LotteryResultHistoryReq， resp: LotteryResultHistoryResp
+    LOTTERY_BALL_NUMBER_HISTORY = 17;  // 歷史紀錄 - 冷熱門球號。 req: LotteryBallNumberHistoryReq， resp: LotteryBallNumberHistoryResp
+    CANCEL_AUTO_BET             = 18;  // 取消自動下注。
+    GET_PLAYER_LIST             = 19;  // 取得房間內玩家列表。 resp: GetPlayerListResp
+    CURRENT_HOT_NUMBER_LIST     = 20;  // 當前熱門選號。 resp: CurrentHotNumberListResp
+    VALIDATE_BET                = 21;  // 驗證押注單。 req: ValidateBetReq
+
+    PLAYER_SETTLE_PUSH        = 25;  // [推送] 玩家結算。 data: PlayerSettlePush
+    ROUND_SETTLE_PUSH         = 26;  // [推送] 此局結算。 data: RoomInfo
+    STOP_BET_PUSH             = 27;  // [推送] 停止下注。 data: StopBetPush
+    ROUND_START_PUSH          = 28;  // [推送] 此局開始。 data: RoomInfo
+    PLAYER_BET_PUSH           = 29;  // [推送] 玩家下注。 data: PlayerBetPush
+    OPEN_LOTTERY_RESULT_PUSH  = 30;  // [推送] 公布開獎結果。 data: RoomInfo
+}
+
+enum TableStatus {
+    UNKNOWN_TABLE_STATUS          = 0;
+    TABLE_STATUS_BET_TIME         = 1;  // 下注時間
+    TABLE_STATUS_OPEN_RESULT_TIME = 2;  // 開獎時間
+    TABLE_STATUS_SETTLE_TIME      = 3;  // 結算時間
+}
+
+message JoinRoomResponse {
+    PlayerInfo playerInfo = 1;  // 玩家詳情
+    RoomInfo roomInfo     = 2;  // 房間詳情
+}
+
+message BetReq {
+    repeated Bet bets         = 1;  // 多組押注
+    uint32 autoBetRoundCount  = 2;  // 自動下注局數，非自動下注為 0
+}
+
+message Bet {
+    repeated uint32 numbers = 1;  // 數字
+    uint64 betAmount        = 2;  // 單組押注金額
+}
+
+message BetResp {
+    uint64 totalBetAmount          = 1;  // 目前總下注金額
+    int64 balance                  = 2;  // 玩家餘額
+    uint32 remainAutoBetRoundCount = 3;  // 剩餘自動下注局數，非自動下注為 0
+
+    repeated UpperLimitBetNumbers upperLimitBetNumbers = 10; // 達到上限的組合數字
+    message UpperLimitBetNumbers {
+        repeated uint32 numbers = 1;  // 數字
+    }
+}
+
+message RoomInfo {
+    string roundID                            = 1;  // 當前局號
+    TableStatus status                        = 2;  // 當前此局狀態
+    int64 stopBetTimeMs                       = 3;  // 停止下注時間
+    repeated uint32 bingoNumbers              = 4;  // 當前開獎號碼
+    int64 serverTimeMs                        = 5;  // server time
+    uint32 lotteryResultAnimationID           = 6;  // 抽獎的動畫ID
+    int64 stopAnimationTimeMs                 = 7;  // 表演結束時間
+    repeated LotteryResult lastLotteryResults = 8;  // 近10場開獎號碼
+    uint64 roundTotalBetAmount                = 9;  // 該局總押分
+
+    message LotteryResult {
+        string roundID               = 1;  // 局號
+        repeated uint32 bingoNumbers = 2;  // 開獎號
+    }
+}
+
+message PlayerInfo {
+    uint64 userID                          = 1;
+    string nickname                        = 2;
+    string imageURL                        = 3;
+    uint64 vipLevel                        = 4;
+    uint64 level                           = 5;
+    int64 balance                          = 6;  // 餘額
+    repeated Bet bets                      = 7;  // 當局押注
+    uint32 remainAutoBetRoundCount         = 8;  // 剩餘自動押注局數
+    repeated BetResult lastPlayerBetRound  = 9;  // 上一局押注
+    yesno.YesNo isFake                     = 10; // 是否是機器人
+}
+
+message BetResult {
+    repeated uint32 numbers = 1;  // 數字
+    uint64 betAmount        = 2;  // 單組押注金額
+    uint64 winAmount        = 3;  // 得分
+    Prize prize             = 4;  // 獎項
+}
+
+message PlayerBetHistoryReq {
+    int64 page    = 1;
+    int64 perPage = 2;
+}
+
+message PlayerBetHistory {
+    string roundID               = 1;  // 局號
+    int64 createdTime            = 2;  // 下注時間
+    repeated BetResult bets      = 3;  // 押注紀錄
+    repeated uint32 bingoNumbers = 4;  // 開獎號碼
+}
+
+message PlayerBetHistoryResp {
+    repeated PlayerBetHistory bets   = 1;
+    pagination.Pagination pagination = 2;
+}
+
+message LotteryResultHistoryReq {
+    int64 page    = 1;
+    int64 perPage = 2;
+}
+
+message LotteryResult {
+    string roundID               = 1;  // 局號
+    repeated uint32 bingoNumbers = 2;  // 開獎號
+    int64 createdTime            = 3;  // 開獎時間
+}
+
+message LotteryResultHistoryResp {
+    pagination.Pagination page     = 1;
+    repeated LotteryResult results = 2;
+}
+
+message LotteryBallNumberHistoryReq {
+
+}
+
+message LotteryBallNumberHistoryResp {
+    map<uint32, uint32> numberBingoTimes = 1; // key: 號碼， value: 中獎次數
+}
+
+message StopBetPush {
+    string roundID = 1; // 局號
+}
+
+message PlayerSettlePush {
+    string roundID                  = 1;  // 局號
+    int64 balance                   = 2;  // 餘額
+    repeated BetResult betResults   = 3;  // 押注結果
+    uint32 remainAutoBetRoundCount  = 4;  // 剩餘自動押注局數
+}
+
+enum Prize {
+    PRIZE_UNKNOWN = 0;
+    PRIZE_FIRST   = 1;  // 一等獎
+    PRIZE_SECOND  = 2;  // 二等獎
+    PRIZE_THIRD   = 3;  // 三等獎
+    PRIZE_FOURTH  = 4;  // 四等獎
+}
+
+message PlayerBetPush {
+    string roundID                 = 1;  // 局號
+    uint64 userID                  = 2;  // 用戶ID
+    uint64 betAmount               = 3;  // 用戶押注額
+    uint64 roundTotalBetAmount     = 4;  // 用戶押注後的該局總押分
+    uint64 balance                 = 5;  // 用戶餘額
+    uint32 remainAutoBetRoundCount = 6;  // 剩餘自動下注局數
+    yesno.YesNo isFake             = 7;  // 是否是機器人
+}
+
+message GetPlayerListResp {
+    repeated RoomPlayer players = 1;
+}
+
+message RoomPlayer {
+    uint64 userID      = 1;
+    string nickname    = 2;
+    string imageURL    = 3;
+    uint64 vipLevel    = 4;
+    uint64 level       = 5;
+    yesno.YesNo isFake = 6; // 是否是機器人
+}
+
+message CurrentHotNumberListResp {
+    string roundID             = 1; // 局號
+    repeated uint32 hotNumbers = 2; // 熱門號碼(大於等於10次投注次數)
+}
+
+message ValidateBetReq {
+    repeated uint32 numbers = 1;  // 數字
+}
+
+message LeaveResp {
+    string roomID      = 1;
+    uint64 userID      = 2;
+    yesno.YesNo isFake = 3; // 是否是機器人
+}

@@ -1,0 +1,27 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+message ListMahjongReplayReq {
+    uint32 page    = 1;  //頁數
+    uint32 perPage = 2;  //每頁幾筆
+}
+
+message ListMahjongReplayResp {
+    repeated MahjongReplay mahjongReplay = 1;
+    pagination.Pagination pagination     = 2;  //分頁資訊
+}
+
+message MahjongReplay {
+    uint64 orderID          = 1;  // 注單ID
+    string gameOrderUID     = 2;  // 遊戲方注單UID  //spin id , bullet id , round id ...etc
+    uint64 userID           = 3;
+    string roomID           = 4;
+    uint64 betAmount        = 5;
+    uint64 gainAmount       = 6;
+    uint64 commissionAmount = 7;
+    bytes tape              = 8;  // 盤面
+    int64 createAtMs        = 9;
+}

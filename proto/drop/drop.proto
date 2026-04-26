@@ -1,0 +1,74 @@
+syntax = "proto3";
+package drop;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/drop";
+
+import "proto/virtualgood/virtualgood.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+// 管理寶箱掉落｜卡牌收集狀態
+service dropService {
+    // GenerateLoots 抽寶箱
+    rpc GenerateLoots(GenerateLootsRequest) returns (GenerateLootsResponse);
+
+    // ExchangeCollection 兌換牌組
+    rpc ExchangeCollection(ExchangeCollectionRequest) returns (ExchangeCollectionResponse);
+
+    // ListUserCollectionRecords 列使用者的收集紀錄
+    rpc ListUserCollectionRecords(ListUserCollectionRecordsRequest) returns (ListUserCollectionRecordsResponse);
+}
+
+message GenerateLootsRequest {
+    uint64 user_id                        = 1;
+    repeated uint64 already_have_item_ids = 2;  // 玩家已擁有的 itemIDs
+    uint64 item_id                        = 3;  // 參考單個 item_id 掉落
+    repeated ItemInfos item_infos         = 4;  // 參考多個 item_id 掉落，及其對應掉落次數
+}
+
+message GenerateLootsResponse {
+    repeated Item items = 1;
+}
+
+message ExchangeCollectionRequest {
+    uint64 user_id       = 1;
+    uint64 collection_id = 2;
+}
+
+message ExchangeCollectionResponse {
+    uint64 reward = 1;
+}
+
+message ListUserCollectionRecordsRequest {
+    uint64 user_id = 1;
+}
+
+message ListUserCollectionRecordsResponse {
+    repeated CollectionRecord collection_records = 1;
+    int32 collection_level                       = 2;  // 當前收集等級
+    int64 expected_refresh_time                  = 3;  // 預期更新時間（每月最後一日）
+}
+
+message ItemInfos {
+    uint64 item_id = 1;
+    uint64 count   = 2;  // 對應掉落次數
+}
+
+message Item {
+    uint64 id                             = 1;
+    yesno.YesNo is_collection_last_one    = 2;  // 是否為該牌組所欠缺的最後一張卡
+    uint64 collection_id                  = 3;  // 如果 is_collection_last_one = 1, 則此處會返回已收集完的牌組ID
+    uint64 from_item_id                   = 4;  // 從 哪個寶箱 item id 產出
+    yesno.YesNo is_repeat                 = 5;  // 當次是否重複
+    int64 use_gold                        = 7;  // 券類面額
+    virtualgood.VirtualGoodType good_type = 9;
+    uint64 exchanged_item_id              = 10;  // 重複的物品的替換物ItemID
+    uint64 exchanged_amount               = 11;  // 替換物數量
+}
+
+message CollectionRecord {
+    uint64 user_id           = 1;
+    uint64 reward            = 2;
+    uint64 collection_id     = 3;
+    repeated uint64 item_ids = 4;
+    yesno.YesNo is_exchanged = 5;  // 是否已經兌換金幣
+    yesno.YesNo is_finished  = 6;  // 是否已經完成
+}

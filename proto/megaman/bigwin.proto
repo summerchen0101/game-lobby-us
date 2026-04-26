@@ -1,0 +1,42 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "proto/ranking/ranking.proto";
+
+message BigWin {
+    uint64 userID             = 1;
+    int64 amount              = 2;
+    int64 betAmount           = 9;
+    uint64 gameID             = 3;
+    yesno.YesNo bigWinPush    = 4;
+    yesno.YesNo megaPackage   = 5;
+    yesno.YesNo isJP          = 6;
+    ranking.BigWinLevel level = 7;
+    yesno.YesNo isEventJP     = 8;
+}
+
+message BigWinPush {
+    uint64 userID                   = 1;
+    int64 amount                    = 2;
+    int64 betAmount                 = 11;
+    uint64 gameID                   = 3;
+    string imageURL                 = 4;
+    string nickname                 = 5;
+    uint64 vipLevel                 = 6;
+    uint64 level                    = 7;
+    yesno.YesNo isJP                = 8;
+    ranking.BigWinLevel BigWinLevel = 9;
+    yesno.YesNo isEventJP           = 10;
+}
+
+message TokenRefundPush {
+    int64 amount  = 1;
+    uint64 gameID = 2;
+    string roomID = 3;
+}
+
+message ListTopBingosResp {
+    repeated BigWinPush topBingos = 1; 
+}

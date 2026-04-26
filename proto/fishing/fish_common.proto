@@ -1,0 +1,178 @@
+/*
+Fish Common Proto
+定義 通用資料結構
+*/
+
+syntax = "proto3";
+package fish;
+
+option go_package       = 'gitlab.ffglobaltech.com/us888/pluto/protos/fishing;fishpb';
+option csharp_namespace = "FishingProto";
+
+//房間類型
+enum RoomType {
+    RoomTypeAll     = 0;
+    RoomTypePublic  = 1;  //公有房
+    RoomTypePrivate = 2;  //私有房
+}
+
+message Room {
+    string id         = 1;
+    RoomType type     = 2;
+    string name       = 3;
+    string password   = 4;
+    int64 playerLimit = 5;
+    bool isLock       = 6;  //房間是否鎖定 (鎖定期間 只出不進, 考慮玩家瞬斷可能 允許原登入玩家重新加入房間)
+
+    Boundary boundary = 7;  //魚池大小
+
+    repeated PlayerInfo players = 8;
+    repeated BetRank betRank    = 9;
+}
+
+message BetRank {
+    uint64 id    = 1;
+    uint64 point = 2;
+}
+
+message Boundary {
+    Posistion min = 1;
+    Posistion max = 2;
+}
+
+message Posistion {
+    double x = 1;
+    double y = 2;
+}
+
+message PlayerInfo {
+    uint64 userID = 1;
+    string name   = 2;
+    int64 balance = 3;  //玩家餘額
+    int64 site    = 4;  //座位
+    PlayMode mode = 5;  //瞄準模式
+
+    BetRank betRank = 6;  //目前注額
+
+    Posistion posistion            = 7;  //
+    int64 degree                   = 8;  //目前砲管角度
+    repeated Bullet specailWeapons = 9;  //特殊武器狀態
+
+    string avatarURL = 10;
+    uint64 level     = 11;
+    uint64 vipLevel  = 12;
+}
+
+enum PlayMode {
+    PlayModeUnknow = 0;  //勿用
+    PlayModeNormal = 1;  //普通攻擊
+    PlayModeAiming = 2;  //瞄準攻擊
+    PlayModeAuto   = 3;  //自動攻擊
+}
+
+message Bullet {
+    string weaponUID = 1;  // 武器uuid ,普通子彈為空
+
+    uint64 playerID = 3;
+    WeaponType type = 4;  //類型
+
+    PlayMode mode = 5;  //發射類型
+
+    message BulletAttr {
+        int64 getTime                = 1;  //獲得時間
+        int64 expiredTime            = 2;  // 過期時間
+        int64 speed                  = 3;  // 速度 座標單位/ms
+        int64 duration               = 4;  //作用時間 (持續 or 飛行時間)
+        repeated int64 degree        = 5;  //角度 (扇形毒霧)
+        int64 fireTimestamp          = 6;  //發射時間 millisecond
+        repeated Posistion posistion = 7;  //當前位置
+        Posistion initPosistion      = 8;  //起始位置中心點座標
+    }
+
+    BulletAttr attr  = 6;
+    uint64 betRankID = 7;  //注額  代表子彈使用 第幾個注額設定
+}
+
+enum WeaponType {
+    WeaponTypeUnknow = 0;  //未知（勿用）
+
+    WeaponTypeNormal    = 1;  //普通子彈
+    WeaponTypeDarkness  = 2;  //毒煙
+    WeaponTypeFire      = 3;  //全畫面隕石
+    WeaponTypeRays      = 4;  //串穿光束
+    WeaponTypeLightning = 5;  //連鎖閃電
+    WeaponTypeFreezing  = 6;  //冷凍陷阱
+
+    WeaponTypeRocket     = 7;   //火箭
+    WeaponTypeBomb       = 8;   //炸彈
+    WeaponTypeEel        = 9;   //電鰻
+    WeaponTypeFreezeCore = 10;  //冰核心
+    WeaponTypeFlameCore  = 11;  //火核心
+}
+
+message Fish {
+    FishBasic basic = 1;  //基礎結構
+
+    string pathID     = 5;  // 路徑id
+    FishStatus status = 6;  //狀態屬性
+
+    int64 createTime  = 7;   //出場時間
+    int64 deadedAt    = 8;   //死亡時間
+    int64 expiredTime = 9;   //過期時間
+    Posistion offset  = 10;  //偏移量
+
+    WeaponType hasWeapon = 3;  //如果有的話代表這隻魚 打死可以得到武器
+
+    repeated int64 posistionStay       = 2;   //附近每格停留 ms
+    repeated FishAttackInfo attackInfo = 11;  //魚攻擊動作演出時間 (boss)
+}
+
+// fish 的基礎通用結構
+message FishBasic {
+    string uid        = 1;  //魚的uuid
+    int64 fishID      = 2;  //魚id
+    FishType type     = 3;  //類型
+    int64 LongRadius  = 5;  //長半徑
+    int64 ShortRadius = 6;  //短半徑
+}
+
+message FishAttackInfo {
+    enum Action {
+        ActionUnknow    = 0;
+        ActionAttack1   = 1;  //攻擊動作1 無法中斷
+        ActionAttack2   = 2;
+        ActionAttack3   = 3;  //攻擊動作3 無法中斷
+        ActionImpatient = 4;  //不耐煩
+    }
+    Action action      = 1;  //演出動作
+    bool attackInvalid = 2;  //是否攻擊無效 true:無效 false:有效 (攻擊會傳hit但不會spin)
+    int64 timestamp    = 3;  // 演出時間 millisecond
+}
+
+enum FishType {
+    FishTypeUnknow  = 0;  // 未知(勿用)
+    FishTypeSmall   = 1;  //小型
+    FishTypeMedium  = 2;  //中型
+    FishTypeBig     = 3;  //大型
+    FishTypeGloden  = 4;  //金色
+    FishTypeBoss    = 5;  //
+    FishTypeSpecail = 6;  // 特殊
+    FishTypeWeapon  = 7;  // 武器泡泡
+    FishTypeTrigger = 8;  //觸發型
+}
+
+message FishStatus {
+    bool alive          = 1;   // 是否存活
+    Posistion posistion = 2;   //當前中心點位置
+    int64 posIndx       = 10;  // 當前所在 點位
+
+    repeated Bullet specailHits = 3;  //被打中的特殊武器
+    repeated Bullet hits        = 4;  //被打中的普通子彈
+
+    int64 longRadius  = 5;  //魚橢圓體長半徑
+    int64 shortRadius = 6;  //魚橢圓體短半徑
+
+    int64 degree = 8;  //目前前進角度
+
+    bool isFreezed = 9;  //是否被凍結
+}

@@ -1,0 +1,119 @@
+syntax = "proto3";
+package tower;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/tower";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+enum TowerType {
+    PING_PONG  = 0;
+    JOIN_ROOM  = 1;
+    LEAVE_ROOM = 2;
+    KICK_ROOM  = 3; // 踢除玩家
+
+    BET         = 10;  // 下注
+    SETTLE      = 11;  // 結算
+//    GAME_INFO   = 12;  // 取得遊戲資訊 ex:關卡設置&賠率
+    HONER_ROLL  = 13;  // 取得榮譽榜
+}
+
+message JoinRoomResp {
+    GameInfo gameInfo             = 1;  // 遊戲資訊
+    PlayerInfo playerInfo         = 2;  // 玩家資訊
+    uint64  betAmount             = 3;  // 注額 (用戶還未下注，則為 0)
+    uint32  currentRound          = 4;  // 當前關卡
+    string currentMultiplier      = 5;  // 當前倍率
+    uint64 currentSettlementScore = 6;  // 當前結算得分
+    string gameOrderUID           = 7;  // game order uid
+}
+
+// 玩家資訊
+message PlayerInfo {
+    uint64 userID   = 1;
+    string nickname = 2;
+    string imageURL = 3;
+    uint64 vipLevel = 4;
+    uint64 level    = 5;
+    int64 balance   = 6;
+}
+
+// 下注 req
+message BetReq {
+    uint64 betAmount = 1;  // 注額 (僅首次下注必填)
+}
+
+// 選擇卡牌 resp
+message BetResp {
+    bool isHit                    = 1;  // 是否有中獎
+    uint32 currentRound           = 2;  // 當前局數
+    string currentMultiplier      = 3;  // 當前倍率
+    uint64 currentSettlementScore = 4;  // 當前結算得分
+    int64 userBalance             = 5;  // 用戶餘額
+    string gameOrderUID           = 6;  // game order uid
+}
+
+// 結算 resp
+message SettleResp {
+    string multiplier   = 1;  // 結算倍率
+    uint64 score        = 2;  // 結算得分
+    int64 userBalance   = 3;  // 用戶餘額
+    string gameOrderUID = 4;  // game order uid
+}
+
+//// 取得遊戲資訊 resp
+//message GameInfoResp {
+//    GameInfo gameInfo     = 1; // 遊戲資訊
+//}
+
+// 遊戲資訊
+message GameInfo {
+    map<uint32, RoundSetting> roundSetting = 1;  // key 是局數, val 是關卡配置
+}
+
+// 關卡配置
+message RoundSetting {
+    string multiplier = 1; // 倍率
+    uint32 womanNum   = 2;  // 美女數量
+    uint32 manNum     = 3;  // 猛男數量
+}
+
+// 取得榮譽榜 req
+message HonerRollReq {
+    uint32 page    = 1;  // 頁碼
+    uint32 perPage = 2;  // 筆數
+}
+
+// 取得榮譽榜 resp
+message HonerRollResp {
+    pagination.Pagination pagination = 1;  // 分頁
+    repeated HonerRollRecord list    = 2;  // 列表
+}
+
+message HonerRollRecord {
+    PlayerInfo playerInfo = 1;  // 玩家資訊
+    uint64 score          = 2;  // 得分
+    int64 winAtMs         = 3;  // 過關時間
+}
+
+// [TAPE] BetOrderTap
+//  存在 judan 的 bet_order 的 Tape
+message BetOrderTape {
+    map<uint32, RoundRecordTape> roundRecords = 1;  // 關卡紀錄
+    uint32 finalRound                         = 2;  // 最後關卡
+    uint64 finalIncome                        = 3;  // 最終收入
+}
+
+// [TAPE] RoundRecordTape
+message RoundRecordTape {
+    string uid        = 1;
+    uint32 round      = 2;  // 關卡回合
+    bool isHit        = 3;  // 抽中
+    string multiplier = 4;  // 關卡倍率
+    uint64 betAmount  = 5;  // 注金
+    uint64 income     = 6;  // 收入
+    int64 createdAtMs = 7;
+}
+
+message KickRoomData {
+    uint64 userID = 1;
+    string roomID = 2;
+}

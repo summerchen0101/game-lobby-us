@@ -1,0 +1,136 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "proto/redenvelope/redenvelope.proto";
+import "proto/playerinfo/model.proto";
+import "proto/msg/msg.proto";
+
+message ListConditionSendReq {
+    uint32 page    = 1;
+    uint32 perPage = 2;
+}
+
+message ListConditionSnatchReq {
+}
+
+message ListConditionSendResp {
+    repeated redenvelope.Condition condition = 1;
+    pagination.Pagination page               = 2;
+}
+
+message CountConditionReq {
+    uint64 countUserID = 1;
+}
+
+message ListConditionSnatchResp {
+    uint64 userID        = 1;
+    uint64 totalAmount   = 2;
+    uint64 nowAmount     = 3;
+    uint64 createdTimeMs = 4;
+    string nickName      = 5;
+}
+
+// SendRequest 發紅包請求
+message SendRequest {
+    redenvelope.RedEnvelopeType type = 1;
+    string message                   = 2;  // 題目 or 來自發送者的祝福
+    int64 money                      = 3;  //總金額
+    int64 quota                      = 4;  // 紅包數量
+    string roomID                    = 5;
+    msg.RoomType roomType            = 6;
+    string roomName                  = 7;
+}
+
+// SendResponse 發紅包響應 serverPush
+message SendResponse {
+    uint64 redEnvelopeID             = 1;  // 新建立的紅包id
+    string message                   = 2;
+    redenvelope.RedEnvelopeType type = 3;
+}
+// SnatchPush 發紅包響應 serverPush
+message SnatchPush {
+    string senderNickname = 1;
+    uint64 amount         = 2;
+    string snatchNickname = 3;
+}
+
+// SnatchRequest 搶紅包請求
+message SnatchRequest {
+    uint64 redEnvelopeID = 1;  // 紅包id
+}
+
+// SnatchResponse 搶紅包響應
+message SnatchResponse {
+    yesno.YesNo isSnatchSuccess         = 1;
+    yesno.YesNo needAnswer              = 2;
+    redenvelope.RedEnvelope redEnvelope = 3;
+    redenvelope.Answer answer           = 4;
+}
+
+// AnswerRequest 搶紅包回覆請求
+// StatusCode: 204
+message AnswerRequest {
+    uint64 redEnvelopeID = 1;  // 紅包id
+    string attachment    = 2;  // 紅包附件
+    string answerID      = 3;
+}
+
+// ListRedEnvelopesRequest 紅包列表請求
+message ListRedEnvelopesRequest {
+    string roomID         = 1;
+    msg.RoomType roomType = 2;
+    yesno.YesNo unSnatch  = 3;
+    yesno.YesNo notBless  = 4;
+}
+
+// ListRedEnvelopesResponse 紅包列表響應
+message ListRedEnvelopesResponse {
+    repeated redenvelope.RedEnvelope redEnvelopes = 1;
+}
+
+// VerifyAnswerRequest 驗證紅包答案請求
+// StatusCode: 204
+message VerifyAnswerRequest {
+    uint64 redEnvelopeID = 1;
+    yesno.YesNo isPass   = 2;
+    string answerID      = 3;
+}
+
+//server push
+message VerifyAnswerResponse {
+    playerinfo.PlayerInfo sender = 1;
+    int64 amount                 = 2;
+}
+
+message VerifyDailyAmountRequest {
+    string password = 1;
+}
+
+message RefundResp {
+    uint64 amount   = 1;
+    uint64 userID   = 2;
+    string nickname = 3;
+}
+
+// ListRedEnvelopesResponse 紅包列表響應
+message ListPlayerSendRedEnvelopesReq {
+    uint32 page = 1;
+}
+
+// ListRedEnvelopesResponse 紅包列表響應
+message ListPlayerSendRedEnvelopesResponse {
+    repeated redenvelope.RedEnvelope redEnvelopes = 1;
+}
+
+// ListRedEnvelopesResponse 紅包列表響應
+message ListPlayerSnatchRedEnvelopesReq {
+    uint32 page = 1;
+}
+
+// ListRedEnvelopesResponse 紅包列表響應
+message ListPlayerSnatchRedEnvelopesResponse {
+    repeated redenvelope.RedEnvelope redEnvelopes = 1;
+}

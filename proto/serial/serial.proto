@@ -1,0 +1,107 @@
+syntax = "proto3";
+package serial;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/serial";
+
+import "google/protobuf/empty.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+service SerialService {
+    rpc Exchange(ExchangeReq) returns (ExchangeResp);
+    rpc SWExchange(SWExchangeReq) returns (ExchangeResp);
+    rpc VerifyOrder(VerifyOrderReq) returns (ExchangeResp);
+
+    rpc GrantVerify(GrantVerifyReq) returns (google.protobuf.Empty);
+    rpc ListForSW(ListForSWOption) returns (ListForSWResp);
+    rpc ListExchangeOrder(ListExchangeOrderOption)
+        returns (ListExchangeOrderResp);
+}
+
+enum SerialType {
+    UNKNOWN_SERIAL_TYPE = 0;
+    NORMAL              = 1;
+    SW                  = 2;
+}
+
+enum ExchangeStatus {
+    UNKNOWN_EXCHANGE_STATUS = 0;
+    INIT                    = 1;
+    SUCCESS                 = 2;
+    PROCESS                 = 3;
+    FAIL                    = 4;
+}
+
+message VerifyOrderReq {
+    bytes data     = 1;
+    string orderID = 2;
+}
+
+message ExchangeReq {
+    uint64 userID         = 1;
+    string serialNumber   = 2;
+    SerialType serialType = 3;
+    uint64 payAmount      = 4;
+}
+
+message ExchangeResp {
+    uint64 productID      = 1;
+    string exchangeID     = 2;
+    uint64 userID         = 3;
+    ExchangeStatus status = 4;
+    bool needBan          = 5;
+}
+message SWExchangeReq {
+    uint64 userID         = 1;
+    string serialNumber   = 2;
+    string password       = 3;
+    SerialType serialType = 4;
+}
+
+message GrantVerifyReq {
+    string exchangeID = 1;
+}
+
+// ListOrderOption for Entity.ListOrderData option
+message ListForSWOption {
+    int64 createdAtMsStart   = 1;
+    int64 createdAtMsEnd     = 2;
+    string thirdPartyOrderID = 3;
+}
+
+// ListOrderResp for Entity.ListOrder response
+message ListForSWResp {
+    string body = 1;
+}
+
+// 產包訂單列表選項
+message ListExchangeOrderOption {
+    uint64 userID          = 1;
+    uint64 serialGroup     = 2;
+    string ID              = 3;
+    string tradeID         = 4;
+    string serialNumber    = 5;
+    int64 createdAtMsStart = 6;
+    int64 createdAtMsEnd   = 7;
+    ExchangeStatus status  = 8;
+    uint32 page            = 9;
+    uint32 perPage         = 10;
+    repeated string ids    = 11;
+}
+
+// 產包訂單資料回傳
+message ListExchangeOrderResp {
+    repeated ExchangeOrder exchangeOrder = 1;
+    pagination.Pagination page           = 2;
+}
+
+// 產包訂單
+message ExchangeOrder {
+    string ID             = 1;
+    string tradeID        = 2;
+    string token          = 3;
+    uint64 userID         = 4;
+    uint64 productID      = 5;
+    ExchangeStatus status = 6;
+    string serialNumber   = 7;
+    uint64 serialGroup    = 8;
+    int64 createdAtMs     = 9;
+}

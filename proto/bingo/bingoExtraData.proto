@@ -1,0 +1,8 @@
+syntax = "proto3";
+package bingo;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/bingo";
+
+message Bingo {
+    repeated string balls = 1;
+    int64 jpIndex         = 2;  // jp 中獎 1: jp1 2:jp2 3:jp3
+}

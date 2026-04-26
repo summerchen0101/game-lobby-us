@@ -1,0 +1,108 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "proto/wallet/wallet.proto";
+import "proto/virtualgood/virtualgood.proto";
+
+// message ListProductsRequest {
+//     uint64 paymentType                        = 1;
+//     virtualgood.PaymentGateway paymentGateway = 2;
+// }
+
+// message ListProductsResponse {
+//     repeated virtualgood.ListGatewayProductsResp items = 1;
+// }
+
+message PaymentPush {
+    wallet.Coin coin   = 1;
+    uint64 status      = 2;
+    string amount      = 3;
+    repeated Item item = 4;
+    string errorMsg    = 5;
+    string reason      = 6;
+}
+
+message WithdrawSuccessPush {
+    uint64 userID       = 1;
+    string actualAmount = 2;
+    string nickname     = 3;
+}
+
+message Item {
+    uint64 itemID = 1;
+    uint64 amount = 2;
+    string name   = 3;
+}
+
+message ListMegaPackageReq {
+    repeated uint64 paymentGateway = 1;
+}
+
+message ListMegaPackageResp {
+    repeated virtualgood.Products products = 1;
+    uint64 expireTimeSec                   = 2;
+}
+
+message GetAndCheckFortuneReq {
+    repeated uint64 paymentGateway = 1;
+}
+
+message GetAndCheckFortuneResp {
+    uint64 amount                          = 1;
+    wallet.Bag bag                         = 2;
+    repeated virtualgood.Products products = 3;
+}
+
+message ListDailyPackageReq {
+    repeated uint64 paymentGateways = 1;
+}
+
+message ListDailyPackageResp {
+    repeated ListDailyPackageRespProduct products = 1;
+}
+
+message ListDailyPackageRespProduct {
+    virtualgood.Products product  = 1; // 嗯
+    uint64               maxLimit = 2; // 今日最多
+    uint64               count    = 3; // 今日已買
+}
+
+message ListWithdrawOrdersReq {
+    repeated int64 userIDIn                     = 1; // 用戶編號
+    repeated int32 withdrawOrderPaymentStatusIn = 2; // 提現單支付狀態
+    int64 startedAtTimestampMillisecond         = 11; // 開始時間戳 毫秒
+    int64 endedAtTimestampMillisecond           = 12; // 結束時間戳 毫秒
+    int64 page                                  = 13; // 第幾頁
+    int64 perPage                               = 14; // 一頁幾筆
+}
+message ListWithdrawOrdersResp {
+    int64 total                                                 = 1; // 總筆數
+    repeated ListWithdrawOrdersRespWithdrawOrder withdrawOrders = 2; // 提現單
+}
+message ListWithdrawOrdersRespWithdrawOrder {
+    string withdrawOrderUID             = 1; // 提現單編號
+    string amount                       = 2; // 金額
+    string fee                          = 3; // 手續費
+    int32 withdrawOrderPaymentStatus    = 4; // 提現單支付狀態
+    int64 createdAtTimestampMillisecond = 5; // 建立時間戳 毫秒
+    string remark                       = 6; // 註記
+}
+
+message CreateWithdrawOrderReq {
+    int64 userID      = 1; // 用戶 ID
+    string amount     = 2; // 金額
+    int64 paymentType = 3; // 提現方式
+
+    string paypalEmail   = 101; // PayPal
+    string cardNumber    = 102; // CreditCard
+    string cardValidCode = 103; // CreditCard
+    string appAccount    = 104; // CashAPP
+    string accountNumber = 105; // ACH
+    string routingNumber = 106; // ACH
+}
+message CreateWithdrawOrderResp {
+    string withdrawOrderUID = 1; // 提現單編號
+}
+
+

@@ -1,0 +1,29 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "proto/drop/drop.proto";
+import "proto/megaman/store.proto";
+
+message GenerateLootsRequest {
+    uint64 user_id                        = 1;
+    repeated uint64 already_have_item_ids = 2;  // 玩家已擁有的 itemIDs
+    uint64 item_id                        = 3;  // 參考單個 item_id 掉落
+    repeated drop.ItemInfos item_infos    = 4;  // 參考多個 item_id 掉落，及其對應掉落次數
+}
+
+message GenerateLootsResponse {
+    repeated drop.Item items = 1;
+}
+
+message TreasureBoxResponse {
+    repeated megaman.StoreItemInfo result_items = 1;
+}
+message ExchangeCollectionRequest {
+    uint64 user_id       = 1;
+    uint64 collection_id = 2;
+}
+
+message ExchangeCollectionResponse {
+    uint64 reward = 1;
+}

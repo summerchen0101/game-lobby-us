@@ -1,0 +1,47 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+//
+//import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+//import "proto/virtualgood/virtualgood.proto";
+//import "proto/backpack/backpack.proto";
+//import "proto/store/store.proto";
+//
+//message ListVirtualGoodsRequest {
+//    virtualgood.VirtualGoodType virtualGoodType = 1;  // 單一物品類型
+//    repeated virtualgood.VirtualGoodType virtualGoodTypes   = 2;  // 多種物品類型
+//    uint64 itemID                               = 3;
+//    repeated uint64 itemIDs                     = 4;
+//    yesno.YesNo isDefault                       = 5;  // 是否預設
+//    yesno.YesNo status                          = 6;
+//    uint32 page                                 = 7;
+//    uint32 perPage                              = 8;
+//}
+//
+//message ListVirtualGoodsResponse {
+//    repeated virtualgood.VirtualGood virtual_goods = 1;
+//}
+//
+//message ListUserGoodInfoRequest {
+//    virtualgood.VirtualGoodType good_type           = 1;  // 虛寶類型
+//    repeated virtualgood.VirtualGoodType good_types = 2;
+//    uint64 sender_id                                = 3;
+//    uint64 receiver_id                              = 4;
+//}
+//
+//message ListUserGoodInfoResponse {
+//    repeated backpack.BackpackInfo user_infos = 1;
+//}
+//
+//message CreateUserGoodInfoRequest {
+//    backpack.BackpackInfo user_good_info = 1;
+//}
+//
+//message UpdateUserGoodInfoRequest {
+//    uint64 item_id                = 1;
+//    backpack.GoodState good_state = 2;  // 物品狀態
+//}
+//
+//message DeleteUserGoodInfoRequest {
+//    uint64 item_id = 1;
+//}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+message ExchangeSWReq {
+    string serialNumber = 1;
+    string password     = 2;
+}
+
+message ExchangeReq {
+    string serialNumber = 1;
+}

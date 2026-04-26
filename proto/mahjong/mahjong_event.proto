@@ -1,0 +1,150 @@
+syntax = "proto3";
+package mahjong;
+option go_package       = "gitlab.ffglobaltech.com/us888/pluto/protos/mahjong";
+option csharp_namespace = "MahjongProto";
+
+// MahjongType 麻將動作
+// 以下的 Request/Response 是指 gateway proto Request/Response 的 data 部分
+
+enum MahjongType {
+    // PING_PONG（未實作, 保留）
+    PING_PONG = 0;
+
+    // JOIN_ROOM 加入牌局
+    // StatusCode: 200
+    // Request: no
+    // Response: playerInfo
+    JOIN_ROOM = 1;
+
+    // USER_KICK_BEFORE（未實作, 保留）
+    USER_KICK_BEFORE = 2;
+
+    // SERVER_UPDATE（未實作, 保留）
+    SERVER_UPDATE = 3;
+
+    ROOM_CLOSE = 10;
+
+    // DISCARD 打牌
+    // StatusCode: 200
+    // Flow: Client -> Server
+    // Request: TileRequest
+    // Response:  playerInfo   //如果有需要我可以提供哪些玩家可以做啥
+    DISCARD = 11;
+
+    // ACTION 吃 碰 暗槓 明槓 加槓 胡 聽牌
+    // StatusCode: 200
+    // Flow: Client -> Server
+    // Request: TileRequest
+    // Response: playerInfo 廣播
+    ACTION = 12;
+
+    // DESK_GET 重新取的桌面
+    // StatusCode: 200
+    // Flow: Client -> Server
+    // Request:
+    // Response: Board
+    DESK_GET = 13;
+
+    // ADD_ACTION_TIME 增加思考時間
+    // StatusCode: 200
+    // Request: AddActionTimeReq
+    // 廣播 PlayerUseAddAction
+    ADD_ACTION_TIME = 14;
+
+    // PLAY_NEXT_ROUND 是否再玩一局
+    // StatusCode: 200
+    // Request: PlayNextRoundReq
+    // 廣播 PlayNextRoundResp
+    PLAY_NEXT_ROUND = 15;
+
+    // START_VOTING_SURRENDER 發起棄權投票
+    // StatusCode: 204
+    // 廣播
+    START_VOTING_SURRENDER = 16;
+
+    // CANCEL_GAME 取消湊桌
+    // StatusCode: 204
+    // 廣播
+    CANCEL_GAME = 18;
+
+    // SURRENDER_VOTE 棄權投票
+    // StatusCode: 200
+    // Request: SurrenderVoteReq
+    // 廣播 SurrenderVoteResp
+    SURRENDER_VOTE = 17;
+
+    // DEAL_FINISH_PUSH 開始遊戲 抓玩牌補完花,請前端自行演出
+    // Response: Board
+    DEAL_FINISH_PUSH = 20;
+
+    // EAST_PLAY_PUSH 輪到東風
+    // Response: playerInfo 廣播
+    EAST_PLAY_PUSH = 21;
+
+    // SOUTH_PLAY_PUSH 輪到南風
+    // Response: playerInfo 廣播
+    SOUTH_PLAY_PUSH = 22;
+
+    // WEST_PLAY_PUSH 輪到西風
+    // Response: playerInfo 廣播
+    WEST_PLAY_PUSH = 23;
+
+    // NORTH_PLAY_PUSH 輪到北風
+    // Response: playerInfo 廣播
+    NORTH_PLAY_PUSH = 24;
+
+    // EAST_PICK_PUSH 輪到東風丟牌
+    // Response: playerInfo 廣播
+    EAST_PICK_PUSH = 25;
+
+    // SOUTH_PICK_PUSH 輪到南風丟牌
+    // Response: playerInfo 廣播
+    SOUTH_PICK_PUSH = 26;
+
+    // WEST_PICK_PUSH 輪到西風丟牌
+    // Response: playerInfo 廣播
+    WEST_PICK_PUSH = 27;
+
+    // NORTH_PICK_PUSH 輪到北風丟牌
+    // Response: playerInfo 廣播
+    NORTH_PICK_PUSH = 28;
+
+    // BOARD_PLAY_PUSH 玩家丟玩牌能做動作做動作
+    // Response: Board 廣播
+    BOARD_PLAY_PUSH = 29;
+
+    // COUNT_COIN_PUSH 結算
+    // Response: Board 廣播
+    COUNT_COIN_PUSH = 30;
+
+    // COUNT_COIN_PUSH 結算
+    // Response: Board 廣播
+    DRAW_PUSH = 34;
+
+    // NEXT_GAME  下一場
+    // Response: nil
+    NEXT_GAME = 32;
+
+    // GAME_STOP_PUSH 遊戲結束
+    // Response: 計分板
+    PLAYER_LEAVE_PUSH = 33;
+
+    // GAME_STOP_PUSH 遊戲結束
+    // Response: 計分板
+    GAME_END_PUSH = 31;
+
+    // PLAYER_LEAVE 玩家離開
+    // Response: player
+    PLAYER_LEAVE = 35;
+
+    // ADD_ACTION_REMAINING_TIME_PUSH 玩家剩餘時間推波
+    // Response: PlayerRemainingTimePush
+    ADD_ACTION_REMAINING_TIME_PUSH = 36;
+
+    // PLAY_NEXT_ROUND_PUSH 是否再玩一局
+    PLAY_NEXT_ROUND_PUSH = 37;
+
+    // SURRENDER_PUSH 投降遊戲結束
+    // Response: 計分板
+    SURRENDER_PUSH = 38;
+}

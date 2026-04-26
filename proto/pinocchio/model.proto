@@ -1,0 +1,110 @@
+syntax = "proto3";
+package pinocchio;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/pinocchio";
+
+enum AccountStatus {
+    UNKNOWN_ACCOUNT_STATUS = 0;
+    ENABLE                 = 1;
+    BLOCK                  = 2;
+}
+
+enum ActionType {
+    UNKNOWN_ACTION_TYPE = 0;
+    READ_ONLY           = 1;
+    SPECIAL_READ_ONLY   = 2;  //特殊讀取權限
+    WRITE               = 3;
+    SPECIAL_WRITE       = 4;  //特殊寫入權限
+}
+
+enum RoleLevel {
+    UNKNOWN_ROLE_LEVEL = 0;
+    PRIME              = 1;
+    CHOICE             = 2;
+    STANDARD           = 3;
+}
+
+message Account {
+    uint64 accountID       = 1;
+    string username        = 2;
+    string passwordEncrypt = 3;
+    AccountStatus status   = 4;
+    uint64 roleID          = 5;  // 角色ID
+    uint32 loginFailCnts   = 6;
+    string otpSecret       = 7;
+    uint32 otpFailCnts     = 8;
+    // int64 otpExpiresAt     = 9;
+    int64 otpLastResetAt = 10;
+    // repeated Menu menus    = 11;  // 該帳戶可使用菜單
+    uint64 creatorID  = 12;
+    uint64 updaterID  = 13;
+    int64 createdAt   = 14;
+    int64 updatedAt   = 15;
+    int64 lastLoginAt = 16;
+    string clientIP   = 17;
+}
+
+message UpdateAccountParams {
+    string username      = 1;
+    AccountStatus status = 2;
+    uint64 roleID        = 3;
+    int64 lastLoginAt    = 4;
+}
+
+message Role {
+    uint64 ID             = 1;
+    string name           = 2;
+    uint64 creatorID      = 3;
+    uint64 updaterID      = 4;
+    int64 createdAt       = 5;
+    int64 updatedAt       = 6;
+    repeated Menu menus   = 7;
+    uint64 organizationID = 8;
+    RoleLevel roleLevel   = 9;  // 權限等級
+}
+
+message Menu {
+    uint64 menuID                   = 1;
+    string name                     = 2;
+    string code                     = 3;
+    uint64 parentID                 = 4;
+    uint32 level                    = 5;
+    repeated ActionType actionTypes = 6;
+    repeated Menu childMenus        = 7;
+    int64 sort                      = 8;
+}
+
+message Token {
+    string tokenStr        = 1;
+    int64 accessExpiresAt  = 2;
+    int64 refreshExpiresAt = 3;
+    uint64 accountID       = 4;
+    TokenClaims claims     = 5;
+}
+
+message TokenClaims {
+    string username               = 1;
+    Role role                     = 2;
+    repeated Menu menuPermissions = 3;
+    map<string, string> meta      = 4;
+}
+
+message MenuPermission {
+    uint64 menuID         = 1;
+    ActionType actionType = 2;
+}
+
+message UpdateRoleParams {
+    string name                         = 1;
+    repeated MenuPermission permissions = 2;
+    RoleLevel roleLevel                 = 3;  // 權限等級
+}
+
+message Claims {
+    uint64 accountID         = 1;
+    string username          = 2;
+    AccountStatus status     = 3;
+    string tokenStr          = 4;
+    Role role                = 5;
+    Menu menus               = 6;
+    map<string, string> meta = 7;
+}

@@ -1,0 +1,201 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "proto/tournaments/model.proto";
+import "proto/wallet/model.proto";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+// ListGameSideTournamentsInfoReq 取得錦標賽資訊(game side)
+message ListGameSideTournamentsInfoReq {
+    uint32 page    = 1;  // 頁數
+    uint32 perPage = 2;  // 每頁幾筆
+
+    repeated tournaments.TournamentsType tournamentsTypeIn = 20;
+    uint64 tournamentsGameID                               = 22;
+}
+
+message ListGameSideTournamentsInfoResp {
+    pagination.Pagination pagination                                     = 1;  // 分頁資訊
+    repeated tournaments.GameSideTournamentsInfo gameSideTournamentsInfo = 2;
+}
+
+// GetGameSideTournamentsInfoReq 在大廳 取得錦標賽資訊(game side)
+message GetGameSideTournamentsInfoReq {
+    uint64 tournamentsID     = 1;  // 錦標賽id
+    uint64 tournamentsGameID = 2;
+}
+
+message GetGameSideTournamentsInfoResp {
+    tournaments.GameSideTournamentsInfo gameSideTournamentsInfo    = 2;
+    wallet.TournamentsWalletStatistics tournamentsWalletStatistics = 3;
+}
+
+// GetGameSideTournamentsInfoInGameReq 在遊戲內 取得錦標賽資訊(game side)
+message GetGameSideTournamentsInfoInGameReq {
+    uint64 tournamentsID     = 1;  // 錦標賽id
+    uint64 tournamentsGameID = 2;
+}
+
+message GetGameSideTournamentsInfoInGameResp {
+    tournaments.GameSideTournamentsInfo gameSideTournamentsInfo    = 2;
+    wallet.TournamentsWalletStatistics tournamentsWalletStatistics = 3;
+}
+
+// ListGameSidePrizeSettingReq 取得錦標賽獎勵(game side)
+message ListGameSidePrizeSettingReq {
+    uint64 tournamentsID = 1;  // 錦標賽id
+}
+
+message ListGameSidePrizeSettingResp {
+    uint64 tournamentsID                                            = 1;  // 錦標賽id
+    repeated tournaments.GameSidePrizeSetting gameSidePrizeSettings = 2;  // 獎項設定
+}
+
+// GetGameSideHoldemTournamentsSettingReq 取得德州樸克錦標賽設定(game side)
+message GetGameSideHoldemTournamentsSettingReq {
+    uint64 tournamentsID = 1;  // 錦標賽id
+}
+
+message GetGameSideHoldemTournamentsSettingResp {
+    uint64 tournamentsID                                          = 1;  // 錦標賽id
+    tournaments.HoldemTournamentsSetting holdemTournamentsSetting = 2;  // 德州樸克錦標賽設定
+}
+
+// GetGameSideHoldemTournamentsSettingResp 取得德州樸克錦標賽盲住結構組合(game side)
+message GetGameSideBlindStructureSetReq {
+    uint64 setID = 1;  // 盲住結構組合id
+}
+
+message GetGameSideBlindStructureSetResp {
+    uint64 setID                                    = 1;  // 盲住結構組合id
+    tournaments.BlindStructureSet blindStructureSet = 2;
+}
+
+// ListGameSidePostTournamentsRankingReq 取得德州樸克錦標賽賽後排名(game side)
+message ListGameSidePostTournamentsRankingReq {
+    uint64 tournamentsID = 3;  // 錦標賽id
+}
+
+message ListGameSidePostTournamentsRankingResp {
+    uint64 tournamentsID                                                               = 1;  // 錦標賽id
+    repeated tournaments.GameSidePostTournamentsRanking gameSidePostTournamentsRanking = 2;
+    tournaments.MyBestTournamentsRanking myBestTournamentsRanking                      = 3;  // 我的錦標賽最佳排行 -> 只計算完賽的
+}
+
+// ListGameSideRealTimeTournamentsRankingReq 取得德州樸克錦標賽即時排名(game side)
+message ListGameSideRealTimeTournamentsRankingReq {
+    uint64 tournamentsID = 3;  // 錦標賽id
+}
+
+message ListGameSideRealTimeTournamentsRankingResp {
+    uint64 tournamentsID                                                                       = 1;  // 錦標賽id
+    repeated tournaments.GameSideRealTimeTournamentsRanking gameSideRealTimeTournamentsRanking = 2;
+}
+
+// GetMyRegisteredTournamentsReq 取得單筆我已報名的錦標賽資訊 -> 會返回最新一次買入的資料
+message GetMyRegisteredTournamentsReq {
+    uint64 tournamentsID                                       = 1;  // 錦標賽id
+    uint64 tournamentsGameID                                   = 2;
+    repeated tournaments.TournamentsStatus tournamentsStatusIn = 3;
+    repeated tournaments.TournamentsType tournamentsTypeIn     = 4;
+}
+
+message GetMyRegisteredTournamentsResp {
+    tournaments.MyRegisteredTournaments myRegisteredTournaments = 2;
+}
+
+// ListMyRegisteredTournamentsReq 取得我已報名的錦標賽資訊列表
+message ListMyRegisteredTournamentsReq {
+    uint32 page                                                = 1;  // 頁數
+    uint32 perPage                                             = 2;  // 每頁幾筆
+    repeated tournaments.TournamentsStatus tournamentsStatusIn = 3;
+    repeated tournaments.TournamentsType tournamentsTypeIn     = 4;
+}
+
+message ListMyRegisteredTournamentsResp {
+    pagination.Pagination pagination                                     = 1;  // 分頁資訊
+    repeated tournaments.MyRegisteredTournaments myRegisteredTournaments = 2;
+}
+
+// PreJoinTournamentsRoomReq 在加入房間前的預先檢查流程
+message PreJoinTournamentsRoomReq {
+    uint64 tournamentsID = 2;  // 錦標賽ID
+}
+
+message PreJoinTournamentsRoomResp {
+    tournaments.MyRegisteredTournaments myRegisteredTournaments = 2;
+}
+
+// RegisterTournamentsReq 報名錦標賽 (首購/重買)
+message RegisterTournamentsReq {
+    uint64 tournamentsID = 2;  // 報名的錦標賽ID
+    // repeated tournaments.RegFee regFees = 3;  // 交付的報名費 -> 改成後端自己判斷要消耗的報名費項目 票券>金幣
+}
+
+message RegisterTournamentsResp {
+    tournaments.MyRegisteredTournaments myRegisteredTournaments = 1;  // 回傳已報名的資訊供前端更新
+}
+
+// AddOnTournamentsReq 續買/多買籌碼
+message AddOnTournamentsReq {
+    uint64 tournamentsID = 2;  // 報名的錦標賽ID
+    // repeated tournaments.RegFee regFees = 3;  // 交付的報名費 -> 改成後端自己判斷要消耗的報名費項目 票券>金幣
+}
+
+message AddOnTournamentsResp {
+}
+
+// RegisterTournamentsInGameReq 在遊戲內 報名錦標賽 (首購/重買)
+message RegisterTournamentsInGameReq {
+    uint64 tournamentsID = 2;  // 報名的錦標賽ID
+}
+
+message RegisterTournamentsInGameResp {
+    tournaments.MyRegisteredTournaments myRegisteredTournaments = 1;  // 回傳已報名的資訊供前端更新
+}
+
+// AddOnTournamentsInGameReq 在遊戲 內續買/多買籌碼
+message AddOnTournamentsInGameReq {
+    uint64 tournamentsID = 2;  // 報名的錦標賽ID
+}
+
+message AddOnTournamentsInGameResp {
+}
+
+// TournamentsStartingSoonNotify 錦標賽即將開賽通知 (開賽前十分鐘內會開始發送)
+message TournamentsStartingSoonNotify {
+    uint64 tournamentsID = 1;   // 錦標賽id
+    int64 startAtMs      = 11;  // 賽事開始時間
+}
+
+// TournamentsStartingNotify 錦標賽開賽通知
+message TournamentsStartingNotify {
+    uint64 tournamentsID = 1;  // 錦標賽id
+}
+
+// TournamentsAwardsDistributionNotify 錦標賽獎勵派發通知
+message TournamentsAwardsDistributionNotify {
+    uint64 tournamentsID                          = 1;   // 錦標賽id
+    string name                                   = 2;   // 賽事名稱
+    repeated tournaments.Award rankingPrizeAwards = 71;  // 排名獎金與額外報酬
+}
+
+// GetTournamentsAwardWinningRecordReq 取得錦標賽獎勵派發紀錄
+message GetTournamentsAwardWinningRecordReq {
+    uint64 tournamentsID     = 1;  // 錦標賽id
+    uint64 tournamentsGameID = 2;
+}
+
+message GetTournamentsAwardWinningRecordResp {
+    tournaments.TournamentsAwardWinningRecord tournamentsAwardWinningRecord = 2;
+}
+
+// message SharedTournamentsAwardWinningRecordReq {
+//     uint64 tournamentsID     = 1;  // 錦標賽id
+//     uint64 tournamentsGameID = 2;
+// }
+
+// message SharedTournamentsAwardWinningRecordResp {
+// }

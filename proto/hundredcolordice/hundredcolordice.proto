@@ -1,0 +1,356 @@
+syntax = "proto3";
+package hundredcolordice;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/hundredcolordice";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+
+// MessageType
+enum MessageType {
+    PingPong = 0;
+    // [RPC] 加入房間
+    // * req: JoinRoomRequest
+    // * resp: JoinRoomResponse
+    JoinRoom = 1;
+    // [RPC] 離開房間
+    LeaveRoom = 2;
+    // [RPC] 下注
+    // * req: BetRequest
+    // * resp: BetResponse
+    Bet = 3;
+    // [RPC] 自動下注
+    // * req: AutoBetRequest
+    // * resp: AutoBetResponse
+    AutoBet = 4;
+    // [RPC] 停止自動下注
+    StopAutoBet = 5;
+
+    // [RPC] 取得房間資訊
+    // * resp: GetRoomResponse
+    GetRoom = 11;
+    // [RPC] 取得玩家列表
+    // * resp: GetRoomPlayerListResponse
+    GetRoomPlayerList = 12;
+    // [RPC] 取得富豪榜
+    // * resp: GetTopBetRankingResponse
+    GetTopBetRanking = 13;
+
+
+    PlayerBetEvent        = 1010;  // (廣播)玩家下注事件。 data: PlayerBetEventData
+    StagePrepareEvent     = 1011;  // (廣播)準備階段事件。 data: StagePrepareEventData
+    StageBetEvent         = 1012;  // (廣播)下注階段事件。 data: StageBetEventData
+    StageOpenResultEvent  = 1013;  // (廣播)發獎階段事件。 data: StageOpenResultEventData
+    StageSettlementEvent  = 1014;  // (廣播)結算階段事件。 data: StageSettlementEventData
+    JackPotEvent          = 1015;  // (廣播)中JP事件。 data: JackPotEventData
+
+    PlayerKickOutEvent    = 1020;  // (單播)玩家踢出房間事件。 data: PlayerKickOutEventData
+    PlayerAutoBetEvent    = 1021;  // (單播)玩家自動下注事件。 data: PlayerAutoBetEventData
+    PlayerSettlementEvent = 1022;  // (單播)結算訊息。 data: PlayerSettlementEventData
+    PlayerWinJackPotEvent = 1023;  // (單播)玩家中JP事件。 data: PlayerWinJackPotEventData
+    StopAutoBetEvent      = 1024;  // (單播)停止自動下注事件。 data: StopAutoBetEventData
+}
+
+// 顏色
+enum DiceColor {
+    DICE_COLOR_UNKNOWN = 0;
+    YELLOW             = 1;
+    BLUE               = 2;
+    WHITE              = 3;
+    RED                = 4;
+    PINK               = 5;
+    GREEN              = 6;
+}
+
+// 自動下注位置模式
+enum AutoBetAreaType {
+    AUTO_BET_AREA_TYPE_UNKNOWN = 0;
+    FIXED                      = 1; // 固定 (每次都下注在同一個位置)
+    ROTATION                   = 2; // 輪換 (依照固定規律更換下注位置)
+}
+
+// 自動下注額模式
+enum AutoBetAmountType {
+    AUTO_BET_TYPE_UNKNOWN = 0;
+    REPEATED              = 1; // 重複下注
+    EARN_ITS_COST         = 2; // 回本下注
+}
+
+enum RoundStage {
+    ROUND_STAGE_UNKNOWN = 0;
+    PREPARE             = 1; // 準備階段
+    BET                 = 2; // 下注階段
+    OPEN_RESULT         = 3; // 開獎階段
+    SETTLEMENT          = 4; // 結算階段
+}
+
+enum JackPotPrize {
+    JACK_POT_PRIZE_UNKNOWN = 0;
+    GRAND = 1;
+    MAJOR = 2;
+    MINOR = 3;
+    MINI  = 4;
+}
+
+message JoinRoomRequest {
+    string roomID      = 1;
+    uint64 tokenAmount = 2; // 預扣金額
+}
+
+message JoinRoomResponse {
+    RoomPlayer me = 1;
+}
+
+// 詳細玩家資訊
+message RoomPlayer {
+    uint64 userID             = 1;
+    string avatarURL          = 2;  // 頭像 URL
+    string nickname           = 3;  // 暱稱
+    uint64 vipLevel           = 4;  // VIP 等級
+    uint64 level              = 5;  // level
+    int64 balance             = 6;  // 餘額
+    RoomPlayerBetInfo betInfo = 7;  // 下注資訊
+}
+
+message Room {
+    string roomID                              = 1;  // 房號
+    string roundID                             = 2;  // 局號
+    RoundStage roundStage                      = 3;  // 回合階段
+    int64 StageStartAtMs                       = 4;  // 階段開始時間
+    int64 StageEndAtMs                         = 5;  // 階段結束時間
+    int32 playerNumber                         = 6;  // 玩家總人數
+    repeated BetDiceAmount betDiceTotalAmounts = 7;  // 各押注區所有玩家下注金額
+    repeated DiceColor newDieColorResult       = 8;  // 最新開獎結果
+    repeated DiceColorRecord diceColorRecords  = 9;  // 骰子顏色歷史紀錄 (新至舊排序)
+    uint64 totalBetAmount                      = 10; // 總押分
+    int32 animationNo                          = 11; // 開獎動畫號碼 0 ~ 199
+    repeated DiceShowProb diceShowProbs        = 12; // 骰子出現機率
+    repeated DiceColor jackpotDice             = 13; // jackpot 指定顏色骰子組合
+    uint64 jackpotAmount                       = 14; // jackpot 彩池金額
+
+    RoomPlayer me                              = 20; // 玩家自己
+
+    message DiceColorRecord {
+        string roundID                = 1; // 局號
+        repeated DiceColor diceColors = 2; // 骰子顏色
+    }
+}
+
+// 基本玩家資訊
+message BasicRoomPlayer {
+    uint64 userID          = 1;
+    string avatarURL       = 2;  // 頭像 URL
+    string nickname        = 3;  // 暱稱
+    uint64 vipLevel        = 4;  // VIP 等級
+    uint64 level           = 5;  // level
+    uint64 latestBetAmount = 6;  // 最新押注額(給富豪榜用)
+}
+
+message RoomPlayerBetInfo {
+    repeated BetDiceAmount betDiceAmounts = 1; // 各押注區自己的下注金額
+    uint64 TotalBetAmount                 = 2; // 總押注額(含手動+自動下注額)
+    AutoBetInfo autoBetInfo               = 3; // 自動下注資訊
+}
+
+// 自動下注資訊
+message AutoBetInfo {
+    AutoBetAreaType autoBetAreaType     = 1; // 自動下注位置模式 ex: 固定、輪換
+    AutoBetAmountType autoBetAmountType = 2; // 自動下注額模式
+    uint32 remainAutoBetRoundCount      = 3; // 剩餘自動下注局數
+    uint64 TotalBetAmount               = 4; // 自動下注總注額
+}
+
+// 下注
+message BetDiceAmount {
+    DiceColor diceColor = 1; // 骰子顏色
+    uint64 betAmount    = 2; // 注額
+    uint32 betTimes     = 3; // 下注次數
+}
+
+message DiceShowProb {
+    DiceColor color = 1;
+    string ShowProb = 2; // 出現機率 ex: 16.66
+}
+
+
+message GetTopBetRankingResponse {
+    repeated BasicRoomPlayer topBetPlayers = 1;
+}
+
+message GetRoomResponse {
+    Room room = 1;
+}
+
+// 玩家列表
+message GetRoomPlayerListResponse {
+    repeated BasicRoomPlayer players = 1;
+}
+
+message GetMyBetHistoryResponse {
+    pagination.Pagination page   = 1;
+    repeated BetOrderTape orders = 2;
+}
+
+
+// 下注
+message BetRequest {
+    DiceColor betColor    = 1; // 顏色
+    uint64 chip           = 2; // 籌碼 ex: 5, 10, 100, 1000
+}
+
+message BetResponse {
+    DiceColor betColor           = 1; // 顏色
+    uint64 myColorTotalBetAmount = 2; // 自己在該顏色的總注額
+    uint64 colorTotalBetAmount   = 3; // 該顏色的總注額
+}
+
+// 自動下注
+message AutoBetRequest {
+    AutoBetAreaType autoBetAreaType     = 1; // 自動下注位置模式 ex: 固定、輪換
+    repeated DiceColor betColors        = 2; // 自動下注位置模式為固定時，可多選押注區
+    uint32 autoBetRoundCount            = 3; // 自動下注局數
+    AutoBetAmountType autoBetAmountType = 4; // 自動下注額模式
+    uint64 startingBetAmount            = 5; // 起始下注金額
+}
+
+message AutoBetResponse {
+    AutoBetInfo autoBetInfo = 1; // 自動下注資訊
+}
+
+// ++++++++++++++++++++++++
+//
+//  Event
+//
+// ++++++++++++++++++++++++
+
+enum KickOutReason {
+    KICK_OUT_REASON_UNKNOWN     = 0;
+    KICK_OUT_DISCONNECTED       = 1; // 玩家斷線
+    KICK_OUT_IDLE               = 2; // 玩家閒置
+    KICK_OUT_BALANCE_NOT_ENOUGH = 3; // 玩家餘額不足
+}
+
+message PlayerKickOutEventData {
+    string roomID        = 1; // 房號
+    string roundID       = 2; // 局號
+    KickOutReason reason = 3; // 離開類型
+}
+
+message PlayerBetEventData {
+    string roomID              = 1; // 房號
+    string roundID             = 2; // 局號
+    uint64 userID              = 3; // 用戶ID
+    DiceColor betColor         = 4; // 押注顏色
+    uint64 playerBetAmount     = 5; // 用戶該次的注額
+    uint64 colorTotalBetAmount = 6; // 所有玩家在該顏色的總注額
+}
+
+message StagePrepareEventData {
+    string roomID        = 1; // 房號
+    string roundID       = 2; // 回合
+    int64 stageStartAtMs = 3; // 階段開始時間
+    int64 stageEndAtMs   = 4; // 階段結束時間
+}
+
+message StageBetEventData {
+    string roomID        = 1; // 房號
+    string roundID       = 2; // 局號
+    int64 stageStartAtMs = 3; // 階段開始時間
+    int64 stageEndAtMs   = 4; // 階段結束時間
+}
+
+message StageOpenResultEventData {
+    string roomID                 = 1; // 房號
+    string roundID                = 2; // 局號
+    int64 stageStartAtMs          = 3; // 階段開始時間
+    int64 stageEndAtMs            = 4; // 階段結束時間
+    repeated DiceColor diceColors = 5; // 骰子顏色
+    int32 animationNo             = 6; // 開獎動畫號碼 0 ~ 199
+
+    repeated BasicRoomPlayer topBetPlayers = 10; // 下注排行榜
+}
+
+message StageSettlementEventData {
+    string roomID                         = 1; // 房號
+    string roundID                        = 2; // 局號
+    int64 stageStartAtMs                  = 3; // 階段開始時間
+    int64 stageEndAtMs                    = 4; // 階段結束時間
+    repeated DiceBetRecord diceBetRecords = 5; // 骰子下注籌碼
+}
+
+message DiceBetRecord {
+    DiceColor color               = 1; // 顏色
+    uint64 betAmount              = 2; // 押注額
+    string multiple               = 3; // 賠率
+    uint64 gainAmount             = 4; // 收入(不扣本金)
+}
+
+message ChipCount {
+    uint64 chip  = 1; // 籌碼
+    uint32 count = 2; // 籌碼數量
+}
+
+// 推送玩家最新的自動下注資訊
+message PlayerAutoBetEventData {
+    string roomID           = 1; // 房號
+    string roundID          = 2; // 局號
+    AutoBetInfo autoBetInfo = 3; // 自動下注資訊
+}
+
+// 推送玩家結算資訊
+message PlayerSettlementEventData {
+    string roomID                         = 1; // 房號
+    string roundID                        = 2; // 局號
+    repeated DiceBetRecord diceBetRecords = 3; // 骰子下注籌碼
+    int64 balance                         = 4; // 餘額
+}
+
+// 更新 JP 資料
+// 時機：每局結束 & jp 骰子更換的時候
+message JackPotEventData {
+    string RoomID                  = 1;
+    string RoundID                 = 2;
+    JackPotPrize prize             = 3; // jp 獎項
+    uint64 jackpotAmount           = 4; // jp 彩池金額
+    repeated DiceColor jackpotDice = 5; // jackpot 顏色骰子組合
+}
+
+// 玩家中 JP
+// 時機：每局結束
+message PlayerWinJackPotEventData {
+    string roomID      = 1;
+    string roundID     = 2;
+    JackPotPrize prize = 3; // jp 獎項
+    uint64 winJpAmount = 4; // jp 金額
+    int64 balance      = 5; // 餘額
+}
+
+message StopAutoBetEventData {
+    string roomID  = 1;
+    string roundID = 2;
+}
+
+// ++++++++++++++++++++++++
+//
+//  Tape
+//
+// ++++++++++++++++++++++++
+
+message BetOrderTape {
+    string roomID                   = 1;
+    string roundID                  = 2;
+    uint64 BetAmount                = 3; // 總注額
+    uint64 totalGainAmount          = 4; // 總贏飛(不扣本金)
+    int64 totalProfitAndLose        = 5; // 總盈虧(扣本金)
+    repeated DiceColor resultColors = 6; // 開獎結果
+    repeated DiceBetTape diceBets   = 7;
+    int64 createdAt                 = 8;
+}
+
+message DiceBetTape {
+    DiceColor color      = 1;
+    string multiple      = 2; // 賠率
+    uint64 betAmount     = 3; // 注額
+    uint64 gainAmount    = 4; // 贏分(扣除服務費)
+    int64 profitAndLose  = 5; // 盈虧(扣除本金、服務費)
+    uint64 serviceCharge = 6; // 服務費
+}

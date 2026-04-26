@@ -1,0 +1,143 @@
+syntax = "proto3";
+package rowing;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/rowing";
+
+// MessageType
+enum MessageType {
+  PingPong = 0;
+  // [RPC] 加入房間
+  // * req: JoinRoomRequest
+  // * resp: JoinRoomResponse
+  JoinRoom = 1;
+  // [RPC] 離開房間
+  LeaveRoom = 2;
+  // [RPC] 開始新局
+  // * resp: StartNewRoundResponse
+  StartNewRound = 3;
+  // [RPC] 下注
+  // * req: BetRequest
+  // * resp: BetResponse
+  Bet = 4;
+  // [RPC] 近10局歷史紀錄
+  // * resp: ListRecordsResponse
+  ListRecords = 5;
+
+  // [EVENT]
+  BetEvent        = 1001; // 下注事件
+  OpenResultEvent = 1002; // 開獎事件
+
+  LeaveRoomEvent = 1010;  // (單播)離開房間事件。 data: LeaveRoomEventData
+}
+
+enum Boat {
+  BOAT_COLOR_UNKNOWN = 0;
+  PURPLE             = 1;
+  YELLOW             = 2;
+  SKY_BLUE           = 3;
+  RED                = 4;
+  GREEN              = 5;
+  DARK_BLUE          = 6;
+}
+
+enum LeaveRoomReason {
+  LEAVE_ROOM_REASON_UNKNOWN = 0;
+  IDLE                      = 1; // 玩家閒置
+  DISCONNECTED              = 2; // 玩家斷線
+  ServerShutDown            = 3;
+}
+
+message Room {
+  string roomID = 1;
+  string roundID = 2;
+}
+
+message RoomPlayer {
+  uint64 userID            = 1;
+  string avatarURL         = 2;  // 頭像 URL
+  string nickname          = 3;  // 暱稱
+  uint64 vipLevel          = 4;  // VIP 等級
+  uint64 level             = 5;  // level
+  int64 balance            = 6;  // 餘額
+  uint64 betAmount         = 8;  // 注額
+}
+
+message JoinRoomRequest {
+  string roomID          = 1;
+}
+
+message JoinRoomResponse {
+  Room room     = 1;
+  RoomPlayer me = 2;
+}
+
+message StartNewRoundResponse {
+  string roundID = 1; // 新局號
+  repeated BoatInfo boatInfos = 2;
+}
+
+message BetRequest {
+  Boat boat        = 1; // 賽艇
+  uint64 betAmount = 2; // 注額
+}
+
+message BetResponse {
+  int64 balance         = 1;  // 餘額
+  Boat boat             = 2;
+  uint64 totalBetAmount = 3;
+}
+
+message BoatInfo {
+  Boat boat         = 1; // 船
+  uint64 odds       = 2; // 賠率
+  uint32 ranking    = 3; // 名次
+  uint64 betAmount  = 4; // 注額
+  uint64 gainAmount = 5; // 贏分（含本金）
+}
+
+
+message ListRecordsResponse {
+  repeated RoundRecord recentRecords = 1;
+
+  message RoundRecord {
+    string roundID            = 1;
+    repeated Boat boatRanking = 2;
+  }
+}
+
+// +++++++++++++++
+// EVENT
+// +++++++++++++++
+
+
+message BetEventData {
+  string roomID               = 1;
+  uint64 userID               = 2;
+  string roundID              = 3;
+  repeated BoatInfo boatInfos = 4;
+
+}
+
+message OpenResultEventData {
+  string roomID               = 1;
+  uint64 userID               = 2;
+  string roundID              = 3;
+  repeated BoatInfo boatInfos = 4;
+  int64 balance               = 5;
+}
+
+message LeaveRoomEventData {
+  string roomID               = 1;
+  uint64 userID               = 2;
+  LeaveRoomReason leaveReason = 3;
+}
+
+// ++++++++++++++
+// Tape
+// ++++++++++++++
+
+message BetOrderTape {
+  uint64 totalBetAmount       = 1; // 注額
+  uint64 totalGainAmount      = 2; // 收入
+  repeated BoatInfo boatInfos = 3;
+}
+

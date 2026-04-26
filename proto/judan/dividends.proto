@@ -1,0 +1,343 @@
+syntax = "proto3";
+package judan;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/judan";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "google/protobuf/empty.proto";
+import "proto/guild/guild.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+service DividendService {
+    rpc DaliyDividendsReport(DaliyDividendsReportRequest) returns (DaliyDividendsReportResponse);     //列出每日分紅
+    rpc GetAvailableDividends(GetAvailableDividendsRequest) returns (GetAvailableDividendsResponse);  //取得可領取分紅點數
+    rpc PayDividends(PayDividendsRequest) returns (PayDividendsRsponse);                              //領取分紅
+
+    rpc JobSettleHourlyGuildScore(JobSettleGuildScoreRequest) returns (google.protobuf.Empty);                             //每小時統計公會積分
+    rpc JobSettleDailyGuildScore(JobSettleGuildScoreRequest) returns (SettleGuildScoreResponse);                           //每日統計公會積分
+    rpc ListGuildDividendSettle(ListGuildDividendSettleRequest) returns (ListGuildDividendSettleResponse);                 //俱樂部分潤後的清單
+    rpc ListGuildDailyTotalScore(ListGuildDailyScoreRequest) returns (ListGuildDailyScoreResponse);                        //公會每日積分結算清單
+    rpc ListGuildUserGameDailySettle(ListGuildUserGameDailySettleRequest) returns (ListGuildUserGameDailySettleResponse);  //公會每日玩家遊戲積分結算清單
+    rpc ListGuildGameDailySettle(ListGuildGameDailySettleRequest) returns (ListGuildGameDailySettleResponse);              //公會每日遊戲積分結算清單
+
+    rpc ListUserToReferrerPoint(ListUserToReferrerPointRequest) returns (ListUserToReferrerPointResponse);
+
+    rpc JobSettleDailyScore(google.protobuf.Empty) returns (google.protobuf.Empty);
+    rpc ListUserGameDailySettle(ListUserGameDailySettleRequest) returns (ListUserGameDailySettleResponse);
+    rpc ListUserDailySettle(ListUserDailySettleRequest) returns (ListUserDailySettleResponse);
+    rpc ReceiveUserDailySettle(ReceiveUserDailySettleRequest) returns (ReceiveUserDailySettleResponse);
+    rpc ReceiveUserDailyBonusSettle(ReceiveUserDailySettleBonusRequest) returns (ReceiveUserDailySettleBonusResponse);
+    rpc ListUserDailyBonusSettle(ListUserDailyBonusSettleRequest) returns (ListUserDailyBonusSettleResponse);
+}
+
+// 每日分紅資訊列表請求
+message DaliyDividendsReportRequest {
+    uint64 userID = 1;
+    uint64 year   = 2;
+    uint64 month  = 3;
+    uint64 day    = 4;
+
+    uint32 page    = 5;  //頁數
+    uint32 perPage = 6;  //每頁幾筆
+}
+
+// 每日分紅資訊列表響應
+message DaliyDividendsReportResponse {
+    uint64 points         = 1;
+    uint64 totalBetAmount = 2;  //總注額
+    uint64 dividendRatio  = 3;  //紅利比例
+    uint64 vipLevel       = 4;  //vip level
+
+    pagination.Pagination pagination      = 5;  //分頁資訊
+    repeated judan.DividendsData dividens = 6;
+}
+
+message DividendsData {
+    uint64 settleTimestampMs = 1;  //結算時間 timestamp millisecond
+    uint64 userID            = 2;  //玩家id
+    string nickname          = 3;
+    string imageURL          = 4;
+
+    uint64 betPoints      = 5;  //總注額
+    uint64 dividendPoints = 6;  //紅利點數
+}
+
+// 取得可分紅點數請求
+message GetAvailableDividendsRequest {
+    uint64 userID = 1;
+    bool detail   = 2;  //是否需要明細
+}
+
+// 取得可分紅點數響應
+message GetAvailableDividendsResponse {
+    uint64 points                         = 1;
+    uint64 totalBetAmount                 = 2;  //總注額
+    uint64 dividendRatio                  = 3;  //紅利比例
+    uint64 vipLevel                       = 4;  //vip level
+    repeated judan.DividendsData dividens = 5;  //明細
+}
+
+message PayDividendsRequest {
+    uint64 userID = 1;
+}
+
+enum DividendSettleJob {
+    JobSettleGuildDividends = 0;
+}
+
+message JobSettleGuildScoreRequest {
+    int64 startMsGte = 1;
+    int64 endMsLte   = 2;
+    string guildID   = 3;
+}
+message SettleGuildScoreResponse {
+    repeated SettleGuildScore settleGuildScore = 1;
+}
+message SettleGuildScore {
+    int64 settleDate        = 1;  // 結算日期
+    uint64 totalScore       = 2;  // 總積分
+    uint64 score            = 3;  // 積分
+    uint64 rate             = 4;  // 比例
+    int64 dividendAmount    = 5;  // 金幣
+    uint64 userID           = 6;
+    guild.Position position = 7;
+}
+message PayDividendsRsponse {
+    uint64 amount = 1;
+}
+message ListGuildDividendSettleRequest {
+    string guildID          = 1;
+    uint64 userID           = 2;
+    repeated uint64 userIDs = 3;
+    repeated string guilds  = 4;
+    int64 startDate         = 5;  // settle date 起算
+    int64 endDate           = 6;  // settle date 結算
+    uint32 page             = 7;
+    uint32 perPage          = 8;
+    bool isNoShowZero       = 9;
+    int64 createdStartDate  = 10;  // created date 起算
+    int64 createdEndDate    = 11;  // created date 結算
+    int64 rateGt            = 12;
+    bool rateGtCheck        = 13;
+    int64 sortType          = 14;
+}
+
+message ListGuildDividendSettleResponse {
+    repeated GuildDividendSettle data = 1;
+    pagination.Pagination pagination  = 2;
+}
+
+message GuildDividendSettle {
+    string guildID          = 1;  // 公會ID
+    uint64 userID           = 2;
+    int64 score             = 3;  // 積分
+    int64 points            = 4;  // 分潤後
+    uint64 settleDate       = 5;  // 結算日
+    guild.Position position = 6;
+    int64 rate              = 7;  // 比例
+    int64 pointsNoOwner     = 8;  // 扣除自己分潤後
+    int64 totalScore        = 9;  // 總積分
+    int64 createdAt         = 10;
+}
+
+message ListGuildDailyScoreRequest {
+    string guildID         = 1;
+    repeated string guilds = 4;
+    int64 startDate        = 5;  // 起算
+    int64 endDate          = 6;  // 結算
+    uint32 page            = 7;
+    uint32 perPage         = 8;
+}
+message ListGuildDailyScoreResponse {
+    repeated GuildDailyTotalScore data = 1;
+    pagination.Pagination pagination   = 2;
+}
+
+message GuildDailyTotalScore {
+    string guildID          = 1;  // 公會ID
+    int64 score             = 2;  // 積分
+    uint64 settleDate       = 3;  // 結算日
+    int64 CreatedTime       = 4;
+    int64 slotScore         = 5;  // 電子遊戲總積分
+    int64 hundredScore      = 6;  // 百人積分
+    int64 videoScore        = 7;  // 視訊積分
+    int64 hundredBetScore   = 8;  // 百人下注積分
+    int64 slotBetScore      = 9;  // 電子遊戲下注積分
+    int64 noOwnerTotalScore = 10;
+    string guildName        = 11;  // 公會名稱
+    uint64 jpScore          = 12;  // jp 獎池
+}
+message ListGuildUserGameDailySettleRequest {
+    int64 startDate = 1;  // 起算
+    int64 endDate   = 2;  // 結算
+    uint64 userID   = 3;
+}
+message ListGuildUserGameDailySettleResponse {
+    repeated GuildUserGame data = 1;
+}
+
+message GuildUserGame {
+    string guildID          = 1;  // 公會ID
+    uint64 userID           = 2;
+    int64 score             = 3;  // 積分
+    int64 points            = 4;  // 分潤後
+    uint64 settleDate       = 5;  // 結算日
+    guild.Position position = 6;
+    int64 rate              = 7;  // 比例
+    int64 pointsNoOwner     = 8;  // 扣除自己分潤後
+    uint64 gameID           = 9;
+}
+
+message ListGuildGameDailySettleRequest {
+    int64 startDate         = 1;  // 起算
+    int64 endDate           = 2;  // 結算
+    uint64 gameID           = 3;
+    repeated uint64 gameIDs = 4;
+    int64 page              = 5;
+    int64 perPage           = 6;
+}
+
+message ListGuildGameDailySettleResponse {
+    repeated GuildGameDailySettle guildGameDailySettle = 1;
+    pagination.Pagination pagination                   = 2;
+}
+message GuildGameDailySettle {
+    uint64 gameID       = 1;
+    int64 score         = 2;
+    int64 pointsNoOwner = 3;
+}
+
+message GuildScoreAndPointsNoOwner {
+    int64 score         = 1;  // 積分
+    int64 pointsNoOwner = 2;  // 扣除自己分潤後
+}
+message ListUserToReferrerPointRequest {
+    uint64 userID          = 1;
+    uint64 referrerID      = 2;
+    int64 createdStartTime = 3;
+    int64 createdEndTime   = 4;
+    string guildID         = 5;
+}
+
+message ListUserToReferrerPointResponse {
+    repeated GuildUserToReferrerPoint userToReferrerPoint = 1;
+}
+
+message GuildUserToReferrerPoint {
+    string guildID              = 1;
+    uint64 userID               = 2;
+    int64 createdAt             = 3;
+    uint64 settleDate           = 4;   // 結算日
+    int64 score                 = 5;   // 個人分數
+    int64 points                = 6;   // 個人分潤
+    int64 totalScore            = 7;   // 個人總積分
+    int64 referrerRate          = 8;   // 上級抽取的趴數
+    guild.Position position     = 9;   // 個人職位
+    uint64 referrerID           = 10;  // 上級 userID
+    uint64 referrerPoint        = 11;  // 上級分潤
+    ReferrerLevel referrerLevel = 12;  // 上級階層
+}
+enum ReferrerLevel {
+    REFERRER_LEVEL_UNKNOWN = 0;
+    REFERRER_LEVEL_FIRST   = 1;
+    REFERRER_LEVEL_SECOND  = 2;
+    REFERRER_LEVEL_THIRD   = 3;
+    REFERRER_LEVEL_FOURTH  = 4;
+    REFERRER_LEVEL_FIFTH   = 5;
+}
+
+message ListGuildTotalScoreRequest {
+    string guildID         = 1;
+    int64 createdStartTime = 2;
+    int64 createdEndTime   = 3;
+}
+
+message ListGuildTotalScoreResponse {
+    repeated GuildDailyTotalScore guildDailyTotalScore = 1;
+}
+
+message TopicGuildDailyScore {
+    string guildID            = 1;  // 俱樂部
+    int64 settleDate          = 2;  // 結算日期 ex: 20240918
+    int64 totalDividendAmount = 3;  // 分潤金幣
+}
+
+message TopicPlayerDailyScore {
+    uint64 userID          = 1;  // 用戶ID
+    string settleDate      = 2;  // 結算日期 ex: 20240918
+    int64 dailyAwardAmount = 3;  // 每日回饋金額
+}
+
+message ListUserGameDailySettleRequest {
+    int64 startDate   = 1;  // 起算
+    int64 endDate     = 2;  // 結算
+    uint64 userID     = 3;
+    int64 createdAtEq = 4;
+}
+message ListUserGameDailySettleResponse {
+    repeated UserGameScore data = 1;
+}
+
+message UserGameScore {
+    uint64 userID   = 1;
+    int64 score     = 2;  // 積分
+    int64 createdAt = 3;  // 結算日
+    uint64 gameID   = 4;
+    int64 winCoin   = 5;
+}
+
+message ListUserDailySettleRequest {
+    int64 startDate       = 1;  // 起算
+    int64 endDate         = 2;  // 結算
+    uint64 userID         = 3;
+    int64 page            = 4;
+    int64 perPage         = 5;
+    yesno.YesNo isReceive = 6;  // 是否領取
+}
+message ListUserDailySettleResponse {
+    repeated UserScore data          = 1;
+    pagination.Pagination pagination = 2;
+}
+
+message UserScore {
+    uint64 userID         = 1;
+    uint64 score          = 2;  // 積分
+    int64 createdAt       = 3;  // 結算日
+    uint64 points         = 4;
+    int64 rate            = 5;
+    yesno.YesNo isReceive = 6;  // 是否領取
+}
+message ReceiveUserDailySettleRequest {
+    uint64 userID = 1;
+}
+message ReceiveUserDailySettleResponse {
+    uint64 awardScore                  = 1;
+    repeated DailyScoreAwardBonus data = 2;
+}
+
+message ReceiveUserDailySettleBonusRequest {
+    int64 bonusId = 1;
+    uint64 userID = 2;
+}
+
+message ReceiveUserDailySettleBonusResponse {
+    DailyScoreAwardBonus data = 1;
+}
+message DailyScoreAwardBonus {
+    int64 bonusType        = 1;  // 1 :小 2:大
+    int64 unLockTime       = 2;  // 解鎖時間
+    int64 receiveTime      = 3;  // 領取時間
+    int64 awardBonus       = 4;  // 金額
+    int64 createdTime      = 5;  // 創立時間
+    int64 endTime          = 6;  // 到期時間
+    int64 bonusID          = 7;
+    int64 awardBeforeBonus = 8;  // 比例前金額
+    int64 awardRate        = 9;  // 比例
+}
+
+message ListUserDailyBonusSettleRequest {
+    uint64 userID = 1;
+}
+
+message ListUserDailyBonusSettleResponse {
+    repeated DailyScoreAwardBonus data = 1;
+}

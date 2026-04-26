@@ -1,0 +1,432 @@
+syntax = "proto3";
+package dsk;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/dsk";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "google/protobuf/wrappers.proto";
+
+service DSKService {
+  rpc GetGateways(GetGatewaysReq) returns (GetGatewaysResp);
+  rpc GetOrderRequest(GetOrderRequestReq) returns (GetOrderRequestResp);
+  rpc GetOrders(GetOrdersReq) returns (GetOrdersResp);
+  rpc CreateOrderRequest(CreateOrderRequestReq) returns (CreateOrderRequestResp);
+
+  rpc IDRRealPayOrderCallback(IDRRealPayOrderCallbackReq) returns (IDRRealPayOrderCallbackResp);
+  rpc IDRNicePayOrderCallback(IDRNicePayOrderCallbackReq) returns (IDRNicePayOrderCallbackResp);
+  rpc IDRTopPayOrderCallback(IDRTopPayOrderCallbackReq) returns (IDRTopPayOrderCallbackResp);
+  rpc IDRWowPayOrderCallback(IDRWowPayOrderCallbackReq) returns (IDRWowPayOrderCallbackResp);
+  rpc IDRDeePayOrderCallback(IDRDeePayOrderCallbackReq) returns (IDRDeePayOrderCallbackResp);
+  rpc IDRHaloPayOrderCallback(IDRHaloPayOrderCallbackReq) returns (IDRHaloPayOrderCallbackResp);
+
+  rpc PHPLetsPayOrderCallback(PHPLetsPayOrderCallbackReq) returns (PHPLetsPayOrderCallbackResp);
+  rpc PHPHaloPayOrderCallback(PHPHaloPayOrderCallbackReq) returns (PHPHaloPayOrderCallbackResp);
+  rpc PHPFastPayOrderCallback(PHPFastPayOrderCallbackReq) returns (PHPFastPayOrderCallbackResp);
+
+  rpc USDPayPlusOrderCallback(USDPayPlusOrderCallbackReq) returns (USDPayPlusOrderCallbackResp);
+}
+
+
+message GetGatewaysReq {
+  repeated int64 idIn                                  = 1;
+  repeated string gatewayTypeIn                        = 3;
+  repeated string gatewayMerchantPaymentCurrencyCodeIn = 12;
+}
+message GetGatewaysResp {
+  repeated GetGatewaysRespGateway gateways = 1;
+}
+message GetGatewaysRespGateway {
+  int64 id                                  = 1;
+  string gatewayName                        = 2;
+  GatewayType gatewayType                   = 3;
+  GatewayStatus gatewayStatus               = 4;
+  GatewayStatus gatewayStatusRec            = 5;
+  string gatewayStatusPay                   = 6;
+  int32 gatewayPriorityRec                  = 7;
+  int32 gatewayPriorityPay                  = 8;
+  // string gatewayMerchantID = 9;
+  // string gatewayMerchantAppID = 10;
+  // string gatewayMerchantSecret = 11;
+  string gatewayMerchantPaymentCurrencyCode = 12;
+  string gatewayMerchantBalance             = 13;
+  // gatewayMerchantFrozenBalance
+}
+
+
+message GetOrderRequestReq {
+  string orderRequestUID = 1;
+}
+message GetOrderRequestResp {
+  string orderRequestUID                = 1;
+  OrderStatus orderStatus               = 2;
+  GatewayType gatewayType               = 3;
+  PaymentMode paymentMode               = 4;
+  string expectedAmount                 = 5;
+  string actualAmount                   = 6;
+  string gatewayErrorCode               = 7;
+  string gatewayErrorMessage            = 8;
+  int64 completedAtTimestampMillisecond = 9;
+}
+
+message GetOrdersReq {
+  uint32 page                                    = 1; // 頁數
+  uint32 perPage                                 = 2; // 每頁幾筆
+  repeated string orderUIDIn                     = 3;
+  repeated string orderRequestUIDIn              = 4;
+  repeated OrderStatus orderStatusIn             = 5;
+  repeated PaymentMode paymentModeIn             = 6;
+  repeated PaymentAccountType paymentAccountType = 7;
+}
+
+message GetOrdersResp {
+  pagination.Pagination pagination   = 1;
+  repeated GetOrdersRespOrder orders = 2;
+}
+
+message GetOrdersRespOrder {
+  int64 id                = 1;
+  string orderUID         = 2;
+  string oldOrderUID      = 3;
+  string orderRequestUID  = 4;
+  OrderStatus orderStatus = 5;
+
+  int64 gatewayID                             = 21;
+  string gatewayName                          = 22;
+  string gatewayMerchantID                    = 23;
+  string gatewayMerchantAppID                 = 24;
+  string gatewayOrderUID                      = 25;
+  int64 gatewayCallbackAtTimestampMillisecond = 26;
+  string gatewayErrorCode                     = 27;
+  string gatewayErrorMessage                  = 28;
+
+  PaymentMode paymentMode               = 41;
+  PaymentAccountType paymentAccountType = 42;
+  string paymentCurrencyCode            = 43;
+  string accountTypePay                 = 44;
+  string accountIDPay                   = 45;
+  string accountNamePay                 = 46;
+  string bankCodePay                    = 47;
+  string accountTypeRec                 = 48;
+  string accountIDRec                   = 49;
+  string accountNameRec                 = 50;
+  string bankCodeRec                    = 51;
+  string paymentURL                     = 52;
+  string paymentQRCode                  = 53;
+  string expectedAmount                 = 54;
+  string actualAmount                   = 55;
+
+  int64 completedAtTimestampMillisecond = 70;
+  int64 expiredAtTimestampMillisecond   = 71;
+  int64 updatedAtTimestampMillisecond   = 72;
+  int64 createdAtTimestampMillisecond   = 73;
+}
+
+message CreateOrderRequestReq {
+  GatewayType gatewayType               = 1;
+  PaymentMode paymentMode               = 2;
+  PaymentAccountType paymentAccountType = 3;
+  string paymentCurrencyCode            = 4;
+  string amount                         = 5;
+  string accountTypePay                 = 6;
+  string accountIDPay                   = 7;
+  string accountNamePay                 = 8;
+  string bankCodePay                    = 9;
+  string accountTypeRec                 = 10;
+  string accountIDRec                   = 11;
+  string accountNameRec                 = 12;
+  string bankCodeRec                    = 13;
+
+  string email     = 21;
+  string phone     = 22; // 格式 886-912345678 或 1-2125551234
+  string firstName = 23;
+  string lastName  = 24;
+  string birthday  = 25; // yyyy-MM-dd
+  string country   = 26;
+  string city      = 27;
+  string state     = 28;
+  string zip       = 29;
+  string address   = 30;
+  string language  = 31; // en-US
+  string ip        = 32;
+}
+message CreateOrderRequestResp {
+  string orderRequestUID              = 1;
+  string paymentURL                   = 2;
+  string paymentQRCode                = 3;
+  int64 expiredAtTimestampMillisecond = 4;
+  int64 createdAtTimestampMillisecond = 5;
+  GatewayType gatewayType             = 6;
+  string gatewayOrderUID              = 7;
+}
+
+
+message IDRRealPayOrderCallbackReq {
+  google.protobuf.StringValue mchtId            = 1;
+  google.protobuf.StringValue orderId           = 2;
+  string tradeId                                = 3;
+  google.protobuf.StringValue amount            = 4;
+  string status                                 = 5;
+  google.protobuf.StringValue payType           = 6;
+  google.protobuf.StringValue chargeTime        = 7;
+  google.protobuf.StringValue seq               = 8;
+  google.protobuf.StringValue biz               = 9;
+  google.protobuf.StringValue param             = 10;  
+  string sign                                   = 11;
+
+  string rawBody = 12; // 被加密的字串
+}
+message IDRRealPayOrderCallbackResp {
+  string orderRequestUID = 1;
+  string orderUID        = 2;
+  string status          = 3; // 解密後的原始資料
+  string totalAmount     = 4; // 解密後的原始資料
+}
+
+
+message IDRNicePayOrderCallbackReq {
+  string order = 1;
+  int64 amount = 2;
+  int64 status = 3;
+  string sign  = 4;
+}
+message IDRNicePayOrderCallbackResp {
+  string orderRequestUID  = 1;
+  string orderUID         = 2;
+  PaymentMode paymentMode = 3; // 講一下是 Rec 還 Pay
+}
+
+
+message IDRTopPayOrderCallbackReq {
+  string platOrderNum = 1;
+  string orderNum     = 2;
+  string status       = 3;
+  string name         = 4;
+  string platSign     = 5;
+
+  // Rec
+  google.protobuf.StringValue code        = 6;
+  google.protobuf.StringValue msg         = 7;
+  google.protobuf.StringValue method      = 8;
+  google.protobuf.StringValue payMoney    = 9;
+  google.protobuf.StringValue payFee      = 10;
+  google.protobuf.StringValue email       = 11;
+  google.protobuf.StringValue phone       = 12;
+
+  // Pay
+  google.protobuf.StringValue money       = 13;
+  google.protobuf.StringValue fee         = 14;
+  google.protobuf.StringValue feeType     = 15;
+  google.protobuf.StringValue number      = 16;
+  google.protobuf.StringValue bankCode    = 17;
+  google.protobuf.StringValue statusMsg   = 18;
+  google.protobuf.StringValue description = 19;
+}
+message IDRTopPayOrderCallbackResp {
+  string orderRequestUID  = 1;
+  string orderUID         = 2;
+  PaymentMode paymentMode = 3; // 講一下是 Rec 還 Pay
+}
+
+
+message IDRWowPayOrderCallbackReq {
+  string rawBody = 1; // 原始 Request Body
+  string sign = 2;
+}
+message IDRWowPayOrderCallbackResp {
+  string orderRequestUID = 1;
+  string orderUID        = 2;
+}
+
+
+message IDRDeePayOrderCallbackReq {
+  string status      = 1;
+  string mchId       = 2;
+  string mchOrderId  = 3;
+  string platOrderId = 4;
+  string amount      = 5;
+  string cost        = 6;
+  string refMsg      = 7;
+  string refCode     = 8;
+  string sign        = 9;
+  string payCode     = 10;
+}
+message IDRDeePayOrderCallbackResp {
+  string orderRequestUID  = 1;
+  string orderUID         = 2;
+  PaymentMode paymentMode = 3; // 講一下是 Rec 還 Pay
+}
+
+
+message IDRHaloPayOrderCallbackReq {
+  string merchantId      = 1;
+  string status          = 2;
+  string merchantOrderNo = 3;
+  string payOrderNo      = 4;
+  string amount          = 5;
+  string completionDate  = 6;
+  string message         = 7;
+  string sign            = 8;
+}
+message IDRHaloPayOrderCallbackResp {
+  string orderRequestUID  = 1;
+  string orderUID         = 2;
+  PaymentMode paymentMode = 3; // 講一下是 Rec 還 Pay
+}
+
+
+message PHPLetsPayOrderCallbackReq {
+  string mchId         = 1;
+  string orderNo       = 2;
+  string amount        = 3;
+  string product       = 4;
+  string paySuccTime   = 5;
+  string status        = 6;
+
+  string mchTransNo    = 7;
+  string transSuccTime = 8;
+  string msg           = 9;
+
+  string sign          = 10;
+}
+message PHPLetsPayOrderCallbackResp {
+  string orderRequestUID  = 1;
+  string orderUID         = 2;
+  PaymentMode paymentMode = 3; // 講一下是 Rec 還 Pay
+  GatewayType gatewayType = 4;
+  string bankCodeRec      = 5;
+}
+
+
+message PHPHaloPayOrderCallbackReq {
+  string merchantId      = 1;
+  string status          = 2;
+  string merchantOrderNo = 3;
+  string payOrderNo      = 4;
+  string amount          = 5;
+  string completionDate  = 6;
+  string message         = 7;
+  string sign            = 8;
+}
+message PHPHaloPayOrderCallbackResp {
+  string orderRequestUID  = 1;
+  string orderUID         = 2;
+  PaymentMode paymentMode = 3; // 講一下是 Rec 還 Pay
+  GatewayType gatewayType = 4;
+  string bankCodeRec      = 5;
+}
+
+
+message PHPFastPayOrderCallbackReq {
+  string merNo              = 1;
+  string orderNo            = 2;
+  string paytypecode        = 3;
+  string orderAmount        = 4;
+  string orderRealityamount = 5;
+  string status             = 6;
+
+  string currency           = 7;
+  string result             = 8;
+  string result_mes         = 9;
+  string sys_no             = 10;
+
+  string sign            = 11;
+}
+message PHPFastPayOrderCallbackResp {
+  string orderRequestUID  = 1;
+  string orderUID         = 2;
+  PaymentMode paymentMode = 3; // 講一下是 Rec 還 Pay
+  GatewayType gatewayType = 4;
+  string bankCodeRec      = 5;
+}
+
+
+message USDPayPlusOrderCallbackReq {
+  bytes data  = 1;
+  string sign = 2;
+}
+message USDPayPlusOrderCallbackResp {
+  string orderRequestUID  = 1;
+  string orderUID         = 2;
+  PaymentMode paymentMode = 3; // 講一下是 Rec 還 Pay
+  GatewayType gatewayType = 4;
+  string bankCodeRec      = 5;
+}
+
+
+enum GatewayType {
+  UnknownGatewayType    = 0;
+
+  // 印尼盾 第三方支付
+  IDRRealPay = 1;
+  IDRNicePay = 2;
+  IDRTopPay  = 3;
+  IDRWowPay  = 4;
+  IDRDeePay  = 6;
+  IDRHaloPay = 7;
+
+  // 菲律賓 第三方支付
+  PHPLetsPayGCash   = 11; // 原生
+  PHPLetsPayGCashII = 12; // 跑分
+  PHPLetsPayMaya    = 13;
+  PHPHaloPay        = 14;
+  PHPFastPay        = 15;
+
+  // 美國 第三方支付
+  USDPayPlus = 21;
+}
+
+
+enum PaymentTypeRec {
+  UnknownPaymentTypeRec = 0;
+  Default               = 1;
+
+  OVO       = 2;
+  DANA      = 3;
+  LinkAJA   = 4;
+  ShopeePay = 5;
+  GoPay     = 6;
+
+  GCash     = 7;
+  Maya      = 8;
+  GrabPay   = 9;
+  // ShopeePay = 5;
+  QRCode    = 10;
+
+  GooglePay  = 11;
+  ApplePay   = 12;
+  PayPal     = 13;
+  CreditCard = 14;
+  CashAPP    = 15;
+  ACH        = 16;
+}
+
+
+enum GatewayStatus {
+  UnknownGatewayStatus = 0;
+  Enabled              = 1;
+  Disabled             = 2;
+}
+
+
+enum PaymentMode {
+  UnknownPaymentMode = 0;
+  Rec                = 1;
+  Pay                = 2;
+}
+
+
+enum PaymentAccountType {
+  UnknownPaymentAccountType = 0;
+  Bank                      = 1;
+  EWallet                   = 2;
+}
+
+
+enum OrderStatus {
+  UnknownOrderStatus        = 0;
+  OrderStatusPreflight      = 1;
+  OrderStatusProcessing     = 2;
+  OrderStatusSuccess        = 3;
+  OrderStatusFailed         = 4;
+  OrderStatusNeedConfirmed  = 5;
+  OrderStatusCreationFailed = 6;
+}
