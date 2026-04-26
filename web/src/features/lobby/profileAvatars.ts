@@ -1,4 +1,4 @@
-/** Preset head icons; replace with `/imgs/...` or CDN URL when final art is in repo */
+/** Preset head icons; replace with `/images/...` or CDN URL when final art is in repo */
 export type ProfileAvatar = {
   id: string
   imageSrc: string

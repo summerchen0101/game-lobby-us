@@ -1,7 +1,7 @@
 import './LobbyComplianceFooter.css'
 
-const LOGO_SRC = '/imgs/others/img_logo.png'
-const AGE_SRC = '/imgs/others/icon_21UP.png'
+const LOGO_SRC = '/images/compliance/img_logo.png'
+const AGE_SRC = '/images/compliance/icon_21UP.png'
 
 const LINK_COL_A: { href: string; label: string }[] = [
   { href: '#terms', label: 'Terms of Service' },

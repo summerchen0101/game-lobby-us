@@ -5,7 +5,7 @@ import "../lobby/SessionPageDecor.css";
 import { ShopCheckoutOverlay } from "./ShopCheckoutOverlay";
 import type { Pack } from "./types";
 
-const PANEL = "/imgs/panel/Panel_Shop";
+const PANEL = "/images/shop";
 
 const PACKS: Pack[] = [
   { id: "1", gcLabel: "600K", bonusSc: 2, price: "$1.99", coinPile: 1 },

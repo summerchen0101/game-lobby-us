@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import './MarketingTopBar.css'
 
-const BRAND_LOGO = '/imgs/brand-logo.webp'
+const BRAND_LOGO = '/images/brand/brand-logo.webp'
 
 type NavBtn = { to: string; label: string }
 

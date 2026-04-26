@@ -39,7 +39,7 @@ export function IosInstallGuide() {
         </h2>
         <img
           className="ios-guide__icon"
-          src="/imgs/pwa_icon.png"
+          src="/images/app/pwa_icon.png"
           alt=""
           width={80}
           height={80}

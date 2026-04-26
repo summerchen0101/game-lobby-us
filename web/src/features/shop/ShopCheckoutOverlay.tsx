@@ -8,7 +8,7 @@ import "./ShopCheckout.css";
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import type { Pack } from "./types";
 
-const PANEL = "/imgs/panel/Panel_Shop";
+const PANEL = "/images/shop";
 
 type Step = "summary" | "protect" | "card";
 

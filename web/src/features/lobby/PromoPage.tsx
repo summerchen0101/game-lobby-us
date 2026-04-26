@@ -15,14 +15,14 @@ const PROMOS: {
     id: '1',
     title: 'Daily Bonus',
     desc: 'Open daily bonus rewards and claim your free credits.',
-    artSrc: '/imgs/panel/Panel_Promo/icon_daily.png',
+    artSrc: '/images/promo/icon_daily.png',
     cta: 'view',
   },
   {
     id: '2',
     title: 'Invite Friends',
     desc: 'Refer friends to earn free sweepstakes coins in the store.',
-    artSrc: '/imgs/panel/Panel_Promo/icon_invite.png',
+    artSrc: '/images/promo/icon_invite.png',
     cta: 'invite',
   },
 ]

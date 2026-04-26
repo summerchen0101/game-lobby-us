@@ -4,8 +4,7 @@ import type { ActiveWallet } from "../../wallet/walletContext";
 const G = "https://static.crowncoinscasino.com/production/assets/games";
 
 /** 直向大廳 Panel 背景（public） */
-export const PANEL_VERTICAL_LOBBY_BG_BASE =
-  "/imgs/panel/Panel_VerticalLobby/bg";
+export const PANEL_VERTICAL_LOBBY_BG_BASE = "/images/lobby/bg";
 
 export const PANEL_BG_UNLOGIN = `${PANEL_VERTICAL_LOBBY_BG_BASE}/tmp_unLoginBg.png`;
 export const PANEL_BG_GC = `${PANEL_VERTICAL_LOBBY_BG_BASE}/tmp_GCbg.png`;
@@ -19,10 +18,10 @@ export function unityDemoGameUrl(): string {
   return import.meta.env.VITE_UNITY_DEMO_URL?.trim() || DEFAULT_UNITY_DEMO_URL;
 }
 
-/** 本地遊戲卡圖（放於 public/imgs/game-entry）；檔名：entry_slot{N}_L.png */
-export const GAME_ENTRY_BASE = "/imgs/game-entry";
+/** 本地遊戲卡圖（放於 public/images/games/entry）；檔名：entry_slot{N}_L.png */
+export const GAME_ENTRY_BASE = "/images/games/entry";
 
-/** 與 public/imgs/game-entry 內檔案對齊，依 slot 編號數字排序（不含 entry_slotLoading_L 等）。 */
+/** 與 public/images/games/entry 內檔案對齊，依 slot 編號數字排序（不含 entry_slotLoading_L 等）。 */
 const GAME_ENTRY_SLOT_IDS: number[] = [
   1, 2, 4, 8, 15, 16, 18, 20, 21, 35, 41, 42, 43, 45, 46, 47, 50, 51, 52, 55,
   56, 57, 58, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71, 72, 74, 75, 76, 77,

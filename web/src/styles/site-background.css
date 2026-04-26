@@ -12,7 +12,7 @@ body {
       var(--theme-radial-gold-body),
       transparent 50%
     ),
-    url("/imgs/panel/Panel_VerticalLobby/bg/Pattern_bg.png");
+    url("/images/lobby/bg/Pattern_bg.png");
   background-repeat: no-repeat, no-repeat, repeat;
   background-size:
     auto,

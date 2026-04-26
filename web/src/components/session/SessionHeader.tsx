@@ -9,7 +9,7 @@ import { getWalletDisplay } from '../../wallet/formatWalletAmount'
 import { useWallet } from '../../wallet/walletContext'
 import './SessionChrome.css'
 
-const BRAND_LOGO = '/imgs/brand-logo.webp'
+const BRAND_LOGO = '/images/brand/brand-logo.webp'
 
 export function SessionHeader() {
   const { user } = useAuth()
