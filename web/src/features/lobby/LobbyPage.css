@@ -384,7 +384,7 @@
   text-transform: uppercase;
 }
 
-/* ALL 橫列與其他 tab 的 3 欄格狀同寬：一欄 = (容器寬 − 2 個 row-gap) / 3 */
+/* ALL 橫列與格狀同寬：n 欄 = (容器寬 − (n−1) 個 gap) / n；預設 3 欄，寬螢 4 欄見下方 media */
 .lobby-landing--session .lobby-games-group {
   container-type: inline-size;
 }
@@ -401,6 +401,16 @@
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+@media (min-width: 64rem) {
+  .lobby-landing--session .lobby-games-group .lobby-game-card {
+    width: calc((100cqi - 3 * var(--space-3)) / 4);
+  }
+
+  .lobby-games-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .lobby-games-grid__item {
@@ -539,6 +549,12 @@
 
 @media (min-width: 64rem) {
   .lobby-benefits__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 80rem) {
+  .lobby-benefits__grid {
     grid-template-columns: repeat(6, 1fr);
   }
 }
@@ -654,10 +670,11 @@ html.guest-lobby-page body::-webkit-scrollbar {
   margin: 0;
   max-width: none;
   border-radius: 0;
-  overflow: hidden;
+  /* 不可對整區 overflow:hidden，否則絕對定位的 CTA 與 box-shadow 會被切掉 */
+  overflow: visible;
   line-height: 0;
   box-shadow: none;
-  padding: 3.5rem 0;
+  padding: 3.5rem 0 3rem;
   background: #000;
 }
 
@@ -702,12 +719,13 @@ html.guest-lobby-page body::-webkit-scrollbar {
   left: 50%;
   bottom: clamp(0.5rem, 2dvw, 0.95rem);
   z-index: 2;
-  width: min(17.5rem, calc(100% - 2 * var(--page-pad-inline)));
+  width: min(19.5rem, calc(100% - 2 * var(--page-pad-inline)));
+  max-width: calc(100% - 1rem);
   min-height: 2.35rem;
   padding-inline: var(--space-3);
   font-size: 0.68rem;
   letter-spacing: 0.055em;
-  transform: translate(-50%, 0.25rem);
+  transform: translateX(-50%);
   box-sizing: border-box;
   box-shadow:
     0 3px 0 var(--crown-gold-shadow),

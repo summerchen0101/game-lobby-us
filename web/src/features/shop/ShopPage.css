@@ -52,6 +52,19 @@
   padding: 0;
 }
 
+@media (min-width: 48rem) {
+  .shop-page__inner {
+    max-width: min(44rem, 100%);
+  }
+}
+
+@media (min-width: 64rem) {
+  .shop-page__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(0.35rem, 0.9vw, var(--space-3));
+  }
+}
+
 .shop-page__card {
   display: flex;
   flex-direction: column;

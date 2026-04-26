@@ -1,7 +1,8 @@
 /* 設計 token：字型、斷點、間距、安全區（色票在 theme-palette.css） */
 :root {
-  --font-sans: 'Outfit Variable', 'Outfit', system-ui, -apple-system, 'Segoe UI', Roboto,
-    'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  --font-sans:
+    "Outfit Variable", "Outfit", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
   --text-hero: clamp(1.35rem, 1rem + 1.5vw, 1.75rem);
   --text-body: clamp(0.9rem, 0.88rem + 0.2vw, 1rem);
   --text-small: 0.8125rem;
@@ -26,9 +27,9 @@
   --session-footer-h: calc(3.6rem + var(--safe-bottom));
 
   /* 斷點（用於 container / media；語意化命名） */
-  --bp-narrow: 30rem;   /* 480 */
-  --bp-tablet: 48rem;   /* 768 */
-  --bp-wide: 64rem;     /* 1024 */
+  --bp-narrow: 30rem; /* 480 */
+  --bp-tablet: 48rem; /* 768 */
+  --bp-wide: 64rem; /* 1024 */
 
   --page-pad: clamp(var(--space-3), 2.5vw, var(--space-6));
   /* 內容區左右：在 page-pad 上再加一層，與 /shop 一致、全站共用 */
@@ -45,6 +46,13 @@
 html {
   height: 100%;
   -webkit-text-size-adjust: 100%;
+}
+
+/* 平板起略放大 1rem 基準；凡用 rem 的字、間距、Session 頂底欄等一併略增 */
+@media (min-width: 48rem) {
+  html {
+    font-size: 160%;
+  }
 }
 
 body {
