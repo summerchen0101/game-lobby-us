@@ -1,57 +1,67 @@
-.pwa-banner {
+.pwa-install {
   position: fixed;
-  z-index: 2000;
-  left: 50%;
-  /* 行動版避開底部導航列；桌機用較大 bottom + safe */
-  bottom: max(1.25rem, var(--safe-bottom));
-  transform: translateX(-50%);
-  width: min(26rem, calc(100vw - var(--page-pad-inline) * 2));
-  padding: var(--space-4);
-  border-radius: var(--crown-card-radius);
-  background: var(--crown-surface-dark);
-  border: 1px solid rgb(255 255 255 / 12%);
-  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.55);
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: max(var(--page-pad), var(--safe-top));
+  padding-bottom: max(var(--page-pad), var(--safe-bottom));
+  padding-left: var(--page-pad-inline);
+  padding-right: var(--page-pad-inline);
+  background: rgba(0, 0, 0, 0.65);
 }
 
-.pwa-banner__text {
-  margin: 0 0 var(--space-3);
-  font-size: var(--text-small);
+.pwa-install__card {
+  width: 100%;
+  max-width: 24rem;
+  padding: 1.5rem 1.25rem 1.25rem;
+  border-radius: 1.5rem;
+  background: #fff;
+  color: #111;
   text-align: center;
-  color: var(--color-text);
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.25);
 }
 
-.pwa-banner__actions {
+.pwa-install__text {
+  margin: 0 0 1.25rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.pwa-install__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: 0.625rem;
   justify-content: center;
 }
 
-.pwa-banner__btn {
-  min-height: 2.5rem;
-  min-width: 5rem;
-  padding: 0 var(--space-4);
+.pwa-install__btn {
+  flex: 1 1 7rem;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
   border-radius: 0.5rem;
   font-weight: 600;
-  font-size: var(--text-small);
-  border: 1px solid transparent;
+  font-size: 0.9375rem;
+  border: none;
+  cursor: pointer;
 }
 
-.pwa-banner__btn--primary {
-  background: linear-gradient(180deg, var(--crown-gold-hover) 0%, var(--crown-gold) 100%);
-  color: #1a1000;
-  border-color: var(--crown-gold-shadow);
+.pwa-install__btn--primary {
+  background: #3b82f6;
+  color: #fff;
 }
 
-.pwa-banner__btn--secondary {
-  background: rgb(255 255 255 / 8%);
-  color: var(--color-text);
-  border-color: rgb(255 255 255 / 15%);
+.pwa-install__btn--primary:hover {
+  background: #2563eb;
 }
 
-/* 小螢幕有固定底部導航時，安裝條上移到導航上方 */
-@media (max-width: 47.99rem) {
-  .pwa-banner {
-    bottom: calc(var(--nav-bottom-h) + var(--space-2));
-  }
+.pwa-install__btn--secondary {
+  background: #d1d5db;
+  color: #111;
+}
+
+.pwa-install__btn--secondary:hover {
+  background: #c4c9d0;
 }

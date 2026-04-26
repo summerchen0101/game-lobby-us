@@ -1,20 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
+import { MdIosShare } from "react-icons/md";
+import { isStandalonePWA } from "../lib/pwaMode";
 import "./IosInstallGuide.css";
 
 function isIOS(): boolean {
   return (
     /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window)
   );
-}
-
-function isStandalonePWA(): boolean {
-  if ((navigator as Navigator & { standalone?: boolean }).standalone)
-    return true;
-  if (typeof matchMedia === "function") {
-    if (matchMedia("(display-mode: standalone)").matches) return true;
-    if (matchMedia("(display-mode: minimal-ui)").matches) return true;
-  }
-  return false;
 }
 
 const SHOW_DELAY_MS = 10_000;
@@ -55,14 +47,10 @@ export function IosInstallGuide() {
         />
         <div className="ios-guide__steps">
           <p>
-            1. Tap the <b>Share</b> button in the browser bar
-            <img
-              className="ios-guide__share"
-              src="/share-hint.png"
-              width={18}
-              height={18}
-              alt=""
-            />
+            1. Tap the <b>Share</b> button in the browser bar{" "}
+            <span className="ios-guide__share-wrap" aria-hidden="true">
+              <MdIosShare className="ios-guide__share" size={20} />
+            </span>
             .
           </p>
           <p>

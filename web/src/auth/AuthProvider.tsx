@@ -23,7 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null)
     setUser(null)
     setReady(true)
-  }, [])
+    navigate('/', { replace: true })
+  }, [navigate])
 
   useEffect(() => {
     setUnauthorizedHandler(() => {

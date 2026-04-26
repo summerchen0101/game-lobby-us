@@ -49,9 +49,16 @@
   margin: 0 0 var(--space-2);
 }
 
-.ios-guide__share {
+.ios-guide__share-wrap {
+  display: inline-flex;
   vertical-align: middle;
-  margin: 0 0.1rem;
+  margin-left: 0.15rem;
+  color: #222;
+}
+
+.ios-guide__share {
+  display: block;
+  flex-shrink: 0;
 }
 
 .ios-guide__dismiss {
@@ -60,9 +67,9 @@
   min-height: var(--min-tap);
   background: none;
   border: none;
-  color: #888;
+  color: var(--crown-locale-green);
   text-decoration: underline;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   width: 100%;
 }
 
