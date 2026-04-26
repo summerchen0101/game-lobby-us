@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { Copy } from 'lucide-react'
 import { InfoPopover } from '../../components/InfoPopover'
+import { useAlert } from '../../components/alert/alertContext'
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from '../../lib/currencyIcons'
 import './InviteFriendsModal.css'
 
@@ -19,6 +20,7 @@ function getReferralUrl() {
 }
 
 export function InviteFriendsModal({ open, onClose }: Props) {
+  const { show } = useAlert()
   const friendsRegistered = 0
   const friendsQualified = 0
   const titleId = useId()
@@ -26,21 +28,31 @@ export function InviteFriendsModal({ open, onClose }: Props) {
   const referralUrl = getReferralUrl()
 
   const copyUrl = useCallback(() => {
-    void navigator.clipboard.writeText(referralUrl).catch(() => {
-      /* unsupported / denied */
-    })
-  }, [referralUrl])
+    if (!referralUrl.trim()) {
+      show('Link unavailable', { variant: 'error' })
+      return
+    }
+    return navigator.clipboard
+      .writeText(referralUrl)
+      .then(() => {
+        show('Link copied', { variant: 'success' })
+      })
+      .catch(() => {
+        show('Could not copy link', { variant: 'error' })
+      })
+  }, [referralUrl, show])
 
   const onInvite = useCallback(() => {
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
       void navigator
         .share({ title: 'Join me', text: 'Play with my referral link', url: referralUrl })
-        .catch(() => {
-          copyUrl()
+        .catch((err) => {
+          if (err instanceof Error && err.name === 'AbortError') return
+          void copyUrl()
         })
       return
     }
-    copyUrl()
+    void copyUrl()
   }, [copyUrl, referralUrl])
 
   useEffect(() => {

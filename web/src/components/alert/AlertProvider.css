@@ -1,0 +1,50 @@
+/* 全站 toast：高於 app-modal，頂部置中；不阻擋全螢幕點擊（氣泡外 pointer-events: none） */
+
+.global-alert-portal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: var(--alert-z-index, 6000);
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  padding-top: max(var(--page-pad, 1rem), var(--safe-top, env(safe-area-inset-top, 0px)));
+  padding-left: var(--page-pad-inline, 1rem);
+  padding-right: var(--page-pad-inline, 1rem);
+  padding-bottom: 0;
+  pointer-events: none;
+}
+
+.global-alert {
+  max-width: min(24rem, calc(100vw - 2 * var(--page-pad-inline, 1rem)));
+  min-width: 0;
+  margin: 0;
+  padding: 0.85rem 1.25rem;
+  box-sizing: border-box;
+  border-radius: var(--crown-btn-radius, 0.75rem);
+  font-size: clamp(0.9rem, 0.85rem + 0.2vw, 1.05rem);
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 0.4rem 1.2rem rgb(0 0 0 / 45%);
+  border: 1px solid color-mix(in srgb, var(--crown-locale-green) 45%, transparent);
+  background: var(--color-elevated);
+  color: var(--crown-locale-green, #3dd68c);
+  pointer-events: auto;
+}
+
+.global-alert--success {
+  color: var(--crown-locale-green, #3dd68c);
+}
+
+.global-alert--info {
+  color: var(--crown-gold, #e8b339);
+  border-color: color-mix(in srgb, var(--crown-gold) 45%, transparent);
+}
+
+.global-alert--error {
+  color: #ffb4b4;
+  border-color: color-mix(in srgb, #f44 50%, transparent);
+  background: color-mix(in srgb, #2a0e0e 35%, var(--color-elevated));
+}

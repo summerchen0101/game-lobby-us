@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Copy, Crown, Info, Volume2 } from "lucide-react";
 import { HiPencil } from "react-icons/hi2";
+import { useAlert } from "../../components/alert/alertContext";
 import { InfoPopover } from "../../components/InfoPopover";
 import { useAuth } from "../../auth/useAuth";
 import { ChangeHeadIconModal } from "./ChangeHeadIconModal";
@@ -16,15 +17,14 @@ const RANK_MAX = 500;
 const RANK_PCT = 0;
 
 export function ProfilePage() {
+  const { show } = useAlert();
   const { user, refreshUser, logout } = useAuth();
   const { avatarId, setAvatarId } = useProfileAvatarId();
   const [headIconOpen, setHeadIconOpen] = useState(false);
   const [myProfileOpen, setMyProfileOpen] = useState(false);
   const [avatarImgFailed, setAvatarImgFailed] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
-  const [uidCopied, setUidCopied] = useState(false);
   const fundsRef = useRef<HTMLDialogElement>(null);
-  const uidCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const soundLabelId = useId();
 
   const rankCurrent = Math.round((RANK_PCT / 100) * RANK_MAX);
@@ -57,33 +57,18 @@ export function ProfilePage() {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [onRefresh]);
 
-  useEffect(() => {
-    return () => {
-      if (uidCopyTimeoutRef.current) {
-        clearTimeout(uidCopyTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const copyUid = useCallback(() => {
     const id = user?.id;
     if (!id) return;
     void navigator.clipboard
       .writeText(id)
       .then(() => {
-        setUidCopied(true);
-        if (uidCopyTimeoutRef.current) {
-          clearTimeout(uidCopyTimeoutRef.current);
-        }
-        uidCopyTimeoutRef.current = setTimeout(() => {
-          setUidCopied(false);
-          uidCopyTimeoutRef.current = null;
-        }, 2000);
+        show("Copied", { variant: "success" });
       })
       .catch(() => {
-        /* ignore unsupported / denied */
+        show("Could not copy", { variant: "error" });
       });
-  }, [user?.id]);
+  }, [user?.id, show]);
 
   const initial = (
     user?.displayName?.trim()?.[0] ??
@@ -187,11 +172,6 @@ export function ProfilePage() {
               />
             </button>
           </div>
-          {uidCopied ? (
-            <p className="profile-page__copy-toast" role="status">
-              Copied
-            </p>
-          ) : null}
           <div className="profile-page__level-row">
             <span className="profile-page__level-label">Entry level</span>
             <InfoPopover

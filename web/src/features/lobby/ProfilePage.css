@@ -243,14 +243,6 @@
   text-align: center;
 }
 
-.profile-page__copy-toast {
-  margin: 0 0 var(--space-2);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--crown-locale-green);
-  text-align: center;
-}
-
 .profile-page__copy {
   flex-shrink: 0;
   padding: 0.35rem 0.6rem;
