@@ -360,10 +360,42 @@
   grid-template-columns: repeat(5, 1fr);
   list-style: none;
   margin: 0;
-  padding: var(--space-2) var(--page-pad) var(--space-1);
+  padding: var(--space-2) var(--page-pad) 0;
   max-width: var(--content-max);
   margin-inline: auto;
   gap: 0;
+}
+
+/* Sliding accent bar aligned with the five tab columns (index via --session-footer-active-index) */
+.session-footer__slide-track {
+  position: relative;
+  display: flex;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: 0.35rem var(--page-pad) var(--space-1);
+  box-sizing: border-box;
+}
+
+/* ~70% of one tab column: centered in each 20% band via margin-left */
+.session-footer__slide {
+  position: relative;
+  flex-shrink: 0;
+  width: 14%;
+  height: 0.2rem;
+  border-radius: 999px;
+  background: var(--session-footer-accent);
+  margin-left: calc(3% + 20% * var(--session-footer-active-index, 0));
+  transition:
+    margin-left 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease;
+  will-change: margin-left;
+  opacity: 1;
+}
+
+.session-footer[data-footer-active-index='-1'] .session-footer__slide {
+  opacity: 0;
+  margin-left: 0;
+  transition: opacity 0.12s ease;
 }
 
 .session-footer__link {
@@ -381,6 +413,7 @@
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .session-footer__link:hover {
@@ -395,10 +428,37 @@
   width: var(--icon-rwd-nav);
   height: var(--icon-rwd-nav);
   opacity: 0.85;
+  transform: scale(1);
+  transform-origin: center 40%;
+  transition:
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease,
+    color 0.2s ease;
 }
 
 .session-footer__link.is-active .session-footer__icon {
   opacity: 1;
   color: var(--session-footer-accent);
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 6px var(--session-footer-accent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-footer__slide {
+    transition: none;
+  }
+
+  .session-footer[data-footer-active-index='-1'] .session-footer__slide {
+    transition: none;
+  }
+
+  .session-footer__icon {
+    transition: opacity 0.12s ease, color 0.12s ease;
+  }
+
+  .session-footer__link.is-active .session-footer__icon {
+    transform: none;
+    filter: none;
+  }
 }
 

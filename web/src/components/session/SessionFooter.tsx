@@ -1,5 +1,6 @@
+import { useMemo } from 'react'
 import { Gift, Home, ShoppingCart, User, Wallet, type LucideIcon } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { matchPath, NavLink, useLocation } from 'react-router-dom'
 import { useWallet } from '../../wallet/walletContext'
 import './SessionChrome.css'
 
@@ -21,12 +22,34 @@ const iconByName: Record<Item['icon'], LucideIcon> = {
   profile: User,
 }
 
+function useFooterActiveIndex(): number {
+  const { pathname } = useLocation()
+  return useMemo(() => {
+    for (let i = 0; i < items.length; i += 1) {
+      const { to, end } = items[i]
+      const p = matchPath(
+        { path: to, end: end ?? false, caseSensitive: true },
+        pathname
+      )
+      if (p) return i
+    }
+    return -1
+  }, [pathname])
+}
+
 export function SessionFooter() {
   const { activeWallet } = useWallet()
+  const activeIndex = useFooterActiveIndex()
   return (
     <nav
       className="session-footer"
       data-active-wallet={activeWallet}
+      data-footer-active-index={activeIndex}
+      style={
+        activeIndex >= 0
+          ? { ['--session-footer-active-index' as string]: String(activeIndex) }
+          : undefined
+      }
       aria-label="Main navigation"
     >
       <ul className="session-footer__list">
@@ -48,6 +71,9 @@ export function SessionFooter() {
           )
         })}
       </ul>
+      <div className="session-footer__slide-track" aria-hidden>
+        <div className="session-footer__slide" />
+      </div>
     </nav>
   )
 }
