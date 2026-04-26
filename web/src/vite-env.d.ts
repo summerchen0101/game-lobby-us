@@ -32,6 +32,10 @@ interface ImportMetaEnv {
    * 設為 `"false"` 可關閉；production build 一律不連線。
    */
   readonly VITE_DEV_GATEWAY_WS?: string
+  /** 僅 dev：連上後是否自動送 LOBBY_GET；`"false"` 關閉 */
+  readonly VITE_DEV_LOBBY_GET?: string
+  /** 寫入 Gateway RequestBasic.clientVer */
+  readonly VITE_CLIENT_VER?: string
   /** 大廳主視覺圖 URL（可覆寫預設 sample 圖） */
   readonly VITE_LOBBY_HERO_IMAGE?: string
   /** 訪客首頁 hero 圖；未設則沿用 VITE_LOBBY_HERO_IMAGE／預設 */

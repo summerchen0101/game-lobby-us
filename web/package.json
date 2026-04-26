@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "proto:generate": "node scripts/generate-gateway-schema.mjs"
+    "proto:generate": "node scripts/generate-gateway-schema.mjs && node scripts/generate-lobby-schema.mjs"
   },
   "dependencies": {
     "@fontsource-variable/outfit": "^5.2.8",

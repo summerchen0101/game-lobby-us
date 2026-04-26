@@ -18,11 +18,14 @@ export function useGatewayWs(params: UseGatewayWsParams): void {
     enabled = false,
     onState,
     onResponse,
+    onOpen,
     onSocketError,
     onGatewayError,
     getRequestBasicExtras,
     url,
     wsToken,
+    clientVer,
+    requestTimeoutMs,
     heartbeatIntervalMs,
     reconnect,
     initialReconnectDelayMs,
@@ -31,6 +34,7 @@ export function useGatewayWs(params: UseGatewayWsParams): void {
 
   const onStateRef = useRef(onState)
   const onResponseRef = useRef(onResponse)
+  const onOpenRef = useRef(onOpen)
   const onSocketErrorRef = useRef(onSocketError)
   const onGatewayErrorRef = useRef(onGatewayError)
   const getExtrasRef = useRef(getRequestBasicExtras)
@@ -38,12 +42,14 @@ export function useGatewayWs(params: UseGatewayWsParams): void {
   useEffect(() => {
     onStateRef.current = onState
     onResponseRef.current = onResponse
+    onOpenRef.current = onOpen
     onSocketErrorRef.current = onSocketError
     onGatewayErrorRef.current = onGatewayError
     getExtrasRef.current = getRequestBasicExtras
   }, [
     onState,
     onResponse,
+    onOpen,
     onSocketError,
     onGatewayError,
     getRequestBasicExtras,
@@ -55,6 +61,8 @@ export function useGatewayWs(params: UseGatewayWsParams): void {
     const client = createGatewayWs({
       url,
       wsToken,
+      clientVer,
+      requestTimeoutMs,
       heartbeatIntervalMs,
       reconnect,
       initialReconnectDelayMs,
@@ -63,6 +71,7 @@ export function useGatewayWs(params: UseGatewayWsParams): void {
         (getExtrasRef.current?.() ?? {}) as Record<string, unknown>,
       onState: (s) => onStateRef.current?.(s),
       onResponse: (m) => onResponseRef.current?.(m),
+      onOpen: (ctx) => onOpenRef.current?.(ctx),
       onSocketError: (e) => onSocketErrorRef.current?.(e),
       onGatewayError: (m) => onGatewayErrorRef.current?.(m),
     })
@@ -73,6 +82,8 @@ export function useGatewayWs(params: UseGatewayWsParams): void {
     enabled,
     url,
     wsToken,
+    clientVer,
+    requestTimeoutMs,
     heartbeatIntervalMs,
     reconnect,
     initialReconnectDelayMs,

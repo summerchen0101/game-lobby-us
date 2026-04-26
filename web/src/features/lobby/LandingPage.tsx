@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { LandingHeader } from "../../components/LandingHeader";
@@ -19,6 +19,11 @@ import {
   unityWebEntryDefaultGameId,
   isSlotWebEntryEnabled,
 } from "../../lib/env";
+import { GATEWAY_API_LOBBY_GET } from "../../realtime/gatewayApi";
+import {
+  decodeLobbyGetResponseBytes,
+  lobbyDecodedGamesToApiGames,
+} from "../../realtime/lobbyDecode";
 import { useGatewayWs } from "../../realtime/useGatewayWs";
 import {
   activeWalletToSlotMode,
@@ -88,14 +93,34 @@ function devGatewayWsProbeEnabled(): boolean {
   return import.meta.env.VITE_DEV_GATEWAY_WS !== "false";
 }
 
+function hexPreview(u8: Uint8Array, maxBytes: number): string {
+  const n = Math.min(maxBytes, u8.byteLength);
+  let s = "";
+  for (let i = 0; i < n; i++) {
+    s += u8[i]!.toString(16).padStart(2, "0");
+  }
+  return s;
+}
+
 export function LandingPage() {
   const { token, user, refreshUser } = useAuth();
   const { activeWallet } = useWallet();
   const { open: openShell } = useGameShell();
 
+  const getRequestBasicExtras = useCallback((): Record<string, unknown> => {
+    const uid = user?.id;
+    if (!uid || !/^\d+$/.test(uid)) {
+      return { userID: 0 };
+    }
+    const n = Number.parseInt(uid, 10);
+    return { userID: Number.isFinite(n) ? n : 0 };
+  }, [user?.id]);
+
   useGatewayWs({
     enabled: devGatewayWsProbeEnabled(),
     wsToken: token ?? "",
+    clientVer: import.meta.env.VITE_CLIENT_VER?.trim() || undefined,
+    getRequestBasicExtras,
     onState: (s) => {
       console.info(
         "[gateway-ws][dev] state:",
@@ -106,6 +131,45 @@ export function LandingPage() {
     },
     onResponse: (msg) => {
       console.info("[gateway-ws][dev] response:", msg);
+    },
+    onOpen: async ({ request }) => {
+      if (!import.meta.env.DEV) return;
+      if (import.meta.env.VITE_DEV_LOBBY_GET === "false") return;
+      try {
+        const r = await request({
+          type: GATEWAY_API_LOBBY_GET,
+          data: new Uint8Array(0),
+        });
+        const raw = r.data;
+        const len = raw instanceof Uint8Array ? raw.byteLength : 0;
+        console.info("[gateway-ws][dev] LOBBY_GET", {
+          code: r.code,
+          type: r.type,
+          errMessage: r.errMessage,
+          dataLength: len,
+          dataHexPreview24:
+            len > 0 && raw instanceof Uint8Array ? hexPreview(raw, 24) : "",
+        });
+        if (
+          len > 0 &&
+          raw instanceof Uint8Array &&
+          String(r.code) === "200"
+        ) {
+          try {
+            const decoded = decodeLobbyGetResponseBytes(raw)
+            const items = lobbyDecodedGamesToApiGames(decoded)
+            console.info(
+              "[gateway-ws][dev] LOBBY_GET decoded games:",
+              items.length,
+              items.slice(0, 3),
+            )
+          } catch (decodeErr) {
+            console.warn("[gateway-ws][dev] LOBBY_GET decode failed", decodeErr)
+          }
+        }
+      } catch (e) {
+        console.warn("[gateway-ws][dev] LOBBY_GET failed", e);
+      }
     },
     onSocketError: (ev) => {
       console.warn("[gateway-ws][dev] WebSocket error:", ev);
