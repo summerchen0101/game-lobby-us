@@ -148,3 +148,10 @@
   color: var(--color-text-muted);
   font-style: normal;
 }
+
+@media (min-width: 48rem) {
+  .app-modal.my-profile-modal {
+    max-width: min(28rem, calc(100vw - 2 * var(--page-pad-inline)));
+    max-height: var(--modal-scroll-max-height);
+  }
+}

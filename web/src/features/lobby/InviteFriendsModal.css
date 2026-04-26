@@ -25,7 +25,7 @@
   font-style: italic;
   line-height: 1;
   cursor: pointer;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: Georgia, "Times New Roman", serif;
   box-shadow: 0 1px 0 color-mix(in srgb, #000000 35%, transparent);
 }
 
@@ -166,7 +166,9 @@
   box-shadow:
     0 var(--crown-btn-shadow-h, 2.5px) 0 0 var(--crown-gold-shadow),
     inset 0 1px 0 rgb(0 0 0 / 20%);
-  transition: filter 0.15s ease, transform 0.08s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.08s ease;
 }
 
 .invite-friends-modal__btn-invite:hover {
@@ -239,4 +241,21 @@
   border: none;
   border-radius: 0;
   box-shadow: none;
+}
+
+@media (min-width: 48rem) {
+  .app-modal.invite-friends-modal {
+    max-width: min(30rem, calc(100vw - 2 * var(--page-pad-inline)));
+    max-height: var(--modal-scroll-max-height);
+  }
+
+  .invite-friends-modal__copy {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .invite-friends-modal__copy svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
 }

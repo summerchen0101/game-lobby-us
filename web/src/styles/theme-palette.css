@@ -88,4 +88,12 @@
   --modal-rule-inset: var(--space-5);
   --modal-rule-color: rgb(0 0 0 / 35%);
   --modal-backdrop-scrim: var(--modal-overlay-scrim);
+  /* 捲動彈窗高度上限；平板見下方 media */
+  --modal-scroll-max-height: min(90dvh, 640px);
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --modal-scroll-max-height: min(90dvh, 800px);
+  }
 }

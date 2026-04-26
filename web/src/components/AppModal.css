@@ -28,7 +28,7 @@
 }
 
 .app-modal--scroll-y {
-  max-height: min(90dvh, 640px);
+  max-height: var(--modal-scroll-max-height);
   overflow-y: auto;
 }
 
@@ -193,4 +193,10 @@
 .profile-page__dialog::backdrop {
   background: var(--modal-backdrop-scrim);
   backdrop-filter: blur(var(--modal-overlay-blur));
+}
+
+@media (min-width: 48rem) {
+  .profile-page__dialog {
+    max-width: min(28rem, calc(100vw - 2 * var(--page-pad-inline)));
+  }
 }

@@ -51,7 +51,7 @@ html {
 /* 平板起略放大 1rem 基準；凡用 rem 的字、間距、Session 頂底欄等一併略增 */
 @media (min-width: 48rem) {
   html {
-    font-size: 160%;
+    font-size: 180%;
   }
 }
 

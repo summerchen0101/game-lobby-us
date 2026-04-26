@@ -376,3 +376,9 @@
   text-align: center;
   color: rgb(255 255 255 / 88%);
 }
+
+@media (min-width: 48rem) {
+  .app-modal.auth-modal {
+    max-width: min(30rem, calc(100vw - 2 * var(--page-pad-inline)));
+  }
+}

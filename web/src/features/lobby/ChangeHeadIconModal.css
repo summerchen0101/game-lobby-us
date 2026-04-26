@@ -32,7 +32,9 @@
 
 .change-head-icon-modal__tile--selected {
   border-color: #22d3ee;
-  box-shadow: 0 0 0 1px #22d3ee, 0 0 0.5rem rgb(34 211 238 / 35%);
+  box-shadow:
+    0 0 0 1px #22d3ee,
+    0 0 0.5rem rgb(34 211 238 / 35%);
 }
 
 .change-head-icon-modal__img {
@@ -71,4 +73,11 @@
 
 .change-head-icon-modal__confirm:active {
   filter: brightness(0.97);
+}
+
+@media (min-width: 48rem) {
+  .app-modal.change-head-icon-modal {
+    max-width: min(28rem, calc(100vw - 2 * var(--page-pad-inline)));
+    max-height: var(--modal-scroll-max-height);
+  }
 }
