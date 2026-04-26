@@ -1,8 +1,6 @@
 import { type FormEvent, useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../auth/useAuth'
-import { ApiError } from '../../lib/api/client'
+import { useAuthModals } from './authModalsContext'
 import './AuthModals.css'
 
 type Props = {
@@ -29,22 +27,28 @@ function IconEyeClosed() {
   )
 }
 
+function maskPhoneForDisplay(raw: string): string {
+  const d = raw.replace(/\D/g, '')
+  if (d.length < 4) return raw.trim() || '—'
+  return `+1 (•••) ••• ${d.slice(-4)}`
+}
+
 export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
-  const { register } = useAuth()
-  const navigate = useNavigate()
+  const { openPhoneVerify } = useAuthModals()
   const formId = useId()
   const emailId = `${formId}-email`
+  const phoneId = `${formId}-phone`
   const passwordId = `${formId}-password`
   const referralId = `${formId}-referral`
   const termsId = `${formId}-terms`
 
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [_referral, setReferral] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -61,28 +65,22 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
     }
   }, [open])
 
-  async function onSubmit(e: FormEvent) {
+  function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
     if (!termsAccepted) {
       setError('Please accept the terms to continue')
       return
     }
-    setSubmitting(true)
-    try {
-      await register({
-        account: email.trim(),
-        password,
-      })
-      onClose()
-      navigate('/', { replace: true })
-    } catch (err) {
-      const msg =
-        err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Registration failed'
-      setError(msg)
-    } finally {
-      setSubmitting(false)
+    const phoneDigits = phone.replace(/\D/g, '')
+    if (phoneDigits.length < 10) {
+      setError('Please enter a valid phone number (at least 10 digits)')
+      return
     }
+    openPhoneVerify({
+      body: { account: email.trim(), password },
+      displayPhone: maskPhoneForDisplay(phone),
+    })
   }
 
   if (!open) return null
@@ -118,6 +116,21 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
               placeholder="Enter email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <label className="auth-modal__field-label auth-modal__field-label--register" htmlFor={phoneId}>
+              Phone:
+            </label>
+            <input
+              id={phoneId}
+              className="auth-modal__input auth-modal__input--register"
+              type="tel"
+              autoComplete="tel"
+              inputMode="tel"
+              placeholder="Phone number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               required
             />
 
@@ -181,8 +194,8 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
             </div>
 
             {error ? <p className="auth-modal__error">{error}</p> : null}
-            <button type="submit" className="auth-modal__submit" disabled={submitting}>
-              {submitting ? '…' : 'REGISTER'}
+            <button type="submit" className="auth-modal__submit">
+              REGISTER
             </button>
           </form>
           <p className="auth-modal__footer">

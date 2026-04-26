@@ -10,6 +10,7 @@ import { TrustpilotSection } from "../../components/TrustpilotSection";
 import { useGameShell } from "../../components/useGameShell";
 import { useAuthModals } from "../auth/authModalsContext";
 import { LoginModal } from "../auth/LoginModal";
+import { PhoneVerificationModal } from "../auth/PhoneVerificationModal";
 import { RegisterModal } from "../auth/RegisterModal";
 import { TermsGateModal } from "../auth/TermsGateModal";
 import { trustpilotBusinessUnitId } from "../../lib/env";
@@ -73,12 +74,15 @@ export function LandingPage() {
     termsOpen,
     loginOpen,
     registerOpen,
+    phoneVerifyOpen,
+    phoneVerifyPayload,
     openTermsThen,
     openLoginDirect,
     openRegisterDirect,
     closeTerms,
     closeLogin,
     closeRegister,
+    closePhoneVerify,
     onTermsAccepted,
   } = useAuthModals();
 
@@ -481,6 +485,12 @@ export function LandingPage() {
           closeRegister();
           openLoginDirect();
         }}
+      />
+      <PhoneVerificationModal
+        open={phoneVerifyOpen}
+        onClose={closePhoneVerify}
+        displayPhone={phoneVerifyPayload?.displayPhone ?? ""}
+        pendingBody={phoneVerifyPayload?.body ?? null}
       />
     </div>
   );
