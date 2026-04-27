@@ -1,0 +1,455 @@
+syntax = "proto3";
+package redenvelope;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/redenvelope";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "google/protobuf/empty.proto";
+
+// redEnvelopeService 紅包相關服務
+service redEnvelopeService {
+    // Send 發送紅包
+    rpc Send(SendRequest) returns (SendResponse);
+
+    // Snatch 搶紅包 - 階段一（直接搶）
+    rpc Snatch(SnatchRequest) returns (SnatchResponse);
+
+    // Answer 搶紅包 - 階段二（要回覆的紅包類型才需要調用）
+    rpc Answer(AnswerRequest) returns (google.protobuf.Empty);
+
+    // CheckMaxSendingLimit 確認送紅包金額上限
+    // need_sms = yes：則在 SendRequest 再上收到的 SMS code
+    // need_sms = no：直接 Send
+    rpc CheckMaxSendingLimit(CheckMaxSendingLimitRequest) returns (CheckMaxSendingLimitResponse);
+
+    // ListRedEnvelopes 列紅包
+    rpc ListRedEnvelopes(ListRedEnvelopesRequest) returns (ListRedEnvelopesResponse);
+    rpc ListRedEnvelopeHistories(ListRedEnvelopeHistoriesRequest) returns (ListRedEnvelopeHistoriesResponse);
+    rpc ListPlayerSend(ListPlayerSendReq) returns (ListRedEnvelopesResponse);
+    rpc ListPlayerSnatch(ListPlayerSnatchReq) returns (ListRedEnvelopesResponse);
+
+    rpc ListConditionSend(ListConditionSendReq) returns (ListConditionSendResp);
+    rpc ListConditionSnatch(ListConditionSnatchReq) returns (ListConditionSnatchResp);
+    rpc CountConditionRedEnvelope(CountConditionReq) returns (google.protobuf.Empty);
+
+    rpc ListRoomUnSnatch(ListRoomUnSnatchReq) returns (ListRoomUnSnatchResp);
+
+    // RedEnvelop OverView 紅包收發總覽
+    rpc RedEnvelopOverView(RedEnvelopOverViewRequest) returns (RedEnvelopOverViewResponse);
+    rpc RedEnvelopOverViewDetail(RedEnvelopOverViewDetailRequest) returns (RedEnvelopOverViewDetailResponse);
+
+    //    // ListRedEnvelopeRanks 列出紅包排行
+    //    rpc ListRedEnvelopeRanks(ListRedEnvelopeRanksRequest) returns (ListRedEnvelopeRanksResponse);
+
+    // VerifyAnswer 發送者驗證紅包答案
+    rpc VerifyAnswer(VerifyAnswerRequest) returns (VerifyAnswerResponse);
+    rpc VerifyDailyAmount(VerifyDailyAmountRequest) returns (google.protobuf.Empty);
+    rpc CleanDailyAmount(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+    rpc RefundRedEnvelopesByUpdateExpireTime(RefundRedEnvelopesByUpdateExpireTimeReq) returns (google.protobuf.Empty);
+
+    // 排程相關
+    // ListExpiredRedEnvelopes 列出逾期需要退款紅包
+    rpc ListRefundRedEnvelopes(google.protobuf.Empty) returns (ListRefundRedEnvelopesResponse);
+
+    // BatchUpdateRedEnvelopeRefundState 批次更新紅包退款狀態
+    rpc BatchUpdateRedEnvelopeRefundState(BatchUpdateRedEnvelopeRefundStateRequest) returns (google.protobuf.Empty);
+}
+
+message RefundRedEnvelopesByUpdateExpireTimeReq {
+    string roomID = 1;
+}
+
+message ListRoomUnSnatchReq {
+    uint64 userID          = 1;
+    repeated string roomID = 2;
+}
+
+message ListRoomUnSnatchResp {
+    repeated RedEnvelope redEnvelopes = 1;  // 紅包id
+}
+
+message ListConditionSendReq {
+    uint64 userID  = 1;
+    uint32 page    = 2;
+    uint32 perPage = 3;
+}
+
+message ListConditionSnatchReq {
+    uint64 userID = 1;
+}
+
+message ListConditionSendResp {
+    repeated Condition condition = 1;
+    pagination.Pagination page   = 2;
+}
+
+message CountConditionReq {
+    uint64 userID      = 1;
+    uint64 countUserID = 2;
+}
+message Condition {
+    uint64 userID          = 1;
+    string nickName        = 6;
+    uint64 totalAmount     = 2;
+    uint64 nowAmount       = 3;
+    uint64 createdAtMs     = 4;
+    uint64 finishedAtMs    = 7;
+    ConditionStatus status = 5;
+}
+
+message ListConditionSnatchResp {
+    uint64 userID       = 1;
+    uint64 totalAmount  = 2;
+    uint64 nowAmount    = 3;
+    uint64 createdAtMs  = 4;
+    uint64 finishedAtMs = 5;
+}
+
+// SnatchRequest 搶紅包請求
+message SnatchRequest {
+    uint64 redEnvelopeID = 1;  // 紅包id
+    uint64 snatcherID    = 2;  // 搶紅包者id
+}
+
+// SnatchResponse 搶紅包響應
+message SnatchResponse {
+    yesno.YesNo isSnatchSuccess = 1;  // 搶單是否成功
+    yesno.YesNo needAnswer      = 2;  // 是否需要回答
+    RedEnvelope redEnvelope     = 3;
+    Answer answer               = 4;  // 回答
+}
+
+// AnswerRequest 搶紅包回覆請求
+// StatusCode: 204
+message AnswerRequest {
+    uint64 redEnvelopeID = 1;  // 紅包id
+    string answerID      = 2;
+    uint64 snatcherID    = 3;
+    string attachment    = 4;
+}
+
+// VerifyAnswerRequest 驗證紅包答案請求
+message VerifyAnswerRequest {
+    uint64 redEnvelopeID = 1;
+    string answerID      = 2;
+    uint64 sendID        = 3;
+    yesno.YesNo isPass   = 4;
+}
+
+// VerifyAnswerRequest 驗證紅包答案請求
+message VerifyAnswerResponse {
+    Answer answer      = 1;
+    string roomID      = 4;
+    uint64 roomType    = 3;
+    yesno.YesNo isPass = 2;
+}
+
+// VerifyDailyAmountRequest 驗證每日紅包上限
+message VerifyDailyAmountRequest {
+    uint64 userID = 1;
+}
+
+// SendResponse 發紅包響應 204
+message SendRequest {
+    RedEnvelopeType type = 1;
+    string message       = 2;  // 題目 or 來自發送者的祝福
+    int64 totalMoney     = 3;  // 紅包金額
+    int64 quota          = 4;  // 紅包數量
+    uint64 senderID      = 5;
+    string roomID        = 6;
+    uint64 ID            = 7;
+    int64 roomType       = 8;
+    string roomName      = 9;
+    uint64 receiverID    = 10;
+}
+
+//此結構為serverPush你懂的
+message SendResponse {
+    uint64 redEnvelopeID = 1;
+    RedEnvelopeType type = 2;
+    string message       = 3;
+}
+
+//// RedEnvelopeActionType 紅包動作類型
+// enum RedEnvelopeActionType {
+//     UNKNOWN_RED_ENVELOPE_ACTION_TYPE = 0;
+//     ALL                              = 1;  // 全部
+//     SNATCH                           = 2;  // 搶
+//     SEND                             = 3;  // 發
+// }
+
+// ListRedEnvelopesRequest 紅包列表請求
+message ListRedEnvelopesRequest {
+    string roomID        = 1;
+    int64 roomType       = 2;
+    yesno.YesNo unSnatch = 3;
+    yesno.YesNo notBless = 4;
+    uint64 userID        = 5;
+}
+
+// ListRedEnvelopesResponse 紅包列表響應
+message ListRedEnvelopesResponse {
+    repeated RedEnvelope redEnvelopes = 1;
+    pagination.Pagination page        = 2;
+}
+
+// ListRedEnvelopesRequest 紅包列表請求
+message ListPlayerSendReq {
+    uint64 userID  = 1;
+    uint32 page    = 2;
+    uint32 perPage = 3;
+}
+
+// ListRedEnvelopesRequest 紅包列表請求
+message ListPlayerSnatchReq {
+    uint64 userID  = 1;
+    uint32 page    = 2;
+    uint32 perPage = 3;
+}
+
+message ListRedEnvelopeHistoriesRequest {
+    uint32 page                     = 1;
+    uint32 perPage                  = 2;
+    repeated uint64 userIDs         = 3;
+    int64 createdAtMsGte            = 4;
+    int64 createdAtMsLte            = 5;
+    RedEnvelopeType type            = 6;
+    uint64 id                       = 7;
+    bool answerIgnoreEmpitySnatcher = 8;  // answer 明細是否忽略沒有搶的紅包
+    repeated uint64 ids             = 9;
+    bool isShowFriendSendOneToOne   = 10;  // 是否只顯示一對一發的紅包(來源是朋友的紅包)
+    State state                     = 11;
+}
+
+message ListRedEnvelopeHistoriesResponse {
+    pagination.Pagination pagination  = 2;
+    repeated RedEnvelope redEnvelopes = 1;
+}
+
+//
+//// RankMode 排名模式
+// enum RankMode {
+//     UNKNOWN_RANK_MODE = 0;
+//     // 限時
+//     LIMITED_TIME = 1;
+//     // 累積
+//     ACCUMULATION = 2;
+// }
+
+//// ListRedEnvelopesResponse 紅包列表響應
+//// 限時紅包榜(發｜搶), 累積紅包榜(發｜搶)
+// message ListRedEnvelopeRanksRequest {
+//     RankMode mode                    = 1;
+//     RedEnvelopeActionType actionType = 2;
+// }
+
+//// ListRedEnvelopeRanksRequest 紅包排名列表請求
+// message ListRedEnvelopeRanksResponse {
+//     repeated RedEnvelope.Rank ranks = 1;
+// }
+
+//// ListRedEnvelopeSettingsRequest 紅包相關設定值列表請求
+//// 模組用
+// message ListSettingsRequest {
+//     yesno.YesNo enableOnly = 1;  // 只列出啟用的設定值
+// }
+
+//// ListRedEnvelopeSettingsResponse 紅包相關設定值列表響應
+//// 模組用
+// message ListSettingsResponse {
+//     repeated RedEnvelope.Setting settings = 1;
+// }
+
+//// UpdateRedEnvelopeSettingRequest 更新紅包相關設定值請求
+//// 模組用
+// message UpdateSettingRequest {
+//     string key                  = 1;
+//     RedEnvelope.Setting setting = 2;
+// }
+
+// ListExpiredRedEnvelopesResponse 過期紅包列表請求
+// 排程用
+message ListRefundRedEnvelopesResponse {
+    repeated RedEnvelope redEnvelopes = 1;
+}
+
+// BatchUpdateRedEnvelopeRefundStateRequest 批次更新紅包退款狀態請求
+// 排程用
+message BatchUpdateRedEnvelopeRefundStateRequest {
+    repeated uint64 redEnvelopeIDs = 1;
+    RefundState refundState        = 2;
+}
+
+// CheckMaxSendingLimitRequest 檢驗最大發送限額請求
+message CheckMaxSendingLimitRequest {
+    uint64 creatorID = 1;
+    int64 money      = 2;
+    int64 quota      = 3;
+}
+
+// CheckMaxSendingLimitResponse 檢驗最大發送限額響應
+message CheckMaxSendingLimitResponse {
+    yesno.YesNo needSMS = 1;
+}
+
+// RedEnvelopeState 紅包狀態
+enum RedEnvelopeState {
+    UNKNOWN_RED_ENVELOPE_STATE = 0;
+    ALL_ANSWERED               = 1;  // 紅包答案都驗證完畢
+    HAS_UNVERIFIED_ANSWER      = 2;  // 紅包有未驗證的答案
+}
+
+// RefundState 退款狀態
+enum RefundState {
+    UNKNOWN_REFUND_STATE = 0;
+    REFUNDED             = 1;  // 已退款
+    NOT_REFUNDED         = 2;  // 未退款
+    NO_NEED_REFUND       = 3;  // 無須退款
+}
+
+// DeliveryStatus 發送狀態 (後台流向列表的狀態)
+enum DeliveryStatus {
+    UNKNOWN_DELIVERY_STATE = 0;
+    WAITING_RECEIVE        = 1;  // 待領取
+    ALREADY_RECEIVE        = 2;  // 已領取
+    RECEIVE_REFUND         = 3;  // 退款
+}
+
+// RedEnvelopeType 紅包類型
+enum RedEnvelopeType {
+    UNKNOWN_RED_ENVELOPE_TYPE = 0;
+    // 祝福紅包
+    BLESS = 1;
+    // 口令紅包
+    KEYWORD = 2;
+    // 圖片紅包
+    PHOTO = 3;
+    // 影片紅包
+    VIDEO = 4;
+    // 語音紅包
+    VOICE = 5;
+    //條件
+    CONDITION = 6;
+    //返還
+    PAY_BACK = 7;
+    // 其他類型紅包
+    OTHER = 15;
+}
+
+// RedEnvelopeType 紅包類型
+enum State {
+    UNKNOWN_STATE = 0;
+    // 已領取
+    SNATCHED = 1;
+    //未搶
+    UN_SNATCH = 2;
+    //退款
+    REFUND = 3;
+}
+
+// RedEnvelopeVerifyState 紅包審核狀態
+enum RedEnvelopeVerifyState {
+    UNKNOWN_VERIFY_STATE = 0;
+    UNVERIFIED           = 1;  // 未審核
+    NO_NEED_VERIFIED     = 2;  // 不需審核
+    VERIFIED_PASS        = 3;  // 審核通過
+    VERIFIED_NOT_PASS    = 4;  // 審核未通過
+}
+
+// RedEnvelope 紅包
+message RedEnvelope {
+    uint64 ID               = 1;
+    string roomID           = 2;
+    uint64 roomType         = 14;
+    string roomName         = 15;
+    RedEnvelopeType type    = 3;
+    RedEnvelopeState state  = 4;
+    int64 money             = 5;
+    int64 quota             = 6;
+    string question         = 7;
+    uint64 creatorID        = 8;
+    int64 createTimeMs      = 9;
+    int64 expireTimeMs      = 10;
+    repeated Answer answers = 11;
+    string creatorNickname  = 12;
+    RefundState refundState = 13;
+}
+
+message Answer {
+    string ID                          = 1;
+    uint64 redEnvelopeID               = 2;
+    uint64 snatcherID                  = 3;
+    int64 receiveMoney                 = 4;
+    RedEnvelopeVerifyState verifyState = 5;
+    string attachment                  = 6;
+    string snatcherNickname            = 7;
+    int64 createTimeMs                 = 8;
+}
+
+message RedEnvelopOverViewRequest {
+    repeated uint64 userIDs         = 3;
+    int64 createdAtMsGte            = 4;
+    int64 createdAtMsLte            = 5;
+    RedEnvelopeType type            = 6;
+    uint64 id                       = 7;
+    bool answerIgnoreEmpitySnatcher = 8;  // answer 明細是否忽略沒有搶的紅包
+}
+
+message RedEnvelopOverViewResponse {
+    repeated PlayerRedEnvelopOverView overviews = 1;
+}
+
+message PlayerRedEnvelopOverView {
+    uint64 userID          = 1;
+    uint64 totalSendAmount = 2;
+    uint64 totalRecvAmount = 3;
+}
+
+message RedEnvelopOverViewDetailRequest {
+    uint32 page          = 1;
+    uint32 perPage       = 2;
+    uint64 userID        = 3;
+    int64 createdAtMsGte = 4;
+    int64 createdAtMsLte = 5;
+    RedEnvelopeType type = 6;
+    uint64 id            = 7;
+
+    RedEnvelopOverViewType category = 8;
+    repeated uint64 userIDs         = 9;
+    State state                     = 10;
+}
+
+enum RedEnvelopOverViewType {
+    ALL  = 0;
+    SEND = 1;
+    RECV = 2;
+}
+
+message RedEnvelopOverViewDetail {
+    uint64 id                       = 1;
+    uint64 userID                   = 2;
+    RedEnvelopOverViewType category = 3;
+    uint64 answer                   = 4;
+    uint64 amount                   = 5;
+    uint64 redEnvelopeTotalAmount   = 6;
+    RedEnvelopeType type            = 7;
+    int64 createTimeMs              = 8;
+}
+
+message RedEnvelopOverViewDetailResponse {
+    pagination.Pagination pagination         = 1;
+    repeated RedEnvelopOverViewDetail detail = 2;
+}
+enum ConditionStatus {
+    UNKNOWN = 0;
+    DONE    = 1;
+    NOT_YET = 2;
+}
+enum RecordType {
+    UNKNOWN_TYPE  = 0;
+    DONE_TYPE     = 1;
+    ADD_AMOUNT    = 2;
+    REDUCE_AMOUNT = 4;
+    CREATE        = 3;
+}

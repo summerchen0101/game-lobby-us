@@ -1,0 +1,568 @@
+syntax = "proto3";
+package gateway;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/gateway";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "google/protobuf/empty.proto";
+import "proto/playerinfo/model.proto";
+
+service GatewayService {
+    rpc Gateway(Request) returns (Response);
+    rpc Schedule(ScheduleReq) returns (google.protobuf.Empty);
+    rpc RegisterConnect(RegisterReq) returns (google.protobuf.Empty);
+    rpc HealthyConnect(RegisterReq) returns (google.protobuf.Empty);
+    rpc DeleteConnect(DeleteReq) returns (google.protobuf.Empty);
+    rpc RegisterUser(RegistryUserReq) returns (RegistryUserResp);
+    rpc ListPlayerBot(ListPlayerBotReq) returns (ListBotResponse);
+    rpc SendSystemMsg(SendSystemMsgReq) returns (google.protobuf.Empty);
+    // NotifyDisconnection 通知玩家斷線
+    rpc NotifyDisconnection(NotifyDisconnectionReq) returns (google.protobuf.Empty);
+}
+
+// request的 基礎通用結構
+message RequestBasic {
+    uint64 userID    = 1;
+    int64 timestamp  = 2; // 請求發起的 utc時間搓
+    string clientVer = 3; // 客戶端版本
+    string requestID = 4; // 客戶端產生的 request id ,可用於追蹤
+    uint64 gameID    = 5;
+    string roomID    = 6;
+    string host      = 7;
+    string token = 8; // lazy register userID to connection
+}
+
+message ResponseBasic {
+    string requestID = 1;
+    int64 timestamp  = 2;
+    string serverVer = 3;
+}
+
+message Request {
+    RequestBasic basic = 1;
+    int64 type         = 2;
+    bytes data         = 3; // 各種 RequestData
+}
+
+message Response {
+    ResponseBasic basic = 1;
+    int64 type          = 2; // 0: pingpong
+    string code         = 3; // 204 代表 請求成功無data回傳 , 200 代表 成功且有資料, 其餘則以error Code呈現
+    string errMessage   = 4; //
+    bytes data          = 5; // 回傳的資料
+    uint64 gameID       = 6; // 後端所使用
+}
+
+message ServerPush {
+    repeated string userID    = 1;
+    yesno.YesNo NeedBroadcast = 3;
+    bytes resp                = 2;
+}
+
+message ScheduleReq {
+    ScheduleType type = 1;
+}
+
+// connect Use
+message RegisterReq {
+    string topic = 1;
+}
+
+// connect Use
+message DeleteReq {
+    string topic = 1;
+}
+
+// connect Use
+message RegistryUserReq {
+    string userID   = 1;
+    string topic    = 2;
+    bool needDelete = 3;
+}
+
+message RegistryUserResp {
+    string guildID = 1;
+}
+
+message ListPlayerBotReq {
+    int64 botCount = 1; // 需要的機器人數量
+    int64 level    = 2; // 機器人等級 1~4
+}
+
+message ListBotResponse {
+    repeated playerinfo.PlayerInfo playerInfos = 1;
+}
+
+message SendSystemMsgReq {
+    yesno.YesNo useSystemTopic     = 1; // 是否使用專屬通道
+    int64 reqType                  = 2; // 前端收到的ＴＹＰＥ
+    int64 apiType                  = 3; // 前端收到的訊息type
+    uint64 senderID                = 4;
+    string nickname                = 5;
+    uint64 vipLevel                = 6;
+    uint64 level                   = 7;
+    string imageUrl                = 8;
+    bytes data                     = 9;
+    map<string, Header> headerMeta = 10;
+}
+
+message Header {
+    repeated string content = 1;
+}
+
+message UserKickBeforeReason {
+    enum Reason {
+        Default              = 0;
+        DuplicateConn        = 1; // 重複登入app
+        GameIsClose          = 2; // 遊戲關閉
+        AccountStatusDeleted = 3; // 帳號已被刪除
+    }
+    Reason reason = 1;
+}
+
+message NotifyDisconnectionReq {
+    uint64 UserID = 1;
+}
+
+enum ScheduleType {
+    UNKNOWN_SCHEDULE_TYPE                                                     = 0;
+    CHECK_RED_ENVELOPE_EXPIRATION                                             = 1;
+    RETRY_ERROR_TRADING                                                       = 2;
+    CHECK_ROOM_PLAYERS                                                        = 3;
+    CLOSE_PRIVATE_ROOM                                                        = 4;
+    DEL_UN_CONFIRM_FRIEND                                                     = 5;
+    AGGREGATE_METRICS                                                         = 6;
+    CHECK_FROZEN_AMOUNT_EXPIRED                                               = 7;
+    JUDAN_GUILD_HOURLY_SCORE_SETTLE                                           = 8;
+    CLEAN_DAILY_AMOUNT                                                        = 9;
+    CHECK_PLAYER_VIP_COUNT_DOWN                                               = 10;
+    JUDAN_GUILD_DAILY_SCORE_SETTLE                                            = 11;
+    PLAYER_ACTIVITY_HANDLE                                                    = 12; // 玩家活躍值處理
+    GUILD_AUTO_MSG_PUSH_SCHEDULE                                              = 13; // 公會自動推播訊息
+    CHECK_PAYMENT_STATUS                                                      = 14; // google檢查玩家是否退款
+    CHECK_CAMPAIGN_EVENT_STATUS                                               = 15; // 檢查活動狀態
+    BOT_WALLET_REFRESH                                                        = 16; // 機器人錢包補錢機制
+    RED_ENVELOPES_PUSH                                                        = 17; // 紅包推波
+    BIG_WIN_PUSH_S                                                            = 18; // 大獎推波
+    BIG_WIN_PUSH_M                                                            = 19; // 大獎推波
+    BIG_WIN_PUSH_L                                                            = 20; // 大獎 推波
+    JUDAN_GUILD_HOURLY_TOTAL_SCORE_RAND                                       = 21; // 公會官方帳號隨機給積分
+    REFUND_TOKEN                                                              = 22;
+    CHECK_BLOCK_LIST_EXPIRED                                                  = 23;
+    DELETE_WEEK_RANKING                                                       = 24; // 每週重置排行榜
+    SET_ORDER_EXPIRE                                                          = 25;
+    CHECK_ACTIVITY_STATUS                                                     = 26; // 檢查活動狀態
+    CHECK_LOTTERY_DRAW_STATUS                                                 = 27; // 檢查樂透開獎狀態
+    CHECK_MISSION_STATUS                                                      = 28; // 檢查任務狀態
+    CHECK_ACTIVITY_IMAGE_STATUS                                               = 29; // 檢查活動圖片狀態
+    CHECK_SPORT_QUIZ_DRAW_FAIL                                                = 30; // 檢查活動圖片狀態
+    SEND_PLAYER_TO_TELEGRAM_GROUP                                             = 31; // 推送玩家到tg group
+    SEND_GAME_JACKPOT_INFO                                                    = 32;
+    SEND_GUILD_DIVIDEND_FIREBASE                                              = 33;
+    SEND_ACTIVITY_LUCKY_FIREBASE                                              = 34;
+    STATISTICS_PLAYER_INFO                                                    = 35; // 統計玩家資訊
+    JobUserRtpTotal                                                           = 36; // 統計玩家每日rtp總輸贏
+    PUBLISH_TOURNAMENTS                                                       = 37; // 發布錦標賽到遊戲端
+    TOURNAMENTS_STARTING_SOON_NOTIFY                                          = 38; // 錦標賽即將開賽通知
+    MIGRATE_REFERRER_CODE                                                     = 39; // 補償推薦碼
+    CLOSE_EXPIRED_PROMOTION_TASKS                                             = 40; // 關閉到期的推廣活動(未領取的獎勵由系統自動發放)
+    AUTO_UPDATE_PLAYER_PROMOTION_TASK_PROGRESS_WITH_STATUS_WAIT_RECEIVE_AWARD = 41; // 在等待領取獎勵期間自動更新玩家推廣任務進度
+    CHECK_USER_BACK                                                           = 42; // 檢查回歸玩家
+    SEND_SUMMONED_PLAYER_MESSAGE                                              = 43; // 送出招回玩家訊息
+    AGG_DEPOSIT_SURVIVAL                                                      = 44; // 匯集充值留存
+    AGG_DAILY_COIN_STATISTIC                                                  = 45; // 匯集每日金幣統計
+    DISTRIBUTE_COMPETITION_AWARD                                              = 46; // 派發競賽獎勵
+    JOB_DAILY_PLAYER_SCORE                                                    = 47; // 每日回饋
+    SEND_PLAYER_CSV_TO_TELEGRAM_GROUP                                         = 48; // 推送玩家Csv到tg group
+    ALERT_MSG_UNREVIEWED_COMPETITION                                          = 49; // 推播未審核競賽至tg競賽群
+    RecordPlayerDailyBalance                                                  = 50; // 記錄特定玩家每天餘額
+    SYNC_WITHDRAW_ORDERS                                                      = 51;
+    DAILY_DAU_STATISTIC                                                       = 52;
+}
+
+enum ApiType {
+    PING_PONG        = 0;
+    JOIN_ROOM        = 1;
+    USER_KICK_BEFORE = 2; // meesage UserKickBeforeReason
+    SERVER_UPDATE    = 3;
+    SERVER_LOGIN     = 4;
+
+    LOBBY_GET                 = 11;
+    WALLET_GET                = 12;
+    WALLET_USE                = 112;
+    GET_SYSTEM_TIME           = 13;
+    GET_BET_LEVEL             = 14;
+    SEND_MESSAGE              = 15;
+    GET_LOGIN_AWARD           = 16; // 每日登入獎勵清單
+    RECEIVE_LOGIN_AWARD       = 17; // 領取登入獎勵
+    GetSummonedAwardList      = 18; // 招回獎勵清單
+    ReceiveSummonedAward      = 19; // 領取招回獎勵
+    GET_DAILY_AWARD           = 945; // 每日回饋
+    RECEIVE_DAILY_AWARD       = 946; // 領取回饋
+    LIST_DAILY_AWARD          = 947; // 每日回饋獎勵紀錄
+    LIST_DAILY_DETAIL_AWARD   = 948; // 每日回饋明細紀錄
+    GET_DAILY_AWARD_BONUS     = 949; // 每日回饋加碼
+    RECEIVE_DAILY_AWARD_BONUS = 950; // 領取回饋加碼
+
+    // Player info
+    GET_PLAYER_INFO             = 20;
+    UPDATE_PLAYER_INFO          = 21;
+    LIST_PLAYER_AVATARS         = 22;
+    UPDATE_PLAYER_AVATAR        = 23;
+    GET_PLAYER_ROLE             = 24;
+    ADD_PLAYER_ROLE             = 25;
+    UPDATE_PLAYER_ROLE          = 26;
+    RESET_MEGA_PASS             = 27;
+    ADD_PLAYER_EXP              = 28;
+    ADD_PLAYER_ANGLE            = 29;
+    UPDATE_PLAYER_ANGLE         = 30;
+    GET_PLAYER_ANGLE            = 31;
+    SENDER_PLAYER_GIFT          = 32;
+    UPDATE_NOVICE_TEACHING      = 33; // 新手教學
+    DELETE_ACCOUNT              = 34;
+    LIST_STRANGER               = 35;
+    CHANGE_ACCOUNT_BINDING      = 36;
+    LIST_STRANGER_WITHOUT_CHECK = 37; // 列出所有玩家，不做任何額外的檢查。用來讓遊戲端查詢待加入好友名單
+    VALIDATE_SECOND_PASSWORD    = 38;
+    SEND_RICH_DADDY_GIFT        = 39;
+
+    // Relation
+    LIST_FRIENDS           = 40;
+    CREATE_FRIENDS         = 41;
+    CONFIRM_FRIENDS        = 42;
+    CANCEL_FRIENDS         = 43;
+    LIST_BLACK_FRIENDS     = 44;
+    ADD_BLACK_LIST         = 45;
+    CANCEL_BLACK_LIST      = 46;
+    LIST_FRIEND_RECOMMENDS = 47;
+    GET_INVITE_FRIEND      = 48;
+
+    // Room
+    LIST_ROOM                   = 60;
+    CREATE_PRIVATE_ROOM         = 61;
+    JOIN_RANDOM_ROOM            = 62;
+    LOCK_ROOM                   = 63;
+    INVITE_ROOM                 = 64;
+    PLAY_TOGETHER               = 65;
+    PLAY_TOGETHER_TIMEOUT       = 66;
+    PLAY_TOGETHER_CANCEL        = 67;
+    PLAY_TOGETHER_EXIST         = 68;
+    PLAY_TOGETHER_TIMEOUT_EXIST = 69;
+    GET_NOW_PLAYING             = 70;
+    CREATE_PASSWORD_ROOM        = 71;
+    JOIN_PASSWORD_ROOM          = 72;
+    LIST_PASSWORD_ROOM          = 73;
+    GET_NOW_PLAYING_COUNT       = 74;
+
+    // kaixilo
+    GET_KAIXILO             = 81;
+    LEVEL_UP_THING          = 82;
+    GET_THING               = 83;
+    LIST_PARASITES          = 84;
+    CREATE_PARASITE         = 85;
+    COUNT_INCOME            = 86;
+    GET_RANDOM_PLAYER       = 87;
+    LIST_RECOMMENDS         = 88;
+    UPDATE_THING            = 89;
+    LIST_MODEL_IDS          = 90;
+    THING_COMPLETE          = 91;
+    DAILY_DIVIDENDS         = 92; // 列出每日分紅
+    GET_AVAILABLE_DIVIDENDS = 93; // 取得可領取分紅點數
+    PAY_DIVIDENDS           = 94; // 領取分紅
+
+    // Red Envelope Service
+    SEND                       = 100;
+    SNATCH                     = 101;
+    ANSWER                     = 102;
+    VERIFY_ANSWER              = 103;
+    LIST_RED_ENVELOPES         = 104;
+    VERIFY_DAILY_AMOUNT        = 105;
+    LIST_USER_SEND_ENVELOPES   = 106;
+    LIST_USER_SNATCH_ENVELOPES = 107;
+    LIST_CONDITION_SNATCH      = 109;
+    LIST_CONDITION_SEND        = 110;
+    COUNT_CONDITION            = 111;
+
+    // Ranking Service
+    ADD_RANKING                    = 131;
+    LIST_RANKING                   = 132;
+    GET_DISPLAY_MENUS              = 136;
+    LIST_COMPETITION               = 137;
+    LIST_COMPETITION_RANKING       = 138;
+    GET_COMPETITION_RANKING_REPLAY = 139; // 取得競賽綁重播回放
+    LIST_JACKPOT_PLAYER_INFO       = 140;
+    GET_JACKPOT_INFO               = 141;
+    LIST_PLAYER_BINGO              = 142;
+    LIST_TOP_BINGOS                = 143;
+
+    // Virtual Good Service
+    //    LIST_VIRTUAL_GOODS    = 151;
+    //    LIST_USER_GOOD_INFO   = 152;
+    //    CREATE_USER_GOOD_INFO = 153;
+    //    UPDATE_USER_GOOD_INFO = 154;
+    //    DELETE_USER_GOOD_INFO = 155;
+
+    // social Service
+    CREATE_CHAT_ROOM       = 171;
+    GET_CHAT_ROOM          = 172;
+    LIST_CHAT_ROOM         = 173;
+    ADD_TO_CHAT_ROOM       = 174;
+    UPDATE_CHAT_ROOM       = 175;
+    CONFIRM_ADD_MEMBER     = 176;
+    UPDATE_POSITION        = 177;
+    LEAVE                  = 178;
+    LIST_RECOMMEND_ROOM    = 179;
+    LIST_ROOM_AMOUNT_LIMIT = 180;
+    INVITE_TO_CHAT_ROOM    = 181;
+    CONFIRM_INVITE_MEMBER  = 182;
+
+    // guild Service
+    CREATE_GUILD                  = 191; // 創建公會
+    GET_GUILD                     = 192; // 取得公會
+    LIST_GUILD                    = 193; // 公會清單
+    APPLY_GUILD                   = 194; // 申請公會
+    UPDATE_GUILD                  = 195; // 修改公會
+    CONFIRM_ADD_GUILD_MEMBER      = 196; // 會員審核
+    CHANGE_MEMBER_POSITION        = 197; // 更換職位
+    LEAVE_GUILD                   = 198; // 請離公會
+    LIST_REFERRER                 = 199; // 調配會員上級清單
+    INVITE_MEMBER                 = 200; // 邀請會員
+    EXTEND_GUILD_TIME             = 201; // 延長公會時間
+    LIST_CONFIRM_MEMBER           = 202; // 會員審核清單
+    LIST_RECOMMENDED              = 203; // 下級清單
+    LIST_MEMBER_SCORE             = 204; // 個人積分
+    GET_GUILD_REPORT              = 205; // 戰積報告
+    CHANGE_MEMBER_REFERRER        = 206; // 調配會員
+    APPLY_LEAVE                   = 207; // 會員申請離開俱樂部
+    LIST_APPLY_LEAVE              = 208; // 會員申請離開俱樂部清單
+    CONFIRM_LEAVE_MEMBER          = 209; // 審批離開會員
+    GET_GUILD_REPORT_DETAIL       = 212; // 公會戰機報告明細
+    GET_GUILD_QRCODE_LINK         = 213; // 公會取得 qr code 連結
+    LIST_GUILD_INVITE_INFO        = 214; // 代理邀請人數資訊
+    LIST_GUILD_INVITE_INFO_DETAIL = 215; // 代理邀請人數資訊明細
+    UPDATE_GUILD_USER_INVITE      = 216; // 更新公會玩家邀請人數
+    CREATE_GUILD_QRCODE_LINK      = 217; // 產生公會 qr code 連結
+    ADD_GUILD_TO_DEEP_LINK        = 218; // 透過 QR code 進入工會
+    LIST_OWN_REFERRER             = 219; // 自己上級會員清單
+    LIST_ALLIANCES                = 220; // 取得工會聯盟
+    UPDATE_USER_TO_MANAGER        = 221; // 更新俱樂部玩家為管理員
+    LIST_USER_TO_REFERRER_POINT   = 222; // 代理中心
+    LIST_GUILD_TOTAL_SCORE        = 223; // 特殊積分
+    GET_MEMBER                    = 224; // 取得會員
+    LIST_MEMBER                   = 225; // 取得會員List
+
+    // message Service
+    GET_ROOM_MESSAGE   = 210;
+    GROUP_ROOM_MESSAGE = 211;
+
+    // Drop 卡片物品掉落
+    GENERATE_LOOTS               = 301; // 抽寶箱
+    EXCHANGE_COLLECTION          = 302; // 兌換牌組
+    LIST_USER_COLLECTION_RECORDS = 303; // 列使用者的收集紀錄
+
+    // Store 商城
+    BUY_STORE_ITEM       = 311;
+    LIST_STORE_ITEMS     = 312;
+    LIST_APK_STORE_ITEMS = 313;
+
+    ListProducts = 316;
+    BuyProduct   = 317;
+
+    // 敏感操作
+    SECONDARY_PASSWORD_SETTING = 330; // 二次密碼設置  playinfo
+    SECONDARY_PASSWORD_CHANGE  = 331; // 二次密碼更改  playinfo
+    SECONDARY_PASSWORD_FORGOT  = 332; // 二次密碼忘記 <<?
+
+    SMS_VERIFY = 333; // sms 驗證碼驗證
+
+    WALLET_SAVING_AMOUNT         = 335; // 保險金操作 將錢包金額 移出移入 保險箱 wallet
+    WALLET_EXCHANGE_PAYMENTPOINT = 336; // 點數兌換成金幣  ExchangePaymentPointToGlodRequest
+    WALLET_FROZEN_RECORD         = 337; // 錢包凍結紀錄 WalletFrozenRecordResponse
+    GET_TOKEN                    = 338;
+    LIST_TOKEN                   = 339;
+    DIAMOND_TRADE                = 340;
+
+    BIG_WIN                    = 350; // 大獎推送
+    GET_AND_CHECK_FORTUNE_COIN = 351;
+    LIST_MEGA_PACKAGE          = 352;
+    LIST_DAILY_PACKAGE         = 353;
+
+
+    // Inbox
+    LIST_INBOX              = 370; // 玩家信箱
+    LIST_HOMEPAGE_CAMPAIGN  = 371; // 首頁 inbox
+    CAMPAIGN_CLICK          = 372; // 點擊inbox時呼叫 返回 跳轉內容
+    ReceiveDailyInboxReward = 373; // 領取每日inbox獎勵 =>  ReceiveDailyInboxRewardResp
+
+    // backpack
+    LIST_BACKPACK = 401; // 背包列表
+    USE_ITEM      = 402; // 使用物品 (現金券)
+
+    GetSerialStatus = 360; // 序號狀態
+    SerialRegister  = 361; // 序號兌換
+
+    MegaAccountBinding         = 362; // mega帳號綁定  MegaAccountBindingRequest
+    ThirdpartyAccountBinding   = 363; // 第三方帳號綁定 ThirdpartyAccountBindingRequest
+    PhoneUnBinding             = 364; // 手機解除綁定
+    ThirdpartyAccountUnBinding = 365; // 第三方帳號解除綁定 ThirdpartyAccountUnBindingRequest
+
+    // event
+    LIST_EVENTS      = 421;
+    ACCEPTING_REWARD = 422;
+
+    EXCHANGE_SW_SERIAL_NUM = 440;
+    EXCHANGE_SERIAL_NUM    = 441;
+
+    LIST_MAHJONG_REPLAY = 461;
+    LIST_REPLAY         = 462;
+    GET_REPLAY          = 463;
+
+    // activity
+    LIST_ACTIVITY      = 470; // 取得活動列表
+    GET_ACTIVITY       = 471; // 取得活動詳情
+    GET_ACTIVITY_IMAGE = 472; // 取得活動圖片
+
+    LIST_LOTTERY_DRAW                  = 480; // 取得樂透開獎列表
+    LIST_LOTTERY_TICKETS               = 481; // 取得彩券列表
+    GET_USER_ACTIVITY_NOTIFICATION_RED = 482; // 取得玩家活動通知紅點資訊
+    UPSERT_USER_LATEST_READ_TICKET     = 483; // 更新玩家最新讀取的彩票ID
+
+    LIST_MISSION              = 490; // 取得任務列表
+    GET_USER_MISSION_PROGRESS = 491; // 取得玩家任務進度
+
+    GET_LUCKY_TIMES       = 492; // 取得玩家幸運轉盤次數
+    RECEIVE_LUCKY_PRODUCT = 493; // 取得幸運轉盤獎品
+    LIST_LUCKY_RANKING    = 494; // 幸運轉盤排名
+
+    ACTIVITY_COLLECT_REWARD = 495; // 領取活動獎勵
+
+    // 推廣相關操作 530~550
+//    GET_REFERRER_CODE_INFO                         = 530; // 取得推薦碼相關資訊
+    BINDING_REFERRER_CODE                          = 531; // 綁定推薦碼
+//    LIST_PLAYER_PROMOTION_TASKS                    = 532; // 取得玩家推廣任務列表
+//    LIST_ONGOING_PLAYER_PROMOTION_TASKS_PROGRESS   = 533; // 取得進行中的玩家推廣任務進度列表(未達標或待領取獎勵)
+//    LIST_COMPLETED_PLAYER_PROMOTION_TASKS_PROGRESS = 534; // 取得完成的玩家推廣任務進度列表(達標且已領取獎勵)
+//    RECEIVE_PROMOTION_TASK_AWARD                   = 535; // 領取推廣任務獎勵
+//    BINDING_REFERRER_CODE_V2                       = 536; // 綁定推薦碼第二版有resp
+    LIST_PLAYER_REFERRER                           = 537;
+    GET_USER_TO_REFERRER_CODE                      = 538;
+
+    // NEW 推廣好友（推薦碼相關）
+    GET_REFERRAL_INFO     = 540; // 取得推廣好友活動資訊
+    CLAIM_REFERRAL_REWARD = 541; // 領取推廣獎勵
+
+    // Auction
+    GetAuctionSettings = 550; // 取得拍賣設定
+    ListAuctions       = 551; // 取得拍賣中心列表
+    MyAuctions         = 552; // 取得我的拍賣列表
+    AddAuction         = 553; // 新增/上架拍賣
+    DiscontinueAuction = 554; // 下架拍賣
+    DealAuction        = 555; // 成交拍賣
+
+    // 金主霸霸榜
+    ListRichDaddies = 600; // 金主榜單
+
+    LIST_WITHDRAW_ORDERS  = 621; // 取得提現單
+    // GET_WITHDRAW_ORDER = 622; // 保留
+    CREATE_WITHDRAW_ORDER = 623; // 建立提現單
+
+    // 第三方遊戲
+    GetThirdPartyGameInfo = 701; // 取得第三方遊戲資訊
+
+
+    // 錦標賽相關
+    LIST_GAME_SIDE_TOURNAMENTS_INFO          = 901; // 在大廳 取得錦標賽資訊(game side)
+    LIST_GAME_SIDE_PRIZE_SETTING             = 902; // 取得錦標賽獎勵(game side)
+    GET_GAME_SIDE_HOLDEM_TOURNAMENTS_SETTING = 903; // 取得德州樸克錦標賽設定(game side)
+    GET_GAME_SIDE_BLIND_STRUCTURE_SET        = 904; // 取得德州樸克錦標賽盲住結構組合(game side)
+
+    GET_MY_REGISTERED_TOURNAMENTS                = 905; // 取得單筆我已報名的錦標賽資訊
+    LIST_MY_REGISTERED_TOURNAMENTS               = 906; // 取得我已報名的錦標賽資訊列表
+    LIST_GAME_SIDE_POST_TOURNAMENTS_RANKING      = 907; // 取得德州樸克錦標賽賽後排名(game side)
+    LIST_GAME_SIDE_REAL_TIME_TOURNAMENTS_RANKING = 908; // 取得德州樸克錦標賽即時排名(game side)
+    GET_GAME_SIDE_TOURNAMENTS_INFO               = 909; // 在大廳 取得單筆錦標賽資訊(game side)
+    GET_TOURNAMENTS_AWARD_WINNING_RECORD         = 910; // 取得錦標賽獎勵派發紀錄
+
+    GET_GAME_SIDE_TOURNAMENTS_INFO_IN_GAME = 929; // 在遊戲內 取得單筆錦標賽資訊(game side)
+
+    PRE_JOIN_TOURNAMENTS_ROOM    = 940; // 在加入房間前的預先檢查流程
+    REGISTER_TOURNAMENTS         = 941; // 在大廳 報名錦標賽 (首購/重買)
+    ADD_ON_TOURNAMENTS           = 942; // 在大廳 續買/多買籌碼
+    REGISTER_TOURNAMENTS_IN_GAME = 943; // 在遊戲內 報名錦標賽 (首購/重買)
+    ADD_ON_TOURNAMENTS_IN_GAME   = 944; // 在遊戲內 續買/多買籌碼
+
+    // server push 類 因為不用switch case 所以放1000後
+    SEND_MESSAGE_PUSH                     = 1000;
+    INVITE_TO_CHAT_ROOM_PUSH              = 1001;
+    INVITE_TO_GUILD_PUSH                  = 1002;
+    INVITE_ROOM_PUSH                      = 1003;
+    PLAY_TOGETHER_PUSH                    = 1004;
+    LEAVE_GROUP_PUSH                      = 1005;
+    ADD_GROUP_PUSH                        = 1006;
+    CHANGE_GROUP_NAME_PUSH                = 1007;
+    MEGA_WIN_PUSH                         = 1008;
+    PLAYER_VIP_LEVEL_UP                   = 1009;
+    GOT_RED_ENVELOPE_PUSH                 = 1010;
+    LAST_ORDER_PUSH                       = 1011;
+    RED_ENVELOPE_REFUND_PUSH              = 1012;
+    PAYMENT_FINISH_PUSH                   = 1013;
+    YOU_GOT_SOMETHING_PUSH                = 1014;
+    CAMPAIGN_PUSH                         = 1020;
+    INVITE_FRIEND_PUSH                    = 1021; // player info
+    GET_TREASURE_BOX_PUSH                 = 1022;
+    BLOCK_MSG_PUSH                        = 1023; // 封鎖使用者 收到此訊息 可跳訊息並回到登入介面 (server 會再發出訊息後三秒內斷開連線)
+    GIFT_MSG_PUSH                         = 1024; // 送禮消息
+    SERVER_MSG_PUSH                       = 1025; // 系統訊息推送  SeverPushMessage
+    SYSTEM_MAINTENANCE_MSG_PUSH           = 1026; // 系統維護 收到此訊息 可跳訊息並回到登入介面 (server 會再發出訊息後三秒內斷開連線) 204
+    ADD_OR_LEAVE_GUILD_MSG_PUSH           = 1027; // 加入或請離公會訊息
+    CHANGE_GUILD_MEMBER_POSITION_MSG_PUSH = 1028; // 更換公會成員職位訊息
+    GUILD_DIVIDENDS_MSG_PUSH              = 1029; // 公會分紅訊息
+    GUILD_AUTO_MSG_PUSH                   = 1030; // 公會自動推播訊息
+    APPLY_LEAVE_GUILD_MSG_PUSH            = 1031; // 申請離開退出後的訊息
+    SNATCH_RED_ENVELOPE_PUSH              = 1032;
+    TOKEN_REFUND_PUSH                     = 1033;
+    CHANGE_DEALER_PUSH                    = 1034;
+    QR_CODE_ADD_GUID_MSG_PUSH             = 1038; // 透過 QR code 加入俱樂部系統訊息 to 推薦人
+    RED_ENVELOPE_VERIFY_PUSH              = 1039;
+    UPDATE_GUILD_USER_TO_MANAGER_PUSH     = 1040; // 俱樂部移除或是設定該會員為管理者訊息
+    GOT_LOTTERY_TICKETS                   = 1041; // 獲得彩券通知
+    GAME_END_PUSH                         = 1042; // 獲得彩券通知
+    JACKPOT_INFO_PUSH                     = 1043;
+    EVENT_JACKPOT_PUSH                    = 1044;
+    PLAYER_LEVEL_UP                       = 1052;
+    SEND_ITEM_PUSH                        = 1053;
+    COMPETITION_AWARD_MSG_PUSH            = 1054; // 競賽獎勵通知
+
+    RICH_DADDAY_GIFT_MSG_PUSH  = 1055; // 金主霸霸拜禮
+    RICH_DADDAY_AWARD_MSG_PUSH = 1056; // 金主霸霸回饋
+    RICH_DADDY_ONLINE_MSG_PUSH = 1057; // 金主霸霸上線
+
+    WITHDRAW_SUCCESS_PUSH = 1048; // 提現成功推波
+
+    // SNATCH_RED_ENVELOPE_PUSH              = 1032;
+    DAILY_LOGIN_AWARD_MSG_PUSH = 1035; // 每入登入獎勵的訊息
+    BAN_PLAYER_MSG_PUSH        = 1036;
+    ACTIVITY_LUCKY_MSG_PUSH    = 1037; // 幸運輪盤送獎訊息
+
+    // Activity Lottery
+    DRAW_LOTTERY_AWARD       = 1050; // 樂透中獎通知
+    RECEIVED_LOTTERY_TICKETS = 1051; // 獲得彩券通知
+
+    SUMMONED_AWARD = 1060;
+
+    // 錦標賽相關通知
+    TOURNAMENTS_STARTING_SOON_PUSH       = 1070; // 錦標賽即將開賽通知 (開賽前10分鐘、3分鐘、30秒)
+    TOURNAMENTS_STARTING_PUSH            = 1071; // 錦標賽開賽通知
+    TOURNAMENTS_AWARDS_DISTRIBUTION_PUSH = 1072; // 獎勵發放通知
+
+    AUCTION_DISCONTINED_PUSH = 1081; // 下架拍賣通知
+    AUCTION_COMPLETED_PUSH   = 1082; // 買家拍賣通知
+    AUCTION_RECEIVED_PUSH    = 1083; // 賣家拍賣通知
+    RECEIVE_DAILY_BONUS_PUSH = 1084; //領取額外每日回饋通知
+
+    // Slot
+    GAME_JACKPOT_INFO       = 2001;
+    LIST_JACKPOT_BINGO_INFO = 2002;
+
+    // Gm command (only for test)
+    GM_COMMAND_GENERAL = 9000; // GmCommandGeneralReq
+}

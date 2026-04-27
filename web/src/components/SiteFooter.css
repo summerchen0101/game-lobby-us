@@ -1,0 +1,108 @@
+.site-footer {
+  margin-top: var(--space-8);
+  padding: var(--space-8) var(--page-pad-inline) var(--space-6);
+  background: linear-gradient(180deg, var(--color-elevated) 0%, var(--color-bg) 100%);
+  border-top: 1px solid var(--color-border);
+}
+
+.site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.site-footer__brand-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.site-footer__top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+
+@media (min-width: 48rem) {
+  .site-footer__top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.site-footer__top-texts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 36rem;
+}
+
+.site-footer__top-text {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.site-footer__top-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.site-footer__age {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.5rem;
+  border: 2px solid rgb(255 255 255 / 35%);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.site-footer__grid {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (min-width: 48rem) {
+  .site-footer__grid {
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+}
+
+.site-footer__para {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.site-footer__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.site-footer__link {
+  color: #e5e5e5;
+  font-size: var(--text-small);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.site-footer__link:hover {
+  color: var(--crown-gold);
+}

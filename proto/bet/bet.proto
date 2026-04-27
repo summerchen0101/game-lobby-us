@@ -1,0 +1,29 @@
+syntax = "proto3";
+package bet;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/bet";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "proto/gamemanager/gamemanager.proto";
+
+service BetService {
+    rpc CreateBetOrders(CreateBetOrdersRequest) returns (CreateBetOrdersResponse);
+    // rpc CreateBetOrder(CreateBetOrderRequest) returns (CreateBetOrderResponse);
+}
+
+message CreateBetOrdersRequest {
+    repeated BetOrder betOrders = 1;
+}
+
+message CreateBetOrdersResponse {
+    uint64 userID  = 1;
+    uint64 balance = 2;
+}
+
+message BetOrder {
+    uint64 gameID                         = 1;
+    gamemanager.GameCategory gameCategory = 2;
+    uint32 roomID                         = 3;
+    uint64 userID                         = 4;
+    uint64 betAccount                     = 5;
+    yesno.YesNo isFree                    = 6;
+}

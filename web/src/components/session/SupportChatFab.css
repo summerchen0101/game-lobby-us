@@ -1,0 +1,52 @@
+/* Shared Support FAB (guest landing + session chrome) */
+
+.support-chat-fab {
+  position: fixed;
+  right: max(var(--page-pad-inline), var(--safe-right));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-text);
+  background: var(--crown-button-primary-gradient);
+  border: none;
+  box-shadow:
+    0 2px 0 rgb(0 0 0 / 70%),
+    0 6px 16px rgb(0 0 0 / 62%),
+    0 12px 32px rgb(0 0 0 / 68%),
+    0 20px 48px rgb(0 0 0 / 68%);
+  transition:
+    transform 0.08s ease,
+    filter 0.15s ease;
+}
+
+.support-chat-fab:hover {
+  filter: brightness(1.12);
+}
+
+.support-chat-fab:active {
+  transform: scale(0.96);
+}
+
+.support-chat-fab--guest {
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+}
+
+.support-chat-fab--session {
+  bottom: calc(
+    var(--session-footer-h, calc(3.6rem + var(--safe-bottom))) + var(--space-3)
+  );
+  z-index: 180;
+}
+
+.support-chat-fab__icon {
+  display: block;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+}

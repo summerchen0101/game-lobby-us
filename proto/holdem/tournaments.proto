@@ -1,0 +1,127 @@
+syntax = "proto3";
+package holdem;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/holdem";
+
+import "proto/virtualgood/virtualgood.proto";
+import "proto/judan/judan.proto";
+
+import "google/protobuf/wrappers.proto";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+// 錦標賽相關
+
+// holdem -> tournaments
+
+// 牌局結算同步給錦標賽
+// ref: tournaments.SettleForTournaments
+message SettleForTournamentsReqData {
+    judan.BuildTournamentsRoundGameOrderRequest buildTournamentsRoundGameOrderRequest = 1;
+}
+
+message SettleForTournamentsRespData {
+    repeated TEvent tEvents = 1;  // 看settle後 有哪些要處理的事件
+}
+
+// tournaments -> holdem
+
+// 錦標賽回合開始 ->觸發遊戲流程開始/繼續進行
+// ref: roomcontroller.TournamentsRoundStart
+
+// 錦標賽相關的事件類型
+enum TEventType {
+    T_EVENT_UNKNOWN                = 0;
+    T_EVENT_CLOSE_ROOM             = 1;  // 關房 -> 在該round結束後，該桌的玩家可能都已經換桌或是已出局且不可重買，可以把遊戲資源回收
+    T_EVENT_CHANGE_ROOM            = 2;  // 換房 -> 在該round結束後，如果玩家未出局，則通知前端作換桌的提示
+    T_EVENT_TAKE_BREAK             = 3;  // 休息 -> 在該round結束後，讓遊戲流程暫停，通知前端做休息的提示，如果可以addOn，通知前端做購買的提示
+    T_EVENT_BLIND_STRUCTURE_CHANGE = 4;  // 盲注級別變更 -> 通知前端同步盲注級別資訊
+    T_EVENT_PLAYER_OUT             = 5;  // 玩家在遊戲中出局 -> 在該round結束後，通知玩家獲得的名次與出局獎勵，通知前端做出局的提示
+    T_EVENT_HAND_FOR_HAND          = 6;  // 全場同步發牌
+    T_EVENT_IN_THE_MONEY           = 7;  // 進錢圈通知 -> 該round結束後，該賽事所有倖存玩家都已經進入錢圈，通知前端做進入錢圈的提示
+    T_EVENT_FINAL_TABLE            = 8;  // 決勝桌通知 -> 在錢圈階段，如果該桌為該賽事的最後一桌，通知前端顯示為決勝桌
+}
+
+message TEvent {
+    uint64 tournamentsID  = 1;  // 錦標賽ID
+    string roomID         = 2;  // 房間編號
+    TEventType tEventType = 3;  // 事件類型
+    bytes data            = 4;  //
+}
+
+// 關房
+message CloseRoomTEventData {}
+
+// 換房
+message ChangeRoomTEventData {
+    string newRoomID                      = 1;  // 新房間的編號
+    repeated RoomMigration roomMigrations = 2;
+}
+
+// 房間遷徙
+message RoomMigration {
+    uint64 userID        = 1;
+    string newRoomID     = 2;  // 新房間的編號
+    int64 remaining_chip = 3;  // 剩餘籌碼
+    string path          = 4;  // 連線的path
+}
+
+// 休息
+message TakeBreakTEventData {
+    google.protobuf.Int64Value takeBreakStartAtMs = 1;  // 從什麼時候開始休息(毫秒)，如果最後一桌尚未結束，不會開始算休息時間，等最後一桌結束後，會再推一次這個event給每一桌，再通知前端進行倒數
+    int64 breakMin                                = 2;  // 休息分鐘數
+    yesno.YesNo addOnEnable                       = 3;  // 可否addOn -> 如果開放addOn，通知前端顯示購買addOn的提示
+}
+
+// 盲注級別變更
+message BlindStructureChangeTEventData {
+    int64 nowBlindLeave                       = 1;  // 現在盲注級別
+    google.protobuf.Int64Value nextBlindLeave = 2;  // 下一個盲注級別 (有可能為null)
+
+    BlindStructure nowBlindStructure  = 31;  // 現在盲住結構
+    BlindStructure nextBlindStructure = 32;  // 下一個盲住結構 (有可能為null)
+}
+
+// BlindStructure 盲住結構
+message BlindStructure {
+    int64 level                                 = 2;  // 盲注等級
+    google.protobuf.Int64Value blindDurationMin = 3;  // 盲注持續時間(分鐘) 如果為null，代表沒有下一個盲注階級
+    int64 smallBlind                            = 4;  // 小盲
+    int64 bigBlind                              = 5;  // 大盲
+    int64 bigBlindAnte                          = 6;  // 大盲前注
+    int64 breaksMin                             = 7;  // 休息時間(分鐘)
+    google.protobuf.Int64Value startAtMs        = 8;  // 該盲注級別開始於(毫秒) null 表示未開始
+    google.protobuf.Int64Value finishAtMs       = 9;  // 該盲注級別結束於(毫秒) null 表示未結束
+}
+
+// 玩家在遊戲中出局
+message PlayerOutTEventData {
+    repeated OutPlayer outPlayers = 1;
+}
+
+message OutPlayer {
+    uint64 userID                     = 1;
+    yesno.YesNo rebuyEnable           = 2;  // 該玩家可否重買，如果可以通知前端演示重買的引導介面
+    int64 ranking                     = 3;  // 排名 (進itm後排名不會重複)
+    int64 outPosition                 = 4;  // 出局名次
+    int64 totalBuyingWhenOut          = 5;  // 出局時的總買入數
+    repeated Award rankingPrizeAwards = 6;  // 排名獎金與額外報酬
+}
+
+// Award 獎項
+message Award {
+    virtualgood.VirtualGoodType goodType = 1;  // 贈送的道具類型
+    uint64 itemID                        = 2;  // 贈送的道具ID
+    int64 amount                         = 3;  // 該道具贈與的數量
+}
+
+// 全場同步發牌
+message HandForHandTEventData {
+}
+
+// 進錢圈通知
+message InTheMoneyTEventData {
+}
+
+// 決勝桌通知
+message FinalTableTEventData {
+}

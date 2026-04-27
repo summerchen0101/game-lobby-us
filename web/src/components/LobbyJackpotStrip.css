@@ -1,0 +1,180 @@
+.lobby-jackpot-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 0.5rem 0.65rem 0.55rem;
+  line-height: normal;
+  pointer-events: none;
+  box-sizing: border-box;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgb(0 0 0 / 28%) 28%,
+    rgb(0 0 0 / 55%) 100%
+  );
+}
+
+/* 三格收斂置中，如參考稿 */
+.lobby-jackpot-strip__cluster {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.32rem;
+  width: 100%;
+  max-width: 20rem;
+}
+
+.lobby-jackpot-strip__cell {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 6.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.4rem 0.25rem 0.45rem;
+  text-align: center;
+  border-radius: 0.28rem;
+  border: 1px solid rgb(234 179 8 / 55%);
+  background: linear-gradient(
+    165deg,
+    rgb(0 0 0 / 82%) 0%,
+    rgb(12 10 8 / 92%) 45%,
+    rgb(0 0 0 / 78%) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 55%),
+    0 4px 14px rgb(0 0 0 / 55%),
+    0 0 20px rgb(234 179 8 / 12%),
+    inset 0 1px 0 rgb(0 0 0 / 18%);
+}
+
+.lobby-jackpot-strip__title {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.24rem;
+}
+
+.lobby-jackpot-strip__word {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  color: #fff8e6;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgb(0 0 0 / 60%),
+    0 2px 4px rgb(0 0 0 / 55%),
+    0 0 10px rgb(0 0 0 / 45%);
+}
+
+.lobby-jackpot-strip__index {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.22rem;
+  border-radius: 0.24rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #0a0a0a;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 40%),
+    inset 0 1px 0 rgb(0 0 0 / 20%);
+}
+
+.lobby-jackpot-strip__index.is-one {
+  background: linear-gradient(
+    180deg,
+    var(--crown-gold-hover) 0%,
+    var(--crown-gold) 55%,
+    var(--crown-purple-deep) 100%
+  );
+}
+
+.lobby-jackpot-strip__index.is-two {
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #1e293b;
+}
+
+.lobby-jackpot-strip__index.is-three {
+  background: linear-gradient(180deg, #f0d080 0%, #a16207 100%);
+  color: #160c04;
+}
+
+.lobby-jackpot-strip__amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem;
+  min-width: 0;
+  width: 100%;
+  padding: 0 0.05rem;
+}
+
+.lobby-jackpot-strip__coin {
+  flex-shrink: 0;
+  width: 0.95rem;
+  height: 0.95rem;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 55%));
+}
+
+.lobby-jackpot-strip__amount {
+  font-size: clamp(0.6rem, 1.2vw + 0.46rem, 0.8rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 0 8px rgb(234 179 8 / 32%),
+    0 1px 0 rgb(0 0 0 / 45%),
+    0 1px 3px rgb(0 0 0 / 65%),
+    0 2px 4px rgb(0 0 0 / 40%);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lobby-jackpot-strip__amount.is-scrambling {
+  animation: lobby-jackpot-amount-tick 0.12s ease-in-out infinite;
+  filter: brightness(1.15);
+}
+
+@keyframes lobby-jackpot-amount-tick {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  40% {
+    transform: translateY(-0.5px);
+    filter: brightness(1.2);
+  }
+
+  60% {
+    transform: translateY(0.5px);
+  }
+}
+
+@media (min-width: 30rem) {
+  .lobby-jackpot-strip__cluster {
+    max-width: 22rem;
+    gap: 0.4rem;
+  }
+
+  .lobby-jackpot-strip__word {
+    font-size: 0.78rem;
+  }
+}

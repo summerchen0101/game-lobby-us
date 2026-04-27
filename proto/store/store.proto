@@ -1,0 +1,251 @@
+syntax = "proto3";
+package store;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/store";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+service StoreService {
+    // 購買商品
+    rpc BuyStoreItem(BuyStoreItemRequest) returns (BuyStoreItemResponse);
+
+    // Server用，取出某玩家所有歷程訂單
+    rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
+
+    // Server用，查看訂單是否存在
+    rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+
+    // Server用，更新商品購買狀態
+    rpc UpdateStoreItemOrderState(UpdateStoreItemOrderStateRequest) returns (UpdateStoreItemOrderStateResponse);
+
+    // Server用，統計某 ItemID 訂單數量
+    rpc CountOrders(CountOrdersRequest) returns (CountOrdersResponse);
+
+    rpc ListAuctions(ListAuctionsRequest) returns (ListAuctionsResponse);
+
+    rpc GetAuction(GetAuctionRequest) returns (GetAuctionResponse);
+
+    rpc ListAuctionIDs(ListAuctionIDsRequest) returns (ListAuctionIDsResponse);
+
+    rpc CreateAuction(CreateAuctionRequest) returns (CreateAuctionResponse);
+
+    rpc DiscontinueAuction(DiscontinueAuctionRequest) returns (DiscontinueAuctionResponse);
+
+    rpc DealAuction(DealAuctionRequest) returns (DealAuctionResponse);
+
+    rpc ReceiveAuctionResults(ReceiveAuctionResultsRequest) returns (ReceiveAuctionResultsResponse);
+}
+
+message CountOrdersRequest {
+    uint64 buyer_id          = 1;
+    uint64 item_id           = 2;
+    repeated uint64 item_ids = 3;
+}
+
+message CountOrdersResponse {
+    map<uint64, uint64> item_count_map = 1;
+}
+
+message ListOrdersRequest {
+    uint64 buyer_id                 = 1;
+    uint64 receiver_id              = 2;
+    uint64 item_id                  = 3;
+    store.StoreItemOrderState state = 4;
+    repeated uint64 ids             = 5; // 訂單ID
+}
+
+message ListOrdersResponse {
+    repeated store.Order orders = 1;
+}
+
+message BuyStoreItemRequest {
+    Order order = 1;
+}
+
+message BuyStoreItemResponse {
+    yesno.YesNo is_success = 1;
+    uint64 order_id        = 2;
+}
+
+message GetOrderRequest {
+    uint64 buyer_id = 1;
+    uint64 item_id  = 2;
+}
+
+message GetOrderResponse {
+    Order order = 1;
+}
+
+message UpdateStoreItemOrderStateRequest {
+    uint64 order_id           = 1;
+    StoreItemOrderState state = 2;
+}
+
+message UpdateStoreItemOrderStateResponse {
+    yesno.YesNo is_success = 1;
+}
+
+enum StoreItemOrderState {
+    UNKNOWN_STORE_ITEM_ORDER_STATE = 0;
+    WAITING_TRANSACTION            = 1;  // 購買準備中
+    BUY_SUCCESS                    = 2;  // 購買成功
+    BUY_FAIL                       = 3;  // 購買失敗
+}
+
+message Order {
+    uint64 buyer_id           = 1;  // 購買玩家 id
+    uint64 receiver_id        = 2;  // 接收玩家 id
+    uint64 item_id            = 3;  // 商品id
+    int64 amount              = 4;  // 購買 item 數量
+    int64 total_price         = 5;  // 總金額
+    string memo               = 6;
+    bytes receipt             = 7;  // 第三方收據 For 驗證用
+    StoreItemOrderState state = 8;
+    uint64 id                 = 9;  // 訂單ID
+}
+
+
+enum AuctionType {
+    UnknownAuctionType = 0;
+    Normal             = 1;  // 普通
+    Password           = 2;  // 密碼
+    Bidding            = 3;  // 競標
+}
+
+
+enum AuctionStatus {
+    UnknownAuctionStatus = 0;
+    ForSale              = 1;  // 上架中
+    Discontinued         = 2;  // 已下架
+    Masked               = 3;  // 隱藏
+    Completed            = 4;  // 交易完成並將交易物品給買家
+    Received             = 5;  // 交易完成並將交易物品給賣家
+}
+
+
+message Auction {
+    int64 id                          = 1;
+    int64 sellerUserID                = 2;
+    int64 buyerUserID                 = 3;
+    AuctionType auctionType           = 4;
+    string otp                        = 5;
+    AuctionStatus auctionStatus       = 6;
+    int64 feeAmount                   = 7;   // 上架手續費
+    int64 currentBidAmount            = 8;
+    int64 sellerReceivedAt            = 9;
+    int64 buyerReceivedAt             = 10;
+    int64 expiredAt                   = 11;
+    int64 createdAt                   = 12;
+    repeated AuctionItem auctionItems = 13;
+    int64 transactionFeeAmountSeller  = 14;  // 賣家成交手續費
+}
+
+
+message AuctionItem {
+    int64 id         = 1;
+    int64 auctionID  = 2;
+    int64 userID     = 3;
+    int64 itemID     = 4;
+    int64 goodType   = 5;
+    int64 amount     = 6;
+    int64 unlockedAt = 7;
+}
+
+
+message ListAuctionsRequest {
+    repeated int64 idIn                    = 1;
+    repeated int64 sellerUserIDIn          = 2;
+    repeated int64 buyerUserIDIn           = 3;
+    repeated AuctionStatus auctionStatusIn = 4;
+    bool isNotExpired                      = 5;
+    int64 sellerUserIDBuyerUserIDOr        = 6;
+    int64 itemID                           = 7;
+    bool isExpired                         = 8;
+
+    int64 limit                            = 10;
+    int64 offset                           = 11;
+
+    int64 createdAtGte = 12;
+    int64 CreatedAtLte = 13;
+}
+message ListAuctionsResponse {
+    int64 total               = 1;
+    repeated Auction auctions = 2;
+}
+
+
+message GetAuctionRequest {
+    int64 id           = 1;
+    int64 sellerUserID = 2;
+    int64 buyerUserID  = 3;
+}
+message GetAuctionResponse {
+    Auction auction = 1;
+}
+
+
+message ListAuctionIDsRequest {
+    repeated int64 sellerUserIDIn          = 1;
+    repeated int64 buyerUserIDIn           = 2;
+    repeated AuctionStatus auctionStatusIn = 3;
+    bool isNotExpired                      = 4;
+    int64 sellerUserIDBuyerUserIDOr        = 5;
+    int64 createdAtGte                     = 6;
+    bool isExpired                         = 7;
+
+    int64 limit                            = 10;
+    int64 offset                           = 11;
+}
+message ListAuctionIDsResponse {
+    int64 total               = 1;
+    repeated int64 auctionIDs = 2;
+}
+
+
+// 新增/上架
+message CreateAuctionRequest {
+    int64 sellerUserID               = 1;
+    AuctionType auctionType          = 2;
+    string otp                       = 3;
+    int64 expiredAt                  = 4;
+    repeated AuctionItem sellerItems = 5;
+    repeated AuctionItem buyerItems  = 6;
+    int64 oldAuctionID               = 7;
+    int64 feeAmount                  = 8;
+}
+message CreateAuctionResponse {
+    int64 id                         = 1;
+    int64 feeAmount                  = 2;
+    repeated AuctionItem sellerItems = 3;
+}
+
+
+// 下架
+message DiscontinueAuctionRequest {
+    int64 auctionID = 1;
+    int64 userID    = 2;
+}
+message DiscontinueAuctionResponse {
+    Auction auction = 1;
+}
+
+
+// 買家成交
+message DealAuctionRequest {
+    int64 auctionID   = 1;
+    int64 buyerUserID = 2;
+    string otp        = 3;  // 密碼
+}
+message DealAuctionResponse {
+    Auction auction = 1;
+}
+
+
+// 賣家領取
+message ReceiveAuctionResultsRequest {
+    int64 sellerUserID                         = 1;
+    repeated int64 auctionIDs                  = 2;
+    repeated int64 transactionFeeAmountSellers = 3;  // 賣家成交手續費
+}
+message ReceiveAuctionResultsResponse {
+    repeated Auction auctions = 1;
+}

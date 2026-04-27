@@ -1,0 +1,10 @@
+/* Session 內頁：底圖由全站 body 負責，此處僅保留堆疊上下文 */
+.session-page--pattern {
+  position: relative;
+  isolation: isolate;
+}
+
+.session-page--pattern > * {
+  position: relative;
+  z-index: 1;
+}

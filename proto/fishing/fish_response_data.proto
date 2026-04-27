@@ -1,0 +1,36 @@
+/*
+Fish Request Proto  version: v1.1
+場景:由客戶端向服務器主動發起請求
+-----------------------------------------------------------------------
+fish_request.proto          定義 gateway/gateway.proto request type emun
+fish_request_data.proto     定義了請求類型的 Data結構
+fish_response_data.proto    定義了請求響應的 Data結構
+-----------------------------------------------------------------------
+*/
+
+syntax = "proto3";
+package fish;
+
+option go_package       = 'gitlab.ffglobaltech.com/us888/pluto/protos/fishing;fishpb';
+option csharp_namespace = "FishingProto";
+import "proto/fishing/fish_common.proto";
+
+message GetRoomInfoResponseData {
+    Room room = 1;
+}
+
+message SyncPoolInfoResponseData {
+    int64 stageID   = 1;  //場景id
+    int64 timestamp = 2;  // server 時間戳 millisecond
+
+    repeated Fish fishs = 4;  //場中的魚
+
+    repeated Bullet normalBullets  = 5;  // 場中的普通子彈
+    repeated Bullet specailBullets = 6;  // 場中的 特殊武器
+
+    string bossUID      = 7;   //boss uid   boss真實離場 死亡會清空
+    int64 bossFishID    = 11;  //boss fish id
+    int64 bossInTime    = 8;   //boss 進場時間  bboss真實離場 死亡會清空
+    int64 bossLeaveTime = 9;   //boss 預計離場時間 boss真實離場 死亡會清空
+    int64 settleTime    = 10;  //傳送結算時間  boss真實離場 死亡會清空
+}

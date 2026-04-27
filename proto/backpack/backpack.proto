@@ -1,0 +1,299 @@
+syntax = "proto3";
+package backpack;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/backpack";
+
+import "google/protobuf/empty.proto";
+import "proto/virtualgood/virtualgood.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+service backpackService {
+    // ListBackpackInfo 列出背包的商品
+    rpc ListBackpackInfo(ListBackpackInfoRequest) returns (ListBackpackInfoResponse);
+
+    // [棄用] CreateBackpackInfo 請使用 CreateBackpackInfoV2
+    rpc CreateBackpackInfo(CreateBackpackInfoRequest) returns (google.protobuf.Empty);
+    // CreateBackpackInfoV2 新增玩家背包
+    rpc CreateBackpackInfoV2(CreateBackpackInfoRequestV2) returns (google.protobuf.Empty);
+
+    // CreateBackpackInfo 新增玩家背包
+    rpc RefundBackpack(RefundBackpackReq) returns (google.protobuf.Empty);
+
+    // UpdateBackpackInfo 更新玩家背包紀錄
+    rpc UpdateBackpackInfo(UpdateBackpackInfoRequest) returns (google.protobuf.Empty);
+
+    // GetBackpackInfo 取得玩家背包單筆
+    rpc GetBackpackInfo(GetBackpackInfoRequest) returns (GetBackpackInfoResponse);
+
+    // BatchUpdateToInUsed 批量更新玩家背包紀錄狀態
+    rpc BatchUpdateToInUsed(BatchUpdateToInUsedRequest) returns (google.protobuf.Empty);
+
+    // UseItem 使用商品
+    rpc UseItem(UseItemRequest) returns (UseItemResponse);
+
+    // BatchUpdate 整批修改商品狀態
+    rpc BatchUpdateGoodState(BatchUpdateGoodStateRequest) returns (google.protobuf.Empty);
+
+    // [棄用] ListBackpackRecords 請使用 ListBackpackRecordsV2
+    rpc ListBackpackRecords(ListBackpackRecordsRequest) returns (ListBackpackRecordsResponse);
+    // ListBackpackRecordsV2 列出玩家獲取物品歷程紀錄
+    rpc ListBackpackRecordsV2(ListBackpackRecordsRequestV2) returns (ListBackpackRecordsResponseV2);
+
+    // CountBackpackInfo 背包的商品 Count
+    rpc CountBackpackInfo(CountBackpackInfoRequest) returns (CountBackpackInfoResponse);
+
+    rpc SenderGift(SenderGiftRequest) returns (google.protobuf.Empty);
+    rpc ExchangeCardCollect(ExchangeCardExchangeRequest) returns (google.protobuf.Empty);
+
+    // 處理拍賣道具流程
+    rpc HandleAuction(HandleAuctionRequest) returns (HandleAuctionResponse);
+
+    // 系統收回
+    rpc SystemWithdrawBackpack(SystemWithdrawBackpackRequest) returns (google.protobuf.Empty);
+}
+
+message ListBackpackRecordsRequest {
+    Source source                        = 1;
+    virtualgood.VirtualGoodType goodType = 2;
+    uint64 startTimeMs                   = 3;  // search createTime start in ms
+    uint64 endTimeMs                     = 4;  // search createTime end in ms
+    repeated uint64 userIDs              = 5;
+    repeated string distinct             = 6;
+    string orderID                       = 7;
+
+    uint32 page    = 11;
+    uint32 perPage = 12;
+}
+
+message ListBackpackRecordsResponse {
+    repeated BackpackRecord records = 1;
+    pagination.Pagination page      = 2;
+}
+
+message ListBackpackRecordsRequestV2 {
+    repeated uint64 userIDIn                         = 1;
+    repeated Source sourceIn                         = 2;  // 道具來源
+    repeated virtualgood.VirtualGoodType goodTypeIn  = 3;  // 道具類型
+    repeated uint64 itemIDIn                         = 4;  // 物品ID
+    repeated string orderIDIn                        = 5;  // 訂單ID (根據來源，關聯 payment.orders.id 或是 serial.exchange_orders.id)
+    int64 createdAtMsGte                             = 10; // 創建時間 >=
+    int64 createdAtMsLte                             = 11; // 創建時間 <=
+    uint32 page                                      = 12;
+    uint32 perPage                                   = 13;
+}
+
+message ListBackpackRecordsResponseV2 {
+    pagination.Pagination pagination  = 1;
+    repeated BackpackRecordV2 records = 2;
+}
+
+message ListBackpackInfoRequest {
+    virtualgood.VirtualGoodType goodType           = 1;
+    repeated virtualgood.VirtualGoodType goodTypes = 2;
+    uint64 userID                                  = 3;
+    GoodState goodState                            = 4;  // 物品狀態
+    repeated uint64 userIDs                        = 5;
+    uint64 startTimeMs                             = 6;  // search createTime start in ms
+    uint64 endTimeMs                               = 7;  // search createTime end in ms
+    uint32 page                                    = 11;
+    uint32 per_page                                = 12;
+    repeated GoodState goodStates                  = 13;  // 多個物品狀態
+}
+
+message GetBackpackInfoRequest {
+    virtualgood.VirtualGoodType goodType = 1;
+    uint64 userID                        = 2;
+    uint64 goodID                        = 3;
+    uint64 id                            = 4;
+    GoodState goodState                  = 5;  // 物品狀態
+    uint64 itemID                        = 6;
+}
+
+message ListBackpackInfoResponse {
+    repeated BackpackInfo backpackInfos = 1;
+    pagination.Pagination page          = 2;
+}
+message GetBackpackInfoResponse {
+    BackpackInfo backpackInfos = 1;
+}
+
+message CreateBackpackInfoRequest {
+    uint64 userID                  = 1;
+    repeated BackpackRecord record = 2;
+}
+
+message CreateBackpackInfoRequestV2 {
+    uint64 fromUserID               = 1;
+    uint64 toUserID                 = 2;
+    repeated BackpackInfo backpacks = 3;
+
+    message BackpackInfo {
+        uint64 itemID                        = 1;  // 來源或是轉換前的物品ID
+        uint64 amount                        = 2;  // 數量
+        Source source                        = 3;  // 道具來源
+        virtualgood.VirtualGoodType goodType = 4;  // 道具類型
+        string orderID                       = 5;  // 訂單ID。 關聯 payment.orders.id 或是 serial.exchange_orders.id
+    }
+}
+
+message RefundBackpackReq {
+    uint64 userID  = 1;
+    Source source  = 2;
+    string orderID = 3;  // 訂單編號
+}
+
+message BatchBackpackInfoRequest {
+    repeated BackpackInfo backPackInfos = 1;
+    repeated BackpackRecord records     = 2;
+}
+
+message BatchUpdateToInUsedRequest {
+    repeated uint64 itemIDs         = 1;  // 會把這些物品更改為 in used
+    uint64 userID                   = 2;
+    repeated uint64 originalItemIDs = 4;  // 會把這些物品更改為 in active
+}
+
+message UpdateBackpackInfoRequest {
+    uint64 itemID         = 1;
+    uint64 userID         = 2;
+    GoodState goodState   = 3;  // 物品狀態
+    uint64 originalItemID = 4;  // 原本啟用中的物品ID
+}
+
+message DeleteUserGoodInfoRequest {
+    uint64 id = 1;
+}
+message UseItemRequest {
+    uint64 itemID = 1;
+    uint64 userID = 2;
+    int64 amount  = 3;
+}
+message UseItemResponse {
+    int64 amount = 1;
+}
+
+message SenderGiftRequest {
+    uint64 itemID   = 1;
+    uint64 userID   = 2; // 發送者ID
+    int64 amount    = 3;
+    uint64 toUserID = 4; // 接收者ID
+}
+
+message BatchUpdateGoodStateRequest {
+    repeated uint64 itemIDs = 1;
+    uint64 userID           = 2;
+    GoodState goodState     = 3;  // 物品狀態
+}
+
+enum GoodState {
+    UNKNOWN_GOOD_STATE = 0;
+    IN_USE             = 1;  // 當前使用中
+    IN_ACTIVE          = 2;  // 已擁有
+    UNUSABLE           = 3;  // 無法使用 (已被使用)
+}
+
+enum Source {
+    UNKNOWN_SOURCE        = 0;
+    STORE                 = 1;   // 商城（禮包, 十連抽寶箱, 角色單抽寶箱）
+    BET_TREASURE_BOX      = 2;   // Bet寶箱
+    SYSTEM                = 3;   // 系統派發
+    PLAYER                = 4;   // 玩家送禮
+    REVERT                = 5;   // 退回
+    COMPENSATE            = 6;   // 補償
+    SERIAL_NUM            = 7;   // 序號
+    LOGIN_AWARD           = 8;   // 登入獎勵
+    PAYMENT               = 9;   // 支付
+    REFUND                = 10;  // 退款
+    LOTTERY               = 11;  // 樂透獎勵
+    TOURNAMENTS_AWARD     = 12;  // 錦標賽獎勵
+    PLAYER_SEND_GIFT      = 13;  // 發送禮物
+    USE_BACKPACK          = 14;  // 使用道具
+    FRAGMENTS_MERGE       = 15;  // 碎片合成
+    DAILY_MISSION_AWARD   = 16;  // 每日任務獎品
+    SUMMONED_PLAYER_AWARD = 17;  // 召回玩家獎勵
+    SYSTEM_WITHDRAW       = 18;  // 系統收回
+    COMPETITION_AWARD     = 19;  // 競賽獎勵
+    ADD_AUCTION           = 20;  // 賣家上架扣除
+    DISCONTINUE_AUCTION   = 21;  // 拍賣下假退回
+    ITEM_FOR_SELLER       = 22;  // 拍賣賣家獲得
+    ITEM_FOR_BUYER        = 23;  // 拍賣買家獲得
+    COMPLETE_AUCTION      = 24;  // 拍賣買家扣除
+}
+
+// BackpackInfo 玩家擁有哪些物品
+message BackpackInfo {
+    // 基本資訊
+    uint64 id                            = 1;
+    uint64 userID                        = 3;
+    GoodState goodState                  = 5;  // 物品狀態
+    virtualgood.VirtualGoodType goodType = 6;
+    uint64 itemID                        = 7;
+    uint64 backpackRecordID              = 8;
+    uint64 amount                        = 9;  // 擁有數量（如果有使用 group by 欄位才會用到，不存DB）
+
+    int64 updateTime = 31;
+}
+
+// 玩家獲得物品歷程紀錄
+message BackpackRecord {
+    uint64 id                            = 1;
+    virtualgood.VirtualGoodType goodType = 2;
+    Source source                        = 3;
+    uint64 fromUserUid                   = 4;   // 來源玩家UID
+    uint64 toUserUid                     = 5;   // 接收玩家UID
+    uint64 gameID                        = 7;   // 從哪一個遊戲獲得的
+    uint64 amount                        = 8;   // 單次紀錄獲得數量
+    uint64 fromItemID                    = 9;   // 來源或是轉換前的物品ID
+    uint64 toItemID                      = 10;  // 接收或是轉換後的物品ID
+    GoodState goodState                  = 11;  // 物品狀態
+    string orderID                       = 12;  // 訂單編號
+    string items                         = 13;  //  接收或是轉換後的物品ID陣列
+    int64 createTime                     = 31;
+}
+
+message CountBackpackInfoRequest {
+    virtualgood.VirtualGoodType goodType = 1;
+    uint64 userID                        = 2;
+    GoodState goodState                  = 3;  // 物品狀態
+}
+
+message CountBackpackInfoResponse {
+    int64 count = 1;
+}
+message ExchangeCardExchangeRequest {
+    uint64 userID    = 1;
+    uint64 collectID = 2;
+    int64 amount     = 3;
+}
+
+message BackpackRecordV2 {
+    uint64 ID                            = 1;
+    uint64 user_id                       = 2;  // 玩家ID
+    Source source                        = 3;  // 來源
+    virtualgood.VirtualGoodType goodType = 4;  // 道具類型
+    uint64 itemID                        = 5;  // 物品ID
+    uint64 amount                        = 6;  // 出/入數量
+    uint64 amountBefore                  = 7;  // 玩家原始數量
+    uint64 amountAfter                   = 8;  // 玩家剩餘數量
+    int64  createdAtMs                   = 9;  // 建立時間
+
+    string orderID                       = 20; // 訂單ID。 關聯 payment.orders.id 或是 serial.exchange_orders.id
+    uint64 participantUserID             = 21; // 此道具變更的關係人 ex: 發送者、接收者
+}
+
+message SystemWithdrawBackpackRequest {
+    uint64 userID           = 1;  // 玩家ID
+    repeated uint64 itemIDs = 2;  // 物品ID
+}
+
+// 處理拍賣道具流程
+message HandleAuctionRequest{
+    int64 userID                            = 1;
+    Source source                           = 2;
+    repeated HandleAuctionRequestItem items = 3;
+}
+message HandleAuctionRequestItem {
+    int64 itemID                         = 1;
+    virtualgood.VirtualGoodType goodType = 2;
+    int64 amount                         = 3;
+}
+message HandleAuctionResponse{}

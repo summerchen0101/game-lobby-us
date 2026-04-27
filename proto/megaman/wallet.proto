@@ -1,0 +1,65 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "proto/wallet/wallet.proto";
+
+// for WALLET_SAVING_AMOUNT enum
+message SavingAmountRequest {
+    uint64 userID = 1;
+    uint64 amount = 2;
+    enum Type {
+        UNKNOWN = 0;  //勿用
+        IN      = 1;  //入
+        OUT     = 2;  //出
+    }
+    Type type                = 3;
+    string secondaryPassword = 4;  //二次密碼
+}
+
+message SavingAmountResponse {
+    wallet.Bag bag = 1;
+}
+
+message ExchangePaymentPointToGlodRequest {
+    uint64 userID = 1;
+    uint64 amount = 2;
+}
+
+message ExchangePaymentPointToGlodResponse {
+    wallet.Bag bag = 1;
+}
+
+message WalletFrozenRecordResponse {
+    repeated WalletFrozenRecord records = 1;
+}
+
+message WalletFrozenRecord {
+    int64 id              = 1;  //序號
+    uint64 amount         = 2;  // 金額
+    int64 frozenUntilAtMs = 3;  // 解凍時間
+    int64 createdAtMS     = 4;  //凍結時間
+}
+
+message GetTokenReq {
+    uint64 gameID = 1;
+    string roomID = 2;
+}
+
+message GetTokenResp {
+    wallet.Token token = 1;
+}
+
+message ListTokenReq {
+    uint64 gameID = 1;  //opts
+}
+
+message ListTokenResp {
+    repeated wallet.Token tokens = 1;
+}
+
+message DiamondTradeReq {
+    uint64 fromUserID = 1;  // trade with system use ID==Const SystemWallet
+    uint64 toUserID   = 2;  // trade with system use ID==Const SystemWallet
+    int64 amount      = 3;
+}

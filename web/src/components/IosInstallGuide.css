@@ -1,0 +1,80 @@
+.ios-guide {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: max(var(--page-pad), var(--safe-top));
+  padding-bottom: max(var(--page-pad), var(--safe-bottom));
+  padding-left: var(--page-pad-inline);
+  padding-right: var(--page-pad-inline);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.ios-guide__card {
+  width: 100%;
+  max-width: 20rem;
+  padding: var(--space-5);
+  border-radius: 0.9rem;
+  background: #fff;
+  color: #333;
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.25);
+}
+
+.ios-guide__title {
+  margin: 0 0 var(--space-3);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.ios-guide__icon {
+  display: block;
+  margin: var(--space-3) auto;
+  border-radius: 1.1rem;
+  object-fit: cover;
+  box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.1);
+}
+
+.ios-guide__steps {
+  text-align: left;
+  margin: var(--space-3) 0;
+}
+
+.ios-guide__steps p {
+  margin: 0 0 var(--space-2);
+}
+
+.ios-guide__share-wrap {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 0.15rem;
+  color: #222;
+}
+
+.ios-guide__share {
+  display: block;
+  flex-shrink: 0;
+  width: var(--icon-rwd-md);
+  height: var(--icon-rwd-md);
+}
+
+.ios-guide__dismiss {
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  min-height: var(--min-tap);
+  background: none;
+  border: none;
+  color: var(--crown-locale-green);
+  text-decoration: underline;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.ios-guide__dismiss:hover {
+  color: #555;
+}

@@ -1,0 +1,249 @@
+/* Promotions：範例圖風格 — 左圖＋右紫底＋白膠囊 CTA；可選疊一層極淡紋理 */
+.promo-page {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-8);
+  border-radius: 0.5rem;
+  position: relative;
+  overflow: visible;
+  background-image: repeating-linear-gradient(
+    115deg,
+    color-mix(in srgb, var(--crown-gold) 6%, transparent) 0 2px,
+    transparent 2px 14px
+  );
+}
+
+.promo-page__title {
+  margin: 0 0 var(--space-4);
+  font-size: clamp(1.35rem, 1.05rem + 1.2vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+  color: #fff;
+}
+
+.promo-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space-5) + clamp(0.45rem, 1.8vw, 1rem));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* 圖上、左外凸時預留，避免與上緣/上一張重疊 */
+.promo-page__list > li {
+  padding-top: clamp(0.4rem, 1.4vw, 0.7rem);
+}
+
+.promo-page__list > li:first-child {
+  padding-top: clamp(0.6rem, 1.8vw, 1.05rem);
+}
+
+/* 整卡可點：使用 button，內層 CTA 僅作視覯 */
+.promo-page__card {
+  --promo-card-purple: #242946;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 0;
+  /* 每張卡較高；插圖主要靠卡內空間呈現、少依賴外凸 */
+  height: clamp(6.6rem, 19.2vw, 7.6rem);
+  max-height: 7.85rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  text-align: inherit;
+  color: inherit;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: var(--crown-surface-card-radius);
+  overflow: visible;
+  background: var(--promo-card-purple);
+  border: none;
+  box-shadow: 0 0.3rem 0.75rem rgb(0 0 0 / 28%);
+  position: relative;
+  z-index: 0;
+  cursor: pointer;
+  transition: box-shadow 0.12s ease;
+}
+
+.promo-page__card:focus {
+  outline: none;
+}
+
+.promo-page__card:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--crown-gold, #c9a227),
+    0 0.3rem 0.75rem rgb(0 0 0 / 28%);
+}
+
+.promo-page__art {
+  flex: 0 0 50%;
+  max-width: 52%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 0 0 0 0;
+  background: transparent;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+.promo-page__art-img {
+  display: block;
+  width: auto;
+  max-width: 125%;
+  height: auto;
+  max-height: none;
+  /* translateX 負：左外凸；translateY 負：上外凸 */
+  object-fit: contain;
+  object-position: bottom left;
+  transform: translate(
+      clamp(-1.1rem, -3.1vw, -0.45rem),
+      clamp(-0.52rem, -1.25vw, -0.14rem)
+    )
+    scale(1.38);
+  transform-origin: bottom left;
+}
+
+.promo-page__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 內容貼合高度、少置中留空 */
+  justify-content: center;
+  gap: 0.28rem;
+  padding: 0.45rem 0.5rem 0.5rem;
+  text-align: center;
+  background: transparent;
+}
+
+.promo-page__h {
+  margin: 0;
+  font-size: clamp(0.88rem, 0.85rem + 0.2vw, 0.98rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.promo-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+  margin: 0;
+}
+
+.promo-page__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-height: 1.85rem;
+  min-width: 4.6rem;
+  padding: 0.22rem 0.8rem;
+  border-radius: 999px;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter 0.12s ease;
+}
+
+.promo-page__btn--light {
+  background: var(--crown-button-primary-gradient);
+  color: var(--color-text, #fff);
+  border: none;
+  box-shadow:
+    0 2px 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 12%);
+}
+
+.promo-page__card:hover .promo-page__btn--light {
+  filter: brightness(1.05);
+}
+
+.promo-page__btn-label {
+  font: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+
+.promo-page__btn-sc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.promo-page__btn-sc-icon {
+  display: block;
+  width: 1.8rem;
+  height: 1.8rem;
+  object-fit: contain;
+}
+
+.promo-page__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.promo-page__hint {
+  margin: 0;
+}
+
+/* 僅極窄寬度：圖在上、內容在下，避免 320px 以下橫向擠壓 */
+@media (max-width: 20rem) {
+  .promo-page__card {
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+  }
+
+  .promo-page__art {
+    flex: 0 0 auto;
+    max-width: 100%;
+    width: 100%;
+    min-height: 5.5rem;
+    max-height: 6.85rem;
+    padding: 0 var(--space-2);
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .promo-page__art-img {
+    max-width: 100%;
+    object-position: bottom center;
+    transform: translate(
+        clamp(-0.75rem, -2.1vw, -0.28rem),
+        clamp(-0.34rem, -0.9vw, -0.1rem)
+      )
+      scale(1.28);
+    transform-origin: bottom center;
+  }
+
+  .promo-page__body {
+    padding: var(--space-2) var(--space-2) var(--space-3);
+  }
+}

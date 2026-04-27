@@ -1,0 +1,33 @@
+/*
+Fish Request Proto  version: v1.1
+場景:由客戶端向服務器主動發起請求
+-----------------------------------------------------------------------
+fish_request.proto          定義 gateway/gateway.proto request type emun
+fish_request_data.proto     定義了請求類型的 Data結構
+fish_response_data.proto    定義了請求響應的 Data結構
+-----------------------------------------------------------------------
+*/
+
+syntax = "proto3";
+package fish;
+
+option go_package       = 'gitlab.ffglobaltech.com/us888/pluto/protos/fishing;fishpb';
+option csharp_namespace = "FishingProto";
+
+enum RequestType {
+    PING_PONG        = 0;
+    JOIN_ROOM        = 1;
+    USER_KICK_BEFORE = 2;
+    SERVER_UPDATE    = 3;
+    SIT              = 4;
+
+    RequestTypeGetRoomInfo  = 5;  //同步房間資訊, 得到 房間資訊 包含玩家信息
+    RequestTypeSyncPoolInfo = 6;  //同步魚池訊息, 得到池中 魚 子彈位置
+    RequestTypeChangeStatus = 7;  // 玩家狀態變更 包含 瞄準模式 砲管角度 Bet
+    RequestTypeFire         = 8;  //開火
+    RequestLeave            = 9;
+    ServerPushMsg           = 10;
+    ServerMsgAck            = 11;  //若server msg需要ack 使用此類型回應
+
+    Keep_Room = 12;  //保留房間 若為公有房 僅在玩家數量只有一個的時候才可以轉變
+}

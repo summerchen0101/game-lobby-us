@@ -1,0 +1,16 @@
+/**
+ * 檔期配色覆寫（選用）
+ *
+ * 用法：
+ * - 在此新增區塊，例如 [data-theme="cny"] { --crown-gold: #…; }
+ * - 建置／開發時設定 VITE_APP_THEME=cny（main 會寫入 <html data-theme>）
+ * - 執行期可 import { setAppTheme } from '../theme/applyTheme' 再 setAppTheme('cny')
+ *
+ * 範例（取消註解並改名即可試用）：
+ *
+ * [data-theme="demo"] {
+ *   --crown-gold: #f0c850;
+ *   --crown-gold-hover: #ffe08a;
+ *   --theme-radial-gold-body: rgb(255 200 100 / 8%);
+ * }
+ */

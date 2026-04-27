@@ -1,0 +1,7 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+message HundredOfGameMsgPush {
+    uint64 gameID = 1;
+}

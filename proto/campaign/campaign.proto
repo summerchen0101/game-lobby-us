@@ -1,0 +1,219 @@
+syntax = "proto3";
+package campaign;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/campaign";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "google/protobuf/empty.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "proto/campaign/event.proto";
+
+// CampaignService 活動事件相關服務
+// naming ref: https://english.cool/activity-campaign-event/
+service CampaignService {
+    rpc GetCampaign(GetCampaignRequest) returns (Campaign);
+    rpc ListCampaign(ListCampaignRequest) returns (ListCampaignResponse);
+    rpc ListPlayerCampaign(ListPlayerCampaignRequest) returns (ListPlayerCampaignResponse);
+    rpc CreateCampaign(CreateCampaignRequest) returns (google.protobuf.Empty);
+    rpc CreateCampaignV2(CreateCampaignRequestV2) returns (google.protobuf.Empty);
+    rpc UpdateCampaign(UpdateCampaignRequest) returns (google.protobuf.Empty);
+    rpc UpdateCampaignV2(UpdateCampaignRequestV2) returns (google.protobuf.Empty);
+    rpc DeleteCampaign(DeleteCampaignRequest) returns (google.protobuf.Empty);
+
+    rpc CampaignClick(CampaignClickRequest) returns (google.protobuf.Empty);
+
+    // ListNews 官網最新消息
+    rpc ListNews(ListNewsRequest) returns (ListNewsResponse);
+}
+
+enum CampaignType {
+    CampaignTypeALL = 0;  //新增時禁用
+    ADVERTISE       = 1;  //廣告
+    COMMODITY       = 2;  //商品
+}
+
+enum ImageType {
+    ImageTypeALL = 0;  //新增時禁用
+    ImgURL       = 1;  //圖片url
+    ICON_ID      = 2;  //素材ID
+    ImgSource    = 3;  //圖片檔案
+}
+
+enum ActionType {
+    ActionTypeALL   = 0;   // 新增時禁用
+    Payment         = 1;   // 商城購買
+    OpenURL         = 2;   // 跳轉到外部網址
+    RedirectURL     = 3;   // inbox 內部跳轉url
+    GoToCharacter   = 4;   // 跳轉到角色頁面
+    GoToGame        = 5;   // 跳轉到某一款遊戲
+    NOACTION        = 6;   // 沒有動作
+    GoToCard        = 7;   // 跳轉到卡牌
+    GoToGuild       = 8;   // 跳轉到俱樂部
+    GoToActivity    = 9;   // 跳轉到活動
+    GoToRanking     = 10;  // 跳轉到排行榜
+    GoToChat        = 11;  // 跳轉到聊天
+    GoToRedEnvelope = 12;  // 跳轉到紅包
+    GoToBackPack    = 13;  // 跳轉到道具背包
+    GoToStore       = 14;  // 跳轉到商城
+    GoToKaixilo     = 15;  // 跳轉到賭場
+}
+
+message Image {
+    ImageType type = 1;
+    string value   = 2;
+}
+
+message Action {
+    ActionType type = 1;
+    string value    = 2;
+}
+
+message Campaign {
+    string id                                      = 1;
+    Image image                                    = 4;
+    Action action                                  = 5;
+    int64 startedAtMs                              = 6;
+    int64 endedAtMs                                = 7;
+    yesno.YesNo isDisplay                          = 8;   //前端是否顯示
+    int64 sort                                     = 13;  //排序
+    uint64 storeItemID                             = 14;  //商城商品id
+    int64 createdAtMs                              = 15;
+    uint64 creatorID                               = 16;
+    int64 updatedAtMs                              = 17;
+    uint64 updaterID                               = 18;
+    uint64 clickLimit                              = 19;  // 點擊次數 = 0 = no limit
+    string name                                    = 20;
+    AppPlatformEventInfo.AppType version           = 21;  // 版本
+    repeated AppPlatformEventInfo.AppType versions = 22;  // 版本 (New: 可以設定多個平台)
+}
+
+message PlayerCampaign {
+    Campaign campaign = 1;
+
+    int64 currentClickCount = 2;  //
+}
+
+//--- Request / Response ---//
+message GetCampaignRequest {
+    string id = 1;
+}
+
+message ListCampaignRequest {
+    CampaignType type     = 1;
+    yesno.YesNo isDisplay = 2;  //前端是否顯示
+    uint32 page           = 6;
+    uint32 perPage        = 7;
+    int64 createdTimeLte  = 8;
+    int64 createdTimeGte  = 9;
+    int64 endTimeLte      = 10;
+    int64 endTimeGet      = 11;
+    string name           = 12;
+    int32 version         = 13;
+}
+
+message ListCampaignResponse {
+    repeated Campaign campaign = 1;
+    pagination.Pagination page = 2;
+}
+
+message CampaignVersionAction {
+    AppPlatformEventInfo.AppType version = 1;
+    ActionType action                    = 2;
+    bytes image                          = 3;
+    uint64 actionStoreItemID             = 4;  // 商品id,遊戲ID,角色ItemID
+    string actionValue                   = 5;  // 動作的值(ex:導轉網址)
+    int64 sort                           = 7;  // 排序
+}
+
+message CreateCampaignRequest {
+    string name                                          = 14;
+    int64 startedAtMs                                    = 6;
+    int64 endedAtMs                                      = 7;
+    yesno.YesNo isDisplay                                = 8;  //前端是否顯示
+    repeated CampaignVersionAction campaignVersionAction = 9;
+}
+
+message CreateCampaignRequestV2 {
+    string name                                    = 1;
+    int64 startedAtMs                              = 2;
+    int64 endedAtMs                                = 3;
+    yesno.YesNo isDisplay                          = 4;  //前端是否顯示
+    ActionType action                              = 5;
+    bytes image                                    = 6;
+    uint64 actionStoreItemID                       = 7;  // 商品id,遊戲ID,角色ItemID
+    string actionValue                             = 8;  // 動作的值(ex:導轉網址)
+    int64 sort                                     = 9;  // 排序
+    repeated AppPlatformEventInfo.AppType versions = 10;
+}
+
+message UpdateCampaignRequest {
+    string id                                   = 1;
+    string name                                 = 14;
+    Image image                                 = 3;
+    Action action                               = 4;
+    int64 startedAtMs                           = 5;
+    int64 endedAtMs                             = 6;
+    yesno.YesNo isDisplay                       = 7;  //前端是否顯示
+    CampaignVersionAction campaignVersionAction = 9;
+}
+
+message UpdateCampaignRequestV2 {
+    string id                                      = 1;
+    string name                                    = 2;
+    int64 startedAtMs                              = 3;
+    int64 endedAtMs                                = 4;
+    yesno.YesNo isDisplay                          = 5;  //前端是否顯示
+    ActionType action                              = 6;
+    bytes image                                    = 7;
+    uint64 actionStoreItemID                       = 8;  // 商品id,遊戲ID,角色ItemID
+    string actionValue                             = 9;  // 動作的值(ex:導轉網址)
+    int64 sort                                     = 10; // 排序
+    repeated AppPlatformEventInfo.AppType versions = 11;
+}
+
+message DeleteCampaignRequest {
+    string id = 1;
+}
+
+message CampaignClickRequest {
+    string id     = 1;
+    uint64 userID = 2;
+}
+
+message ListPlayerCampaignRequest {
+    yesno.YesNo isDisplay                = 2;  //前端是否顯示
+    uint64 userID                        = 6;
+    AppPlatformEventInfo.AppType version = 7;
+}
+
+message ListPlayerCampaignResponse {
+    repeated PlayerCampaign campaign = 1;
+    pagination.Pagination page       = 2;
+}
+
+enum NewsCategory {
+    UnknownNewsCategory = 0;
+    Latest              = 1;
+    Operation           = 2;
+    Activity            = 3;
+    CustomerService     = 4;
+}
+
+message News {
+    string id              = 1;
+    string title           = 2;
+    string content         = 3;
+    NewsCategory category  = 4;
+    int64 createTimeMs     = 5;
+    yesno.YesNo isRedirect = 6;
+}
+
+message ListNewsRequest {
+    uint32 page           = 1;
+    uint32 perPage        = 2;
+    NewsCategory category = 3;
+}
+
+message ListNewsResponse {
+    repeated News news         = 1;
+    pagination.Pagination page = 2;
+}

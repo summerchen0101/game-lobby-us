@@ -1,0 +1,567 @@
+syntax = "proto3";
+package judan;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/judan";
+import "proto/playerinfo/model.proto";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "proto/wallet/wallet.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "proto/judan/dividends.proto";
+import "google/protobuf/empty.proto";
+
+service JudanService {
+    rpc CreateBetOrder(CreateBetOrderRequest) returns (CreateBetOrderResponse);                 // 建立注單  玩家對官方
+    rpc CreateBetOrders(CreateBetOrdersRequest) returns (CreateBetOrdersResponse);              // 建立多筆注單  玩家對官方
+    rpc BatchCreateBetOrder(BatchCreateBetOrderRequest) returns (BatchCreateBetOrderResponse);  // 建立注單  玩家對官方
+
+    rpc AddOrderEvent(OrderEventRequest) returns (OrderEventResponse);  // 遊戲事件 可多次回報, 會 append order event
+
+    rpc BuildRoundGameOrder(BuildRoundGameOrderRequest) returns (BuildRoundGameOrderResponse);  // 建立多人牌局注單  適用 莊／閒 皆為玩家的遊戲
+    // BuildTournamentsRoundGameOrder 建立 錦標賽 多人牌局注單
+    rpc BuildTournamentsRoundGameOrder(BuildTournamentsRoundGameOrderRequest) returns (BuildTournamentsRoundGameOrderResponse);
+
+    rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);        // 列出注單 不包含event
+    rpc GetOrder(GetOrderRequest) returns (Order);                         // 訂單資訊
+    rpc GetOrderTape(GetOrderTapeRequest) returns (GetOrderTapeResponse);  // 注單盤面
+
+    rpc GetGameBetStatistics(GetGameBetStatisticsRequest) returns (GetGameBetStatisticsResponse);  // 取得遊戲注單統計
+    rpc GetPlayerBetStatistics(GetPlayerBetStatisticsRequest) returns (GetPlayerBetStatisticsResponse);
+    rpc CountOrders(CountOrdersRequest) returns (CountOrdersResponse);
+    rpc ListOrderRanking(ListOrdersRankingRequest) returns (ListOrdersRankingResponse);  // 列出注單 不包含event
+
+    rpc CalculateGameRevenues(CalculateGameRevenuesRequest) returns (CalculateGameRevenuesResponse);  // 取得計算注單資料的每款遊戲營收
+    rpc ListPlayerDailyBetRTP(ListUserDailyBetRTPRequest) returns (ListUserDailyBetRTPResponse);
+    rpc JobUserDailyRtpTotal(google.protobuf.Empty) returns (google.protobuf.Empty);
+    rpc ListPlayerGameRtp(ListPlayerGameRtpRequest) returns (ListPlayerGameRtpResponse);
+    rpc GetPlayerGameRtp(GetPlayerGameRtpRequest) returns (GetPlayerGameRtpResponse);
+    rpc GetGameRtpStrategy(GetGameRtpStrategyRequest) returns (GetGameRtpStrategyResponse);
+}
+
+enum WalletType {
+    UNKNOWN_WALLET_TYPE = 0;
+    GC                  = 1;
+    SC                  = 2;
+}
+
+enum GameCategory {
+    UNKNOWN_GAME_CATEGORY = 0;
+    SLOT                  = 1; // 拉霸機
+    FISHING               = 2; // 魚機
+    BLACK_JACK            = 3; // 21.
+    MAHJONG               = 4; // 麻將
+    NIUNIU                = 5;
+    SRATCHOFF             = 6; // 刮刮樂
+    HUNDRED               = 7; // 刮刮樂
+    VIDEO                 = 8; // 真人視訊系列
+    Pinball               = 9; // 彈珠
+    SEVEN_POKER           = 10; // 7Pk
+    SPORT_QUIZ            = 11; // 體育競猜
+    MARY                  = 12; // 小瑪莉
+    Bingo                 = 13; // 小瑪莉
+    Tower                 = 14;
+    Rocket                = 15; // 火箭
+    Holdem                = 16; // 德州撲克
+    SAMGONG               = 17; // 三公
+    QiuQiu                = 18; // domino 99
+    Domino                = 19; // domino 接龍
+    ColorDice             = 20; // 繽紛骰
+    PachinMarble          = 21; // 柏青彈珠
+    Rowing                = 22; // 賽艇
+}
+
+enum OrderStatus {
+    UNKNOWN_ORDER_STATUE = 0;
+    SUCCESS              = 1; // 成功建立
+    TRADING_ERROR        = 2; // 交易發生錯誤
+    PENDING              = 3; // 待處理
+    INSUFFICIENT_BALANCE = 4; // 餘額不足
+}
+
+// RTP 統計類型
+enum OrderRTPCountType {
+    NORMAL  = 0; // 普通遊玩
+    VOUCHER = 1; // 兌換卷
+}
+
+message Order {
+    uint64 orderID      = 1; // 注單ID
+    string gameOrderUID = 2; // 遊戲方注單UID  //spin id , bullet id , round id ...etc
+    uint64 gameID       = 3;
+    uint64 userID       = 4;
+
+    string roomID                 = 5;
+    uint64 roomType               = 29;
+    uint64 roomLevel              = 30;
+    GameCategory category         = 6;
+    uint64 betAmount              = 7;
+    uint64 gainAmount             = 8;
+    uint64 commissionAmount       = 9;
+    uint64 refundAmount           = 19;
+    uint64 commissionOriginAmount = 28; // 水錢金額
+    OrderStatus status            = 10;
+    float winRate                 = 26;
+    bytes tape                    = 11; // 盤面
+
+    int64 createdAtMs  = 12;
+    int64 updatedAtMs  = 13;
+    string errorReason = 14;
+    string errorCode   = 15;
+
+    repeated OrderEvent events     = 16; // 注單事件歷程
+    OrderRTPCountType rtpCountType = 17; // RTP 統計類型
+    string remark                  = 18;
+
+    repeated wallet.Coin balance          = 20;
+    float userRTP                         = 21;
+    uint64 originalBetAmount              = 22; // 原始下注金額 ... 若為空則以 created 當下event累加
+    playerinfo.PlayerRTPGear userStrategy = 23; // 玩家當下的策略
+    yesno.YesNo userStrategyLock          = 24; // 玩家當下的策略是否lock
+    bytes initTape                        = 25; // slot game game info 盤面
+    int64 winLoseToRanking                = 27; // 給排行榜的總輸贏
+    int64 vipLevel                        = 31; // vip 等級
+
+    WalletType walletType = 32; // 錢包類型
+}
+
+message OrderEvent {
+    string id = 1; // event id (request id)
+
+    int32 action             = 2; // 自定義類型
+    uint64 userID            = 3;
+    uint64 raiseBetAmount    = 4; // 增加注額 若有值
+    uint64 raiseGainAmount   = 5; // 增加派彩 若有值
+    uint64 commissionAmount  = 6; // 官方抽成(水錢)
+    uint64 raiseRefundAmount = 12; // 退款 官方錢包 -> 玩家錢包
+
+    int64 createdAtMs = 7; // 建立時間(遊戲方) ms
+    bytes tape        = 8; // 盤面 選填: 統一存入 json 以利後台解析
+
+    OrderStatus status = 9;
+    string errorReason = 10;
+    string errorCode   = 11;
+}
+
+message CreateBetOrderRequest {
+    string gameOrderUID         = 1; // 遊戲方注單UID；若想建立補單，以此欄位當作依據
+    int64 createdAtMs           = 2; // 建立時間(遊戲方) ms
+    uint64 userID               = 3;
+    uint64 gameID               = 4;
+    GameCategory category       = 5;
+    string roomID               = 6;
+    uint64 roomType             = 16;
+    uint64 roomLevel            = 17;
+    repeated EventRecord events = 7; // 這邊統一看 CreateBetOrderRequest.userID 不看 EventRecord.userID
+
+    bytes tape                     = 8; // 盤面
+    OrderRTPCountType rtpCountType = 9; // RTP 統計類型
+
+    /*
+        由道具觸發 或者 買FG觸發的FG
+        注額會是規定注額
+        使用道具：顯示道具ID
+        買的：顯示BUY
+    */
+    string remark            = 10; // 備註
+    yesno.YesNo isFakePlayer = 11;
+
+    uint64 originalBetAmount = 12; // 原始下注金額 ... 若為空則以 created 當下event累加
+    bytes gameInfoTape       = 14; // slot game 初始盤面狀態
+    bool isJP                = 13; // 是否JP
+
+    bool ignoreCreateBettingEventReq = 15; // 忽略建立下注事件
+    yesno.YesNo isOfficialPlayer     = 18; // 是否為官方號下注
+
+    WalletType walletType = 19; // 錢包類型
+}
+
+message BatchCreateBetOrderRequest {
+    repeated CreateBetOrderRequest orders = 1;
+}
+
+message UserBalance {
+    uint64 userID                           = 1;
+    int64 balance                           = 2;
+    int64 updatedAtMs                       = 3;
+    playerinfo.PlayerRTPGear currentRTPGear = 4; // 現在執行檔位(已經和 Lock 互相比較出來的結果 )
+}
+
+message CreateBetOrderResponse {
+    UserBalance userBalance = 1;
+    Order order             = 2;
+}
+
+message CreateBetOrdersRequest {
+    uint64 userID         = 1;
+    uint64 gameID         = 2;
+    GameCategory category = 3;
+    string roomID         = 4;
+    int32 action          = 5;
+    message CreateOrder {
+        string gameOrderUID            = 1; // 遊戲方注單UID
+        int64 createdAtMs              = 2; // 遊戲方建立時間 ms
+        bytes tape                     = 3; // 盤面
+        repeated EventRecord events    = 4; // 這邊統一看 CreateBetOrdersRequest.userID 不看 EventRecord.userID
+        OrderRTPCountType rtpCountType = 5; // RTP 統計類型
+        /*
+由道具觸發 或者 買FG觸發的FG
+注額會是規定注額
+使用道具：顯示道具ID
+買的：顯示BUY
+*/
+        string remark            = 6; // 備註
+        uint64 originalBetAmount = 7; // 原始注額
+    }
+    repeated CreateOrder orders = 6;
+    yesno.YesNo isFakePlayer    = 7;
+}
+
+message CreateBetOrdersResponse {
+    UserBalance userBalance   = 1;
+    map<string, Order> orders = 2; // map<gameOrderUID, Order>
+}
+
+message BatchCreateBetOrderResponse {
+    map<uint64, UserBalance> userBalance = 1;
+}
+
+message ListOrdersRequest {
+    uint64 userID                    = 1;
+    repeated GameCategory categories = 2;
+    repeated uint64 gameIDs          = 3;
+    int64 createdAtMsGte             = 4;
+    int64 createdAtMsLte             = 5;
+    uint32 page                      = 6;
+    uint32 perPage                   = 7;
+    OrderRTPCountType rtpCountType   = 8; // RTP 統計類型
+    repeated uint64 userIDs          = 9;
+
+    enum WinLoseEnum {
+        UNKNOWN = 0;
+        WIN     = 1;
+        LOSE    = 2;
+    }
+    WinLoseEnum winlose = 10;
+
+    enum OrderByEnum {
+        DEFAULT = 0;
+
+        CreatedAtAsc   = 1;
+        CreatedAtDesc  = 2;
+        GainAmountDesc = 3;
+        GainRateDesc   = 4;
+    }
+
+    OrderByEnum orderBy           = 11;
+    bool ignoreTape               = 12;
+    int64 betGte                  = 13;
+    int64 betLte                  = 14;
+    string mahjongBetType         = 15;
+    yesno.YesNo gainAmountGtZero  = 16;
+    yesno.YesNo gainRateGtZero    = 17;
+    repeated uint64 orderIDs      = 18;
+    repeated string gameOrderUIDs = 19;
+    float gainRateGt              = 20;
+    int64 gainAmountGt            = 21;
+    yesno.YesNo isRemarkEmpty     = 22;
+    int64 vipLevelGte             = 23;
+    int64 roomType                = 24;
+    bool ignorePagination         = 25; // 不計算分頁(總數)
+
+    bool useHintUserID1CreatedAtMs1Category1VIPLevel1 = 31;
+
+    WalletType walletType = 26; // 錢包類型
+}
+
+message ListOrdersResponse {
+    repeated Order orders            = 1;
+    pagination.Pagination pagination = 2;
+}
+
+message CountOrdersRequest {
+    uint64 gameID        = 1;
+    int64 createdTimeGte = 2;
+}
+
+message CountOrdersResponse {
+    int64 OrderCount = 1;
+}
+message GetOrderTapeRequest {
+    uint64 orderID     = 1;
+    string gameOrderID = 2;
+    uint64 gameID      = 3;
+}
+
+message GetOrderTapeResponse {
+    bytes tape     = 1; // 盤面
+    bytes initTape = 2; // slot game 初始盤面
+}
+
+message OrderEventRequest {
+    uint64 gameID       = 1;
+    string gameOrderUID = 2; // spin id , bullet id , game round id ...ect
+    string roomID       = 3;
+    string id           = 4; // event id (request id)
+
+    repeated EventRecord events = 5;
+    repeated WinLose winLose    = 6;
+
+    int64 createdAtMs             = 7; // 建立時間(遊戲方) ms
+    bytes tape                    = 8; // 盤面 選填: 統一存入 json 以利後台解析
+    yesno.YesNo isUpdateOrderTape = 9; // 是否覆蓋 order Tape
+
+    uint64 orderID                          = 10; // 篩選條件
+    bool useBetOrderToCreateBettingEventReq = 11; // 使用注單資料建立下注事件
+
+    WalletType walletType = 19; // 錢包類型
+}
+
+message OrderEventResponse {
+    map<uint64, UserBalance> userBalance = 1;
+}
+
+message GetOrderRequest {
+    uint64 orderID = 1; // 注單ID
+}
+
+message BuildRoundGameOrderRequest {
+    uint64 gameID                     = 1;
+    string gameOrderUID               = 2; // spin id , bullet id , game round id ...ect
+    string roomID                     = 3;
+    string id                         = 4;
+    GameCategory category             = 5;
+    repeated uint64 roundPlayer       = 6; // 這局的真實玩家(機器人除外)
+    repeated EventRecord settleRecord = 7;
+    repeated WinLose winLose          = 8; // 輸贏？
+    uint64 roomType                   = 14;
+    uint64 roomLevel                  = 15;
+
+    int64 createdAtMs          = 9; // 建立時間(遊戲方) ms
+    bytes tape                 = 10; // 盤面 選填: 統一存入 json 以利後台解析
+    repeated uint64 fakePlayer = 11; // 假的玩家
+    bool useToken              = 12;
+    string mahjongBetType      = 13; // 麻將下注50/20
+}
+
+message BuildRoundGameOrderResponse {
+    map<uint64, UserBalance> userBalance = 1;
+}
+
+message BuildTournamentsRoundGameOrderRequest {
+    uint64 gameID                     = 1;
+    string gameOrderUID               = 2; // spin id , bullet id , game round id ...ect
+    string roomID                     = 3;
+    string id                         = 4;
+    GameCategory category             = 5;
+    repeated uint64 roundPlayer       = 6; // 這局的真實玩家(機器人除外)
+    repeated EventRecord settleRecord = 7;
+    repeated WinLose winLose          = 8; // 輸贏？
+    uint64 roomType                   = 14;
+    uint64 roomLevel                  = 15;
+
+    int64 createdAtMs          = 9; // 建立時間(遊戲方) ms
+    bytes tape                 = 10; // 盤面 選填: 統一存入 json 以利後台解析
+    repeated uint64 fakePlayer = 11; // 假的玩家
+    bool useToken              = 12;
+    string mahjongBetType      = 13; // 麻將下注50/20
+
+    uint64 tournamentsID = 80; // 錦標賽ID
+    int64 timesOfBuying  = 81; // 第幾次買入
+}
+
+message BuildTournamentsRoundGameOrderResponse {
+    map<uint64, UserBalance> userBalance = 1;
+}
+
+message EventRecord {
+    int32 action                   = 1; // 自定義類型
+    uint64 userID                  = 2;
+    uint64 raiseBetAmount          = 3; // 增加注額 若有值  玩家錢包 -> 官方錢包
+    uint64 raiseRefundAmount       = 7; // 退款 官方錢包 -> 玩家錢包
+    uint64 raiseGainAmount         = 4; // 官方派彩    官方錢包 -> 玩家錢包 ; bigwin 參考此欄位
+    uint64 commissionAmount        = 5; // 官方抽成(水錢)
+    bytes tape                     = 6; // 盤面 選填: 統一存入 json 以利後台解析
+    yesno.YesNo ignoreBigWinPush   = 8; // 是否忽略 bigwin push
+    yesno.YesNo usingGameToken     = 9; // 是否使用代幣 true: 從 wallet game_token 操作; false: wallet amount || 官方 amount <-> player token
+    bytes initTape                 = 10; // slot game game info 盤面
+    float winRate                  = 11;
+    uint64 commissionOriginAmount  = 12; //  水錢金額
+    uint64 originalRaiseBetAmount  = 13; // 原始注額 (合併注單用)
+    uint64 originalRaiseGainAmount = 14; // 原始派彩 (合併注單用)
+}
+
+message WinLose {                                     // 輸贏？
+    int32 action                               = 1; // 自定義類型
+    uint64 winAmount                           = 2; // 為輸家增加注額 bet 為贏家增加 派彩 gain
+    uint64 OriginWinAmount                     = 11; // 原始贏分
+    uint64 OriginBetAmount                     = 12; // 原始下注
+    uint64 winner                              = 3; // userID ->  default:0 , 0,1 = 官方  輸贏同為官方 則不記賬
+    uint64 loser                               = 4; // userID ->  default:0 , 0,1 = 官方  輸贏同為官方 則不記賬
+    uint64 winnerCommissionAmount              = 5; // 跟贏家抽的水錢 進入官方錢包
+    map<uint64, uint64> userCommissionAmount   = 6; // 跟贏家抽的水錢 進入官方錢包 userID CommissionAmount
+    map<uint64, uint64> commissionOriginAmount = 10; // 水錢金額
+    // uint64 raiseRefundAmount      = 6;  // 退款 官方錢包 -> 玩家錢包
+    yesno.YesNo ignoreBigWinPush = 7; // 是否忽略 bigwin push
+    yesno.YesNo usingGameToken   = 9; // 是否使用代幣 true: 從 wallet game_token 操作; false: wallet amount || loser token <-> winner token 若 其中一方為官方 則改用 amount
+}
+
+message GetGameBetStatisticsRequest {
+    repeated uint64 gameIDs = 1;
+    uint64 strategy         = 2;
+    WalletType walletType   = 3;
+}
+
+message GetGameBetStatisticsResponse {
+    message GameBetStatistics {
+        uint64 gameID          = 1;
+        uint64 totalBet        = 2;
+        uint64 totalGain       = 3;
+        uint64 totalCommission = 4;
+        float rtp              = 5;
+    }
+    repeated GameBetStatistics filterData                 = 1;
+    repeated GameBetStatistics totalData                  = 2;
+    GuildScoreAndPointsNoOwner guildScoreAndPointsNoOwner = 3;
+}
+
+message GetPlayerBetStatisticsRequest {
+    repeated uint64 userIDs  = 1;
+    yesno.YesNo isFakePlayer = 2; // 是否非真實玩家
+    uint32 page              = 3;
+    uint32 perPage           = 4;
+    enum Sort {
+        NoSet   = 0;
+        RtpDesc = 1;
+        RtpAcs  = 2;
+    }
+
+    Sort sort = 5;
+    WalletType walletType = 6;
+}
+
+message GetPlayerBetStatisticsResponse {
+    message GamePlayerStatistics {
+        uint64 userID            = 1;
+        yesno.YesNo isFakePlayer = 7;
+        uint64 totalBet          = 2;
+        uint64 totalGain         = 3;
+        uint64 totalCommission   = 4;
+        float rtp                = 5;
+        float rtp_sort_score     = 8;
+        message GameBetStatistics {
+            uint64 gameID          = 1;
+            uint64 totalBet        = 2;
+            uint64 totalGain       = 3;
+            uint64 totalCommission = 4;
+            float rtp              = 5;
+        }
+        repeated GameBetStatistics data = 6;
+    }
+    repeated GamePlayerStatistics data = 1;
+    pagination.Pagination pagination   = 2; // 分頁資訊
+}
+message ListOrdersRankingRequest {
+    repeated uint64 gameIDs           = 1;
+    int64 createdAtMsGte              = 2;
+    int64 createdAtMsLte              = 3;
+    uint32 page                       = 4;
+    uint32 perPage                    = 5;
+    int64 betGte                      = 6;
+    int64 betLte                      = 7;
+    string mahjongBetType             = 8;
+    yesno.YesNo gainAmountGtZero      = 9;
+    yesno.YesNo gainRateGtZero        = 10;
+    OrderRankingType orderRankingType = 11;
+    yesno.YesNo isRemarkEmpty         = 12;
+    WalletType walletType             = 13;
+}
+
+message ListOrdersRankingResponse {
+    repeated OrderRanking orderRanking = 1;
+}
+
+message OrderRanking {
+    uint64 userID  = 1;
+    int64 sumValue = 2;
+}
+enum OrderRankingType {
+    DEFAULT     = 0;
+    WIN_COIN    = 5; // 總贏分
+    TOTAL_SCORE = 6; // 總輸贏
+    TOTAL_BET   = 7; // 總下注
+}
+
+message CalculateGameRevenuesRequest {
+    repeated uint64 gameIDs       = 1;
+    WalletType walletType         = 2;
+    int64 createdAtMilliSecondGte = 11;
+    int64 createdAtMilliSecondLte = 12;
+}
+message CalculateGameRevenuesResponse {
+    repeated CalculateGameRevenuesResponseRevenue revenues = 1;
+}
+message CalculateGameRevenuesResponseRevenue {
+    uint64 gameID                     = 1;
+    uint64 totalPlayerBetAmount       = 2;
+    uint64 totalPlayerGainAmount      = 3;
+    uint64 totalPlayerComissionAmount = 4;
+}
+
+message ListUserDailyBetRTPRequest {
+    repeated uint64 userIDs = 1;
+    int64 day               = 2;
+    int64 month             = 3;
+    int64 Year              = 4;
+    int64 UpdatedTimeGte    = 5;
+    int64 UpdatedTimeLte    = 6;
+    WalletType walletType   = 7;
+}
+
+message ListUserDailyBetRTPResponse {
+    repeated UserBetDailyRTP userBetDailyRTP = 1;
+}
+message UserBetDailyRTP {
+    uint64 Year                        = 1;
+    uint64 Month                       = 2;
+    uint64 Day                         = 3;
+    uint64 UserID                      = 4;
+    uint64 GameID                      = 5;
+    bool IsFake                        = 6;
+    uint64 TotalBet                    = 7;
+    uint64 TotalGain                   = 8;
+    uint64 TotalCommission             = 9;
+    int64 UpdatedTime                  = 10;
+    uint64 TotalCommissionOriginAmount = 11;
+}
+
+message ListPlayerGameRtpRequest {
+    uint64 gameID           = 1;
+    uint64 userID           = 2;
+    repeated uint64 userIDs = 3;
+    WalletType walletType   = 4;
+}
+message PlayerGameRtp {
+    int64 bet     = 1;
+    int64 gain    = 2;
+    uint64 gameID = 3;
+    uint64 userID = 4;
+}
+message ListPlayerGameRtpResponse {
+    repeated PlayerGameRtp gameRtp = 1;
+}
+message GetPlayerGameRtpRequest {
+    uint64 gameID           = 1;
+    uint64 userID           = 2;
+    WalletType walletType   = 3;
+}
+message GetPlayerGameRtpResponse {
+    PlayerGameRtp gameRtp                 = 1;
+    playerinfo.PlayerRTPGear userStrategy = 2;
+}
+message GetGameRtpStrategyRequest {
+    uint64 gameID         = 1;
+    WalletType walletType = 2;
+}
+message GetGameRtpStrategyResponse {
+    playerinfo.PlayerRTPGear userStrategy = 1;
+    int64 rtp                             = 2;
+}

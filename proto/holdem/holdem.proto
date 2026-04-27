@@ -1,0 +1,523 @@
+syntax = "proto3";
+package holdem;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/holdem";
+
+import "proto/holdem/tournaments.proto";
+
+// RoundStage 回合階段
+enum RoundStage {
+  UnknownRoundStage = 0;
+  Shuffling         = 1;  // 洗牌階段
+  Dealing           = 2;  // 發牌階段
+  PreFlop           = 3;  // 翻牌前階段
+  Flop              = 4;  // 翻牌階段
+  Turn              = 5;  // 轉牌階段
+  River             = 6;  // 河牌階段
+  Settlement        = 7;  // 結算階段
+
+  TakeABreak        = 8;  // 休息階段
+}
+
+
+// RoomPlayerActionType 房間玩家動作類型
+enum RoomPlayerActionType {
+  UnknownRoomPlayerAction = 0;
+  SmallBlind              = 1;  // 小盲
+  BigBlind                = 2;  // 大盲
+  Fold                    = 3;  // 棄牌 
+  Check                   = 4;  // 過牌
+  Call                    = 5;  // 跟注
+  Raise                   = 6;  // 加注
+  AllIn                   = 7;  // 全下
+}
+
+
+// HandCardsType 手牌類型
+enum HandCardsType {
+  UnknownHandCardsType = 0;
+  HighCard             = 1;   // 高牌 
+  OnePair              = 2;   // 一對
+  TwoPairs             = 3;   // 兩對
+  ThreeOfaKind         = 4;   // 三條
+  Straight             = 5;   // 順子
+  Flush                = 6;   // 同花
+  FullHouse            = 7;   // 葫蘆
+  FourOfaKind          = 8;   // 四條
+  StraightFlush        = 9;   // 同花順
+  RoyalFlush           = 10;  // 皇家同花順
+}
+
+
+// MessageType
+enum MessageType {
+  PingPong        = 0;
+
+  // [RPC]
+  JoinRoom = 1;  // 加入房間
+  ExitRoom = 2;  // 離開房間
+  SitDown  = 3;  // 坐下
+
+  JoinTournamentsRoom = 4;  // 加入錦標賽房間
+
+  // [RPC]
+  GetRoom = 11;  // 取得房間資訊
+
+  // [RPC]
+  RoomPlayerAction       = 21;  // 玩家動作
+  RoomPlayerBuyInsurance = 22;  // 玩家買保險
+  RoomPlayerFastpass     = 23;  // 玩家預約丟大盲快速通關入場
+
+  // [RPC]
+  BroadcastRoom = 31; // 廣播訊息給房間所有玩家 
+
+  // [PUSH]
+  RoomInfoEvent   = 1001; // 房間訊息事件
+  RoomClosedEvent = 1002; // 房間關閉事件
+
+  // [PUSH]
+  JoinRoomEvent = 1011;  // 加入房間事件  
+  ExitRoomEvent = 1012;  // 離開房間事件  
+  SitDownEvent  = 1013;  // 坐下事件
+  StandUpEvent  = 1014;  // 站起事件
+  
+  // [PUSH]
+  RoomPlayerHandCardsEvent      = 1021;  // 玩家個人手牌事件
+  RoomPlayerActionEvent         = 1022;  // 玩家動作事件
+  RoomRoundSettlementEvent      = 1023;  // 房間回合結算事件
+  RoomPlayerInsuranceEvent      = 1024;  // 通知玩家可以購買保險事件
+  RoomPlayerTournamentInfoEvent = 1025;  // 通知玩家個人錦標賽資訊
+
+
+  // [PUSH]
+  BroadcastRoomEvent = 1031;  // 房間廣播事件
+
+}
+
+
+// InitializeRoomOptions 用來放在什麼 RoomFilter 的魔法咒語
+message InitializeRoomOptions {
+  int64 roomLevel               = 1;   // 房間等級
+  int64 requiredVIPLevel        = 2;   // 最低 VIP 等級要求
+  int64 minToken                = 3;   // 進房需要最少的代幣數量
+  int64 maxToken                = 4;   // 進房需要最多的代幣數量
+  int64 smallBlindToken         = 5;   // 小盲代幣
+  int64 bigBlindToken           = 6;   // 大盲代幣
+  int64 expectedPlayerCount     = 7;   // 預計進房人數
+  int64 guaranteeAmount         = 8;   // 押金
+  int64 actionTime              = 9;   // 玩家動作時間 秒
+  bool robotEnable              = 10;  // 是否開放機器人陪打
+  int64 robotMaxNumber          = 11;  // 機器人最多幾個
+}
+
+// InitialzeTournamentsRoomOptions 初始化錦標賽時間的參數
+message InitialzeTournamentsRoomOptions {
+  uint64 tournamentsID              = 1;    // 錦標賽ID
+  int64 startAtMs                   = 2;    // 開賽時間
+  int64 seatPerTable                = 3;    // 每桌座位數
+  BlindStructure nowBlindStructure  = 200;  // 當前盲住結構
+  BlindStructure nextBlindStructure = 201;  // 下一個盲住結構 (有可能為null)
+}
+
+// [RPC] JoinRoom 加入房間
+message JoinRoomRequest {
+  string roomID                   = 1;  // 房間編號
+  int64 token                     = 2;  // 代幣
+  bool autoReplenish              = 3;  // 餘額小於買入代幣就補滿
+  bool autoReplenishBeforeStandUp = 4;  // 餘額小於小盲就補滿
+  string latitude                 = 5;  // 經度
+  string longitude                = 6;  // 緯度
+}
+message JoinRoomResponse {
+  string roomID = 1;  // 房間編號
+}
+
+// message JoinTournamentsRoomRequest {
+//   string roomID        = 1;  // 房間編號
+//   uint64 tournamentsID = 2;  // 錦標賽ID
+// }
+// message JoinTournamentsRoomResponse {
+//   string roomID        = 1;  // 房間編號
+//   uint64 tournamentsID = 2;  // 錦標賽ID
+// }
+
+message JoinRoomEventMessage {
+  string roomID           = 1;   // 房間編號
+  int64 userID            = 2;   // 玩家用戶編號
+  string avatarURL        = 3;   // 頭像 URL
+  string name             = 4;   // 名稱
+  uint64 vipLevel         = 5;   // VIP 等級
+  bool isFake             = 6;   // 是否是機器人
+  int64 baseID            = 7;   // 0 代表站著，座位編號 1~9
+  int64 balance           = 8;   // 餘額
+  bool isOnline           = 9;   // 線上
+  bool isPlaying          = 10;  // 此局是否有玩
+  string roundID          = 11;  // 回合編號
+  string latitude         = 12;  // 經度
+  string longitude        = 13;  // 緯度
+}
+
+  
+// [RPC] ExitRoom 離開房間
+message ExitRoomRequest {
+  string roomID = 1;  // 房間編號
+}
+message ExitRoomResponse {
+  string roomID = 1;  // 房間編號
+}
+message ExitRoomEventMessage {
+  string roomID           = 1;   // 房間編號
+  int64 userID            = 2;   // 玩家用戶編號
+  string avatarURL        = 3;   // 頭像 URL
+  string name             = 4;   // 名稱
+  uint64 vipLevel         = 5;   // VIP 等級
+  bool isFake             = 6;   // 是否是機器人
+  int64 baseID            = 7;   // 0 代表站著，座位編號 1~9
+  int64 balance           = 8;   // 餘額
+  bool isOnline           = 9;   // 線上
+  bool isPlaying          = 10;  // 此局是否有玩
+  string roundID          = 11;  // 回合編號
+}
+
+
+// [RPC] SitDown 坐下
+message SitDownRequest {
+  string roomID                   = 1;  // 房間編號
+  int64 token                     = 2;  // 代幣
+  int64 baseID                    = 3;  // 0 代表站著，座位編號 1~9
+  bool autoReplenish              = 4;  // 餘額小於買入代幣就補滿
+  bool autoReplenishBeforeStandUp = 5;  // 餘額小於小盲就補滿
+}
+message SitDownResponse {
+  string roomID = 1;  // 房間編號
+}
+message SitDownEventMessage {
+  string roomID           = 1;   // 房間編號
+  int64 userID            = 2;   // 玩家用戶編號
+  string avatarURL        = 3;   // 頭像 URL
+  string name             = 4;   // 名稱
+  uint64 vipLevel         = 5;   // VIP 等級
+  bool isFake             = 6;   // 是否是機器人
+  int64 baseID            = 7;   // 0 代表站著，座位編號 1~9
+  int64 balance           = 8;   // 餘額
+  bool isOnline           = 9;   // 線上
+  bool isPlaying          = 10;  // 此局是否有玩
+  string roundID          = 11;  // 回合編號
+  string latitude         = 12;  // 經度
+  string longitude        = 13;  // 緯度
+}
+
+
+// [RPC] GetRoom 取得房間資訊
+message GetRoomRequest {
+  string roomID = 1;  // 房間編號
+}
+message GetRoomResponse {
+  string roomID                           = 1;   // 房間編號
+  repeated GetRoomResponsePlayer players  = 2;   // 玩家
+  repeated GetRoomResponsePlayer bases    = 3;   // 座位 index 0~8
+  int64 smallBlindToken                   = 4;   // 小盲代幣
+  int64 bigBlindToken                     = 5;   // 大盲代幣
+  RoundStage roundStage                   = 6;   // 回合狀態
+  repeated int32 flopCardSeqs             = 7;   // 翻牌三張
+  int32 turnCardSeq                       = 8;   // 轉牌一張
+  int32 riverCardSeq                      = 9;   // 河牌一張
+  int32 buttonBaseID                      = 10;  // Button 位編號 1~9
+  repeated GetRoomResponsePlayer watchers = 11;  // 觀戰玩家
+  int32 smallBlindBaseID                  = 12;  // 小盲位編號 1~9
+  int32 bigBlindBaseID                    = 13;  // 大盲位編號 1~9
+  int32 currentActionBaseID               = 14;  // 當前動作位編號 1~9
+  repeated int32 requesterHandCardSeqs    = 15;  // 請求者的個人手牌二張
+  int64 centerPotAmount                   = 16;  // 底池金額
+  int64 currentRoundStageBetAmount        = 17;  // 當前回合階段押注金額
+  int64 currentActionStartedAt            = 18;  // 毫秒 等待當前動作開始時間
+  int64 currentActionEndedAt              = 19;  // 毫秒 等待當前動作結束時間
+  repeated int64 pots                     = 20;  // 主池/邊池 第一個是主池
+  repeated int64 displayPots              = 21;  // 顯示用的主池/邊池 第一個是主池
+  string roundID                          = 22;  // 回合編號
+
+  bool isTournament         = 50;  // 是否為錦標賽
+  int64 tournamentID        = 51;  // 錦標賽 ID
+  int64 startedAt           = 52;  // 於此時間點後開始遊戲
+  int64 currentBlindLevel   = 53;  // 當前盲注等級
+  int64 currentFinishedAt   = 54;  // 於此時間點後升盲
+  int64 nextBlindLevel      = 55;  // 下個盲注等級
+  int64 nextSmallBlindToken = 56;  // 下個升小盲代幣
+  int64 nextBigBlindToken   = 57;  // 下個升大盲代幣
+  bool  nextTakeABreak      = 58;  // 此局完後休息
+  bool isInTheMoney         = 59;  // 是否錢圈
+  bool isFinalTable         = 60;  // 是否決勝桌
+}
+message GetRoomResponsePlayer {
+  int64 userID                                  = 1;   // 玩家用戶編號
+  string avatarURL                              = 2;   // 頭像 URL
+  string name                                   = 3;   // 名稱
+  uint64 vipLevel                               = 4;   // VIP 等級
+  bool isFake                                   = 5;   // 是否是機器人
+  int64 baseID                                  = 6;   // 0 代表站著，座位編號 1~9
+  int64 balance                                 = 7;   // 餘額
+  bool isOnline                                 = 8;   // 線上
+  bool isPlaying                                = 9;   // 此局是否有玩
+  bool isWinner                                 = 10;  // 結算階段時此局是否獲勝
+  GetRoomResponsePlayerHandCards handCards      = 11;  // 結算階段時會顯示
+  int64 currentRoundStageBetAmount              = 12;  // 當前回合階段押注金額
+  RoomPlayerActionType lastRoomPlayerActionType = 13;  // 玩家最後動作類型
+  string baseName                               = 14;  // 座位名稱
+  string latitude                               = 15;  // 經度
+  string longitude                              = 16;  // 緯度
+  int64 currentRoundActualGainAmount            = 17;  // 玩家當前回合實際獲取金額
+
+  int64 rank = 50;  // 錦標賽排名
+}
+message GetRoomResponsePlayerHandCards {
+  repeated int32 handCardSeqs = 1;  // 玩家個人手牌二張
+  HandCardsType handCardsType = 2;  // 玩家手牌類型
+}
+
+
+// [RPC] RoomPlayerAction
+message RoomPlayerActionRequest {
+  string roomID                             = 1;  // 房間編號
+  RoomPlayerActionType roomPlayerActionType = 2;  // 房間玩家動作類型
+  int64 betAmount                           = 3;  // 押注金額
+}
+message RoomPlayerActionResponse {
+  string roomID = 1;                     // 房間編號
+  int64 currentRoundStageBetAmount = 2;  // 回合階段當前押注金額
+}
+message RoomPlayerActionEventMessage {
+  string roomID                             = 1;  // 房間編號
+  string roundID                            = 2;  // 回合編號
+  int64 userID                              = 3;  // 玩家用戶編號
+  RoomPlayerActionType roomPlayerActionType = 4;  // 房間玩家動作類型
+  int64 currentRoundStageBetAmount          = 5;  // 回合階段當前押注金額
+  int64 betAmount                           = 6;  // 押注金額
+  int64 balance                             = 7;  // 餘額
+}
+
+
+// [RPC] RoomPlayerBuyInsurance
+message RoomPlayerBuyInsuranceRequest {
+  string roomID = 1;  // 房間編號
+  int64 amount  = 2;  // 保險金額
+}
+message RoomPlayerBuyInsuranceResponse {}
+
+
+// [RPC] BroadcastRoom
+message BroadcastRoomRequest {
+  string roomID  = 1;  // 房間編號
+  string roundID = 2;  // 回合編號
+  bytes data     = 3;  // 資料
+}
+message BroadcastRoomResponse {}
+message BroadcastRoomEventMessage {
+  string roomID  = 1;  // 房間編號
+  string roundID = 2;  // 回合編號
+  bytes data     = 3;  // 資料
+}
+
+// [RPC] RoomPlayerFastpass
+message RoomPlayerFastpassRequest {
+  string roomID = 1;  // 房間編號
+}
+message RoomPlayerFastpassResponse {}
+
+
+// [PUSH] RoomInfoEvent 推送房間資訊
+message RoomInfoEventMessage {
+  string roomID                                = 1;   // 房間編號
+  repeated RoomInfoEventMessagePlayer players  = 2;   // 玩家
+  repeated RoomInfoEventMessagePlayer bases    = 3;   // 座位 index 0~8
+  int64 smallBlindToken                        = 4;   // 小盲代幣
+  int64 bigBlindToken                          = 5;   // 大盲代幣
+  RoundStage roundStage                        = 6;   // 回合狀態
+  repeated int32 flopCardSeqs                  = 7;   // 翻牌三張
+  int32 turnCardSeq                            = 8;   // 轉牌一張
+  int32 riverCardSeq                           = 9;   // 河牌一張
+  int32 buttonBaseID                           = 10;  // Button 位編號 1~9
+  repeated RoomInfoEventMessagePlayer watchers = 11;  // 觀戰玩家
+  int32 smallBlindBaseID                       = 12;  // 小盲位編號 1~9
+  int32 bigBlindBaseID                         = 13;  // 大盲位編號 1~9
+  int32 currentActionBaseID                    = 14;  // 當前動作位編號 1~9
+  int64 centerPotAmount                        = 15;  // 底池金額
+  int64 currentRoundStageBetAmount             = 16;  // 當前回合階段押注金額
+  int64 currentActionStartedAt                 = 17;  // 毫秒 等待當前動作開始時間
+  int64 currentActionEndedAt                   = 18;  // 毫秒 等待當前動作結束時間
+  repeated int64 pots                          = 19;  // 主池/邊池 第一個是主池
+  string roundID                               = 20;  // 回合編號
+  repeated int64 displayPots                   = 21;  // 顯示用的主池/邊池 第一個是主池
+
+  bool isTournament         = 50;  // 是否為錦標賽
+  int64 tournamentID        = 51;  // 錦標賽 ID
+  int64 startedAt           = 52;  // 於此時間點後開始遊戲
+  int64 currentBlindLevel   = 53;  // 當前盲注等級
+  int64 currentFinishedAt   = 54;  // 於此時間點後升盲
+  int64 nextBlindLevel      = 55;  // 下個盲注等級
+  int64 nextSmallBlindToken = 56;  // 下個升小盲代幣
+  int64 nextBigBlindToken   = 57;  // 下個升大盲代幣
+  bool  nextTakeABreak      = 58;  // 此局完後休息
+  bool isInTheMoney         = 59;  // 是否錢圈
+  bool isFinalTable         = 60;  // 是否決勝桌
+}
+message RoomInfoEventMessagePlayer {
+  int64 userID                                  = 1;   // 玩家用戶編號
+  string avatarURL                              = 2;   // 頭像 URL
+  string name                                   = 3;   // 名稱
+  uint64 vipLevel                               = 4;   // VIP 等級
+  bool isFake                                   = 5;   // 是否是機器人
+  int64 baseID                                  = 6;   // 0 代表站著，座位編號 1~9
+  int64 balance                                 = 7;   // 餘額
+  bool isOnline                                 = 8;   // 線上
+  bool isPlaying                                = 9;   // 此局是否有玩
+  bool isWinner                                 = 10;  // 結算階段時此局是否獲勝
+  RoomInfoEventMessagePlayerHandCards handCards = 11;  // 結算階段時會顯示
+  int64 currentRoundStageBetAmount              = 12;  // 當前回合階段押注金額
+  RoomPlayerActionType lastRoomPlayerActionType = 13;  // 玩家最後動作類型
+  string baseName                               = 14;  // 座位名稱
+  string latitude                               = 15;  // 經度
+  string longitude                              = 16;  // 緯度
+  int64 currentRoundActualGainAmount            = 17;  // 玩家當前回合實際獲取金額
+
+  int64 rank = 50;  // 錦標賽排名
+}
+message RoomInfoEventMessagePlayerHandCards {
+  repeated int32 handCardSeqs = 1;  // 玩家個人手牌二張
+  HandCardsType handCardsType = 2;  // 玩家手牌類型
+}
+
+
+// [PUSH] RoomClosedEvent 房間關閉事件
+message RoomClosedEventMessage {
+  string roomID  = 1;  // 房間編號
+  string roundID = 2;  // 回合編號
+}
+
+
+// [PUSH] StandUpEvent
+message StandUpEventMessage {
+  string roomID  = 1;   // 房間編號
+  int64 userID   = 2;   // 玩家用戶編號
+  int64 baseID   = 7;   // 0 代表站著，座位編號 1~9
+  bool isOnline  = 9;   // 線上
+  bool isPlaying = 10;  // 此局是否有玩
+  string roundID = 11;  // 回合編號
+}
+
+
+// [PUSH] RoomPlayerHandCardsEvent 玩家個人手牌事件
+message RoomPlayerHandCardsEventMessage {
+  string roomID               = 1;  // 房間編號
+  int64 userID                = 2;  // 玩家用戶編號
+  repeated int32 handCardSeqs = 3;  // 玩家個人手牌二張
+  string roundID              = 4;  // 回合編號
+}
+
+
+// [PUSH] RoomRoundSettlementEvent 房間回合結算事件
+message RoomRoundSettlementEventMessage {
+  string roomID          = 1;  // 房間編號
+  string roundID         = 2;  // 回合編號
+  int64 userID           = 3;  // 玩家用戶編號
+  int64 gainAmount       = 4;  // 獲得金額
+  bool isCenterPotAmount = 5;  // 是否為底池金額
+}
+
+
+// [PUSH] RoomPlayerInsuranceEvent 通知玩家可以購買保險事件
+message RoomPlayerInsuranceEventMessage {
+  string roomID                                          = 1;   // 房間編號
+  string roundID                                         = 2;   // 回合編號
+  int64 userID                                           = 3;   // 玩家用戶編號
+  repeated int32 flopCardSeqs                            = 4;   // 翻牌三張
+  int32 turnCardSeq                                      = 5;   // 轉牌一張
+  int32 riverCardSeq                                     = 6;   // 河牌一張
+  repeated int64 pots                                    = 7;   // 主池/邊池 第一個是主池
+  repeated int32 defeatedOutCardSeqs                     = 8;   // 會被反超的牌
+  string odds                                            = 9;   // 賠率 會有小數點
+  int64 endedAt                                          = 10;  // 購買結束時間戳 毫秒
+  repeated RoomPlayerInsuranceEventMessagePlayer players = 11;  // ...
+  string maxInsuranceAmount                              = 12;  // 最大保險費
+  string minInsuranceAmount                              = 13;  // 最小保險費
+  repeated int64 displayPots                             = 14;  // 顯示用的主池/邊池 第一個是主池
+}
+message RoomPlayerInsuranceEventMessagePlayer {
+  int64 userID                = 1;  // 玩家用戶編號
+  string avatarURL            = 2;  // 頭像 URL
+  string name                 = 3;  // 名稱
+  repeated int32 handCardSeqs = 4;  // 玩家個人手牌二張
+  string winRate              = 5;  // 勝率
+  int64 outs                  = 6;  // 就 outs
+}
+
+
+// [PUSH] RoomPlayerTournamentInfoEventMessage 房間玩家錦標賽資訊
+message RoomPlayerTournamentInfoEventMessage {
+  int64 tournamentID = 1;  // 錦標賽 ID
+  string roomID      = 2;  // 房間編號
+  string roundID     = 3;  // 回合編號
+  int64 userID       = 4;  // 玩家用戶編號
+  bool rebuyEnable   = 5;  // 玩家可否重買
+  int64 ranking      = 6;  // 排名 錢圈時使用
+  int64 outPosition  = 7;  // 出局名次 非錢圈時使用
+  string toRoomID    = 8;  // 去新房間編號
+  string toPath      = 9;  // 去新房間 Path / Host
+}
+
+
+// [Tape]
+message BetOrderTape {
+  string roomID                                   = 1;   // 房間編號
+  string roundID                                  = 2;   // 回合編號
+  repeated BetOrderTapePlayer players             = 3;   // 玩家
+  int64 smallBlindToken                           = 4;   // 小盲代幣
+  int64 bigBlindToken                             = 5;   // 大盲代幣
+  repeated int32 flopCardSeqs                     = 7;   // 翻牌三張
+  int32 turnCardSeq                               = 8;   // 轉牌一張
+  int32 riverCardSeq                              = 9;   // 河牌一張
+  repeated int64 pots                             = 10;  // 主池/邊池 第一個是主池
+  repeated BetOrderTapeEventMessage eventMessages = 11;  // 一局所有 EventMessage ...
+  int64 totalAmountOfCompensate                   = 12;  // 回合總理賠金額
+  int64 roomLevel                                 = 13;  // 房間等級
+  int64 roomType                                  = 14;  // 房間類型 3:鎖定的公房 4:密碼房
+  repeated int64 displayPots                      = 15;  // 顯示用的主池/邊池 第一個是主池
+  int64 minToken                                  = 16;  // 最小買入
+  int64 maxToken                                  = 17;  // 最大買入
+
+  bool isTournament                               = 50;  // 是否為錦標賽
+  int64 tournamentID                              = 51;  // 錦標賽 ID
+  
+  bool isInsurance                                = 101; // 是否為保險的注單
+  RoundStage insuranceRoundStage                  = 102; // 買保險的回合狀態
+  int64 insuranceAmount                           = 103; // 保險金額
+  string insuranceOdds                            = 104; // 保險倍率
+  repeated int32 insuranceDefeatedOutCardSeqs     = 105; // 會被反超的牌 Outs
+  int64 insuranceBoughtAt                         = 106; // 購買於時間戳 毫秒
+}
+message BetOrderTapePlayer {
+  int64 userID                                  = 1;
+  string avatarURL                              = 2;   // 頭像 URL
+  string name                                   = 3;   // 名稱
+  uint64 vipLevel                               = 4;   // VIP 等級
+  bool isFake                                   = 5;   // 是否是機器人
+  int64 baseID                                  = 6;   // 0 代表站著，座位編號 1~9
+  int64 balance                                 = 7;   // 餘額
+  bool isOnline                                 = 8;   // 線上
+  bool isPlaying                                = 9;   // 此局是否有玩
+  bool isWinner                                 = 10;  // 結算階段時此局是否獲勝
+  BetOrderTapePlayerHandCards handCards         = 11;  // 結算階段時會顯示
+  string baseName                               = 12;  // 座位名稱
+  int64 betAmount                               = 13;  // 回合押注金額
+  int64 gainAmount                              = 14;  // 回合收入金額
+  RoomPlayerActionType lastRoomPlayerActionType = 15;  // 玩家最後動作類型
+  string latitude                               = 16;  // 經度
+  string longitude                              = 17;  // 緯度
+}
+message BetOrderTapePlayerHandCards {
+  repeated int32 handCardSeqs = 1;  // 玩家個人手牌二張
+  HandCardsType handCardsType = 2;  // 玩家手牌類型
+}
+message BetOrderTapeEventMessage {
+  MessageType messageType = 1;
+  bytes data              = 2;  // 與 messageType 相對應 EventMessage 用 protobuf 序列化後的 byte 陣列
+  int64 pushedAt          = 3;  // 毫秒 推送時的時間戳
+}

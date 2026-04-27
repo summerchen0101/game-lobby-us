@@ -1,0 +1,9 @@
+syntax = "proto3";
+package bingo;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/bingo";
+
+message BingoGameInfo {
+  int64 jp1            = 1;
+  int64 jp2         = 2;
+  int64 jp3       = 3;
+}

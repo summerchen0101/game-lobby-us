@@ -1,0 +1,16 @@
+syntax = "proto3";
+package slot;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/slot";
+
+message JackPotDetail {
+    int64 awards        = 1;  // 獎項
+    uint64 initialValue = 2;  // 初始值
+    uint64 upperLimit   = 3;  // 上限值
+    float rate          = 4;  // 速率
+    float amount        = 5;  // 現在水池金額
+}
+
+message MiniDetail {
+    int64 award = 1;  // 獎項
+    int64 rate  = 2;  // 倍率
+}

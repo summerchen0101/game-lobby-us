@@ -1,0 +1,408 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "google/protobuf/wrappers.proto";
+
+import "proto/wallet/wallet.proto";
+import "proto/playerinfo/model.proto";
+import "proto/playerinfo/playerinfo.proto";
+import "proto/iam/iam.proto";
+import "proto/backpack/backpack.proto";
+import "proto/msg/msg.proto";
+import "proto/megaman/store.proto";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+message ListPlayerForStrangerReq {
+    uint64 userID   = 1;
+    string nickname = 2;
+}
+
+message ListPlayerForStrangerResp {
+    repeated Stranger strangers = 1;
+}
+
+message Stranger {
+    uint64 userID   = 1;
+    string nickname = 2;
+    string imageUrl = 3;
+    uint64 vipLevel = 4;
+    uint64 level    = 5;
+    uint64 gender   = 6;
+}
+
+message ListPlayerForStrangerWithoutCheckReq {
+    uint64 userID   = 1;
+    string nickname = 2;
+}
+
+message ListPlayerForStrangerWithoutCheckResp {
+    repeated Stranger strangers = 1;
+}
+
+message GetInfoRequest {
+    yesno.YesNo needSkin = 1;
+    uint64 userID        = 2;
+}
+
+message GetInfoResponse {
+    wallet.Bag bag                              = 1;
+    playerinfo.GetPlayerInfoResponse playerInfo = 2;
+    repeated PlayerGiftInfo topSenders          = 3;
+    repeated PlayerGiftInfo topReceives         = 4;
+    uint64 chipCnts                             = 5; // 籌碼數量
+    wallet.Bag bagGC                            = 6;
+}
+
+message PlayerGiftInfo {
+    playerinfo.PlayerGift gift = 1;
+    string nickName            = 2;
+    uint64 avatarID            = 3; // 當前玩家頭像ID
+    string avatarURL           = 4; // 當前玩家頭像URL
+    uint64 vipLevel            = 5; // 玩家vip等級
+    uint64 level               = 6; // 玩家等級
+}
+
+message UpdateInfoRequest {
+    string nickName                           = 1;
+    playerinfo.Gender gender                  = 2;
+    google.protobuf.StringValue autobiography = 3;
+}
+
+message ListPlayerAvatarsResponse {
+    repeated PlayerAvatarsInfo avatarsInfo = 1;
+}
+message PlayerAvatarsInfo {
+    uint64 avatarID              = 1; // 頭像 Item ID
+    string avatarUrl             = 2; // fb 頭像
+    backpack.GoodState goodState = 3; // 擁有狀態
+}
+message GetPlayerRoleSkinResponse {
+    repeated PlayerRoleSkinInfo roleSkinInfo = 1;
+}
+
+message GetPlayerAngleResponse {
+    repeated PlayerAngleInfo angleInfo = 1;
+}
+message PlayerRoleSkinInfo {
+    uint64 roleID                = 1; // 角色 Item ID
+    backpack.GoodState goodState = 2; // 擁有狀態
+    int64 amount                 = 3; // 擁有數量
+}
+
+message PlayerAngleInfo {
+    uint64 angleID               = 1; // 天使 Item ID
+    backpack.GoodState goodState = 2; // 擁有狀態
+}
+
+message UpdatePlayerCurrentAvatarRequest {
+    uint64 avatarID        = 1;
+    string avatarURL       = 2;
+    yesno.YesNo isFBAvatar = 3; // 是否更新FB頭像
+}
+
+message AddPlayerRoleRequest {
+    uint64 itemID = 1;
+}
+
+message UpdatePlayerCurrentRoleRequest {
+    uint64 itemID = 1;
+}
+
+// SECONDARY_PASSWORD_SETTING = 330;  //二次密碼設置  playinfo
+message SecondaryPasswordSettingRequest {
+    uint64 userID   = 1;
+    string password = 2; // 密碼
+}
+
+// SECONDARY_PASSWORD_CHANGE    //二次密碼更改  回應 204|200
+message SecondaryPasswordChangeRequest {
+    uint64 userID      = 1;
+    string oldPassword = 2;
+    string newPassword = 3;
+    string answer      = 4; // 選填
+}
+
+// SECONDARY_PASSWORD_CHANGE    //二次密碼更改  playinfo
+message SecondaryPasswordChangeResponse {
+    yesno.YesNo needSMSAnswer = 1; // 如果需要回答 驗證碼 則 yes; 看到yes 請重打一次SecondaryPasswordChangeRequest 並帶上 answer
+    string phoneNum           = 2; // 如果需要才有此值
+}
+
+// SECONDARY_PASSWORD_FORGOT   //二次密碼忘記  回應 204|200
+message SecondaryPasswordForgotRequest {
+    uint64 userID      = 1;
+    string answer      = 2; // 選填
+    string newPassword = 3; // 跟著答案一起帶
+}
+
+// SECONDARY_PASSWORD_FORGOT   //二次密碼忘記  playinfo
+message SecondaryPasswordForgotResponse {
+    yesno.YesNo needSMSAnswer = 1; // 如果需要回答 驗證碼 則 yes; 看到yes 請重打一次SecondaryPasswordChangeRequest 並帶上 answer
+    string phoneNum           = 2; // 如果需要才有此值
+}
+
+// AddPlayerExpRequest 增加  經驗值
+message AddPlayerExpRequest {
+    uint64 user_id             = 1;
+    playerinfo.AddExpType type = 2;
+    uint64 amount              = 3; // 儲值金額｜注額
+    uint64 gameID              = 4;
+    uint64 timestampMs         = 5;
+}
+
+// AddPlayerExpResponse 增加  經驗值返回響應
+message AddPlayerExpResponse {
+    yesno.YesNo is_level_up     = 1; // 該次請求是否導致玩家 升級
+    uint64 orignal_level        = 2; // 玩家請求執行當下  等級
+    uint64 current_level        = 3; // 玩家當前  等級
+    yesno.YesNo is_vip_level_up = 4; // 該次請求是否導致玩家 VIP 升級
+    uint64 orignal_vip_level    = 5; // 玩家請求執行當下 VIP 等級
+    uint64 current_vip_level    = 6; // 玩家當前 VIP 等級
+}
+
+// SMS_VERIFY 適用先驗證後輸入的界面 ... 回應 204
+message SMSCodeVefityRequest {
+    uint64 user_id      = 1;
+    int32 smsActionType = 2; // ApiType ex: SECONDARY_PASSWORD_CHANGE
+    string answer       = 3; // sms code
+}
+
+// 玩家送禮物 Request
+message SenderPlayerGiftRequest {
+    uint64 senderID       = 1; // 送方
+    uint64 receiverID     = 2; // 收方
+    int64 productID       = 8; // 物品 ID
+    int64 itemID          = 3; // 物品 ID
+    int64 amount          = 4; // 數量
+    int64 price           = 5; // 總價格
+    string roomID         = 6; // 發送訊息的房間ID
+    msg.RoomType RoomType = 7; // 發送訊息房間類型
+}
+
+message PlayerGiftResponse {
+    uint64 senderID     = 1; // 送方
+    string senderName   = 2; // 送方名稱
+    uint64 receiverID   = 3; // 收方
+    string receiverName = 4; // 收方名稱
+    uint64 itemID       = 5; // 物品ID
+    int64 amount        = 6; // 數量
+}
+
+message PlayerGiftSerialResponse {
+    string serialNumber = 1; // 兌換序號 ApiType GetSerialStatus  SerialReq GetSerialStatusResp 取得兌換狀態; ApiType SerialRegister  SerialReq -> SerialRegisterResp 序號兌換
+}
+
+message SenderRichDaadyGiftRequest {
+    string richDaddyID = 1; // 榜單 id
+    int64 productID    = 2; // 商品 id
+}
+
+message SerialReq {
+    string serialNumber = 1;
+}
+
+message GetSerialStatusResp {
+    string serialNumber = 1;
+    int64 activedAtMs   = 2;
+}
+
+message SerialRegisterResp {
+    repeated megaman.StoreItemInfo items = 1;
+}
+
+message MegaAccountBindingRequest {  // 正確無誤 回傳204; 若需驗證則回應 200 MegaAccountBindingResponse
+    uint64 userID      = 1;
+    string phone       = 2; //+886-0987654321 -> 987654321
+    string countryCode = 3; //+886-0987654321 -> 886
+    string email       = 4; //
+    string password    = 5; // 必填
+    string answer      = 6;
+    string firstName   = 7;
+    string lastName    = 8;
+    string birthday    = 9; // yyyy-MM-dd
+    string country     = 10;
+    string city        = 11;
+    string state       = 12;
+    string zip         = 13;
+    string address     = 14;
+    string language    = 15; // en
+}
+//
+
+message MegaAccountBindingResponse {
+    yesno.YesNo needSMSAnswer = 1; // 如果需要回答 驗證碼 則 yes; 看到yes MegaAccountBindingRequest 並帶上 answer
+    string phoneNum           = 2; // 如果需要才有此值
+}
+
+message ThirdpartyAccountBindingRequest {  // 204
+    uint64 userID              = 1;
+    iam.OAuthProvider privoder = 2;
+    string accessToken         = 3;
+}
+
+message PhoneUnBindingRequest {
+    uint64 userID      = 1;
+    string phone       = 2; //+886-0987654321 -> 987654321
+    string countryCode = 3; //+886-0987654321 -> 886
+    string answer      = 4;
+}
+
+message PhoneUnBindingResponse {
+    yesno.YesNo needSMSAnswer = 1; // 如果需要回答 驗證碼 則 yes; 看到yes MegaAccountBindingRequest 並帶上 answer
+    string phoneNum           = 2; // 如果需要才有此值
+}
+
+message UpdateNoviceTeaching {
+    uint64 userID                            = 1;
+    playerinfo.NoviceTeaching noviceTeaching = 2;
+}
+
+message ThirdpartyAccountUnBindingRequest {  // 204
+    uint64 userID              = 1;
+    iam.OAuthProvider privoder = 2;
+}
+
+message DeletePlayerInfoReq {
+    iam.OAuthProvider privoder = 1;
+    string accessToken         = 2;
+}
+
+message MegaAccountBinding {
+    string phone       = 1;
+    string countryCode = 2;
+    string email       = 3;
+    string password    = 4;
+    string answer      = 5; // 驗證碼
+}
+
+message ThirdpartyAccountBinding {
+    string accessToken = 1; // 綁定帳號的 accessToken
+}
+
+enum OAuthProvider {
+    UNKNOWN_OAUTH_PROVIDER = 0;
+    PROVIDER_MEGA          = 1; // 自家平台
+    PROVIDER_GOOGLE        = 2;
+    PROVIDER_FB            = 3;
+    PROVIDER_LINE          = 4;
+    PROVIDER_APPLE         = 5;
+}
+
+message ChangeAccountBindingReq {
+    OAuthProvider oauthProvider             = 1; // 綁定的代號
+    MegaAccountBinding megaAccountBinding   = 2; // 手機綁定
+    ThirdpartyAccountBinding newAccessToken = 3; // 社群帳號綁定
+    ThirdpartyAccountBinding oldAccessToken = 4; // FB accessToken (註銷 FB 綁定使用)
+}
+
+// 取得推薦碼相關資訊Req
+message GetReferrerCodeInfoReq {
+}
+
+// 取得推薦碼相關資訊Resp
+message GetReferrerCodeInfoResp {
+    google.protobuf.StringValue referrerCode  = 1; // 我的推薦碼
+    uint64 level                              = 2; // 玩家目前等級
+    yesno.YesNo isBinding                     = 3; // 是否已經綁定
+    google.protobuf.UInt64Value referalUserID = 4; // 推薦人userID
+    google.protobuf.UInt64Value bindAtMs      = 5; // 推薦人綁定時間
+    bool canSeeReferralPage                   = 6; // 可否看見推薦頁面
+}
+
+// 綁定推薦人代碼Req
+message BindingReferrerCodeReq {
+    string referrerCodeToBeBound = 1; // 要綁定的推薦人代碼
+}
+message BindingReferrerCodeResp {
+    int64 referrerCodeMoney = 1; // 綁定的推薦人贈送金額
+}
+
+// 取得玩家推廣任務列表Req
+message ListPlayerPromotionTasksReq {
+    uint32 page    = 1; // 頁數
+    uint32 perPage = 2; // 每頁幾筆
+}
+
+// 取得玩家推廣任務列表Resp
+message ListPlayerPromotionTasksResp {
+    pagination.Pagination pagination                             = 1; // 分頁資訊
+    repeated playerinfo.PlayerPromotionTask playerPromotionTasks = 2; // 玩家推廣任務列表
+}
+
+// 取得進行中的玩家推廣任務進度列表(未達標或待領取獎勵)Req
+message ListOngoingPlayerPromotionTasksProgressReq {
+    uint32 page    = 1; // 頁數
+    uint32 perPage = 2; // 每頁幾筆
+}
+
+// 取得進行中的玩家推廣任務進度列表(未達標或待領取獎勵)Resp
+message ListOngoingPlayerPromotionTasksProgressResp {
+    pagination.Pagination pagination                                                                = 1; // 分頁資訊
+    repeated playerinfo.OngoingPlayerPromotionTasksProgress ongoingPlayerPromotionTasksProgressList = 2; // 進行中的玩家推廣任務進度列表
+}
+
+// 取得完成的玩家推廣任務進度列表(達標且已領取獎勵)Req
+message ListCompletedPlayerPromotionTasksProgressReq {
+    uint32 page    = 1; // 頁數
+    uint32 perPage = 2; // 每頁幾筆
+}
+
+// 取得完成的玩家推廣任務進度列表(達標且已領取獎勵)Resp
+message ListCompletedPlayerPromotionTasksProgressResp {
+    pagination.Pagination pagination                                                                    = 1; // 分頁資訊
+    repeated playerinfo.CompletedPlayerPromotionTasksProgress completedPlayerPromotionTasksProgressList = 2; // 完成的玩家推廣任務進度列表
+}
+
+// 領取推廣任務獎勵Req
+message ReceivePromotionTaskAwardReq {
+    uint64 promotionTaskID = 1; // 指定領取的推廣任務ID (如果為零，領取所有任務獎勵)
+}
+
+// 領取推廣任務獎勵Resp
+message ReceivePromotionTaskAwardResp {
+    int64 totalAwardAmount                                               = 1; // 總獎勵金額
+    repeated playerinfo.PlayerPromotionTask receivedPlayerPromotionTasks = 2; // 該次領取獎勵的玩家推廣任務列表 -> 用於前端更新頁面資源
+}
+
+message UpdateProfileSimulation {
+    yesno.YesNo isBatteryChange = 1;
+    string phoneDevice          = 2;
+    string phoneHandheldDevice  = 3;
+}
+
+message ListPlayerReferrerRequest {
+    uint64 userID  = 1;
+    uint32 page    = 2; // 頁數
+    uint32 perPage = 3; // 每頁幾筆
+}
+
+message ListPlayerReferrerResponse {
+    repeated PlayerReferrer player   = 1;
+    pagination.Pagination pagination = 2; // 分頁資訊
+}
+
+message PlayerReferrer {
+    uint64 userID        = 1;
+    string nickname      = 2;
+    int64 vipLevel       = 3;
+    string avatarURL     = 4; //頭像
+    yesno.YesNo isOnline = 5; // 是否上限
+}
+
+message GetUserToReferrerCodeRequest {
+    string referrerCode = 1;
+}
+message GetUserToReferrerCodeResponse {
+    uint64 userID            = 1;
+    string guildReferrerCode = 2;
+    string guildID           = 3;
+    string guildName         = 4;
+}
+
+message ValidateSecondPasswordRequest {
+    string password = 1;
+}
+message ValidateSecondPasswordResponse {}

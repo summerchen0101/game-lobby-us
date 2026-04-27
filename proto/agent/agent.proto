@@ -1,0 +1,77 @@
+syntax = "proto3";
+package agent;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/agent";
+
+import "google/protobuf/empty.proto";
+
+service AgentService {
+    rpc CreateAgent(CreateAgentReq) returns (google.protobuf.Empty);
+    rpc GetAgent(GetAgentReq) returns (GetAgentResp);
+    rpc ListAgent(ListAgentReq) returns (ListAgentResp);
+    rpc AddAgentDownLine(AddAgentDownLineReq) returns (google.protobuf.Empty);
+    rpc AddAgentMember(AddAgentMemberReq) returns (google.protobuf.Empty);
+}
+
+message CreateAgentReq {
+    uint64 userID = 1;
+    string name   = 2;
+    uint64 upLine = 3;
+}
+
+message GetAgentReq {
+    uint64 userID = 1;
+}
+
+message GetAgentResp {
+    Agent agent = 1;
+}
+
+message ListAgentReq {
+    uint64 path = 1;
+}
+
+message ListAgentResp {
+    repeated Agent agent = 1;
+}
+
+message AddAgentDownLineReq {
+    uint64 agentID = 1;
+    uint64 userID  = 2;
+}
+
+message AddAgentMemberReq {
+    uint64 agentID = 1;
+    uint64 userID  = 2;
+}
+
+message Agent {
+    uint64 userID        = 1;
+    string name          = 2;
+    Role role            = 3;
+    repeated uint64 path = 4;
+}
+
+enum Role {
+    UNKNOWN_ROLE    = 0;
+    FIRST_AGENT     = 1;
+    SECOND_AGENT    = 2;
+    THIRD_AGENT     = 3;
+    FOUR_AGENT      = 4;
+    FIVE_AGENT      = 5;
+    SIX_AGENT       = 6;
+    SEVEN_AGENT     = 7;
+    EIGHT_AGENT     = 8;
+    NINE_AGENT      = 9;
+    TEN_AGENT       = 10;
+    ELEVEN_AGENT    = 11;
+    TWELFTH_AGENT   = 12;
+    THIRTEEN_AGENT  = 13;
+    FOURTEEN_AGENT  = 14;
+    FIFTEEN_AGENT   = 15;
+    SIXTEEN_AGENT   = 16;
+    SEVENTEEN_AGENT = 17;
+    EIGHTEEN_AGENT  = 18;
+    NINETEEN_AGENT  = 19;
+    TWENTY_AGENT    = 20;
+    MEMBER          = 21;
+}

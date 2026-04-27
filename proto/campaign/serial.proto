@@ -1,0 +1,122 @@
+
+syntax = "proto3";
+package campaign;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/campaign";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "google/protobuf/empty.proto";
+
+service SerialService {
+    //序號
+    rpc ListSerialPoolInfos(ListSerialPoolInfosReq) returns (ListSerialPoolInfosResp);
+    rpc CreateNewSerialPool(CreateNewSerialPoolReq) returns (google.protobuf.Empty);
+    rpc GetSerialPoolInfo(GetSerialPoolInfoReq) returns (SerialPool);
+    // rpc GetCurrentSerialNumber(GetCurrentSerialNumberReq) returns (GetCurrentSerialNumberResp);
+    rpc DeleteNewSerialPool(DeleteNewSerialPoolReq) returns (google.protobuf.Empty);
+
+    rpc GenSerialNumber(GenSerialNumberReq) returns (GenSerialNumberResp);
+    rpc GetSerialInfo(GetSerialInfoReq) returns (SerialNumberRecord);
+
+    rpc RegisterSerialNumber(RegisterSerialNumberReq) returns (google.protobuf.Empty);
+
+    rpc ImportSerialNumber(ImportSerialNumberReq) returns (google.protobuf.Empty);
+    rpc ListSerialPoolNumbers(ListSerialPoolNumbersReq) returns (ListSerialPoolNumbersResp);
+}
+
+message ListSerialPoolInfosReq {
+    repeated string poolIdentities = 1;
+    uint32 page                    = 2;
+    uint32 perPage                 = 3;
+}
+
+message ListSerialPoolInfosResp {
+    pagination.Pagination page   = 1;
+    repeated SerialPoolInfo info = 2;
+}
+
+message SerialPoolInfo {
+    SerialPool pool                           = 1;
+    repeated SerialNumberRecord serialNumbers = 2;
+}
+
+message CreateNewSerialPoolReq {
+    string poolIdentity = 1;
+    uint64 startIndx    = 2;
+    Activaion type      = 3;
+}
+
+message SerialPool {
+    string poolIdentity = 1;
+    // uint64 startIndx    = 2;
+    Activaion type      = 2;
+    uint64 CurrentIndex = 3;
+}
+
+message GetSerialPoolInfoReq {
+    string poolIdentity = 1;
+}
+
+// message GetCurrentSerialNumberResp {
+//     string poolIdentity = 1;
+//     uint64 number       = 2;
+// }
+
+message DeleteNewSerialPoolReq {
+    string poolIdentity = 1;
+}
+
+message GenSerialNumberReq {
+    string poolIdentity = 1;
+    yesno.YesNo async   = 2;
+    // repeated uint64 userIDs = 2;
+    uint64 emptyNum          = 3;
+    map<string, string> meta = 4;
+}
+
+message GenSerialNumberResp {
+    repeated SerialNumberRecord serialnumbers = 1;
+}
+
+message ImportSerialNumberReq {
+    string poolIdentity                       = 1;
+    repeated SerialNumberRecord serialnumbers = 2;
+}
+
+message SerialNumberRecord {
+    uint64 serialNo          = 1;
+    string serialNumber      = 2;
+    Activaion type           = 3;
+    uint64 userID            = 4;
+    int64 createdAtMs        = 5;
+    int64 activedAtMs        = 6;
+    map<string, string> meta = 7;
+}
+
+enum Activaion {
+    Unknow                  = 0;
+    OnlyOneUserOneActivaion = 1;
+    MultiUserOneActivation  = 2;
+}
+
+message ListSerialPoolNumbersReq {
+    string poolIdentity = 1;
+    uint32 page         = 2;
+    uint32 perPage      = 3;
+}
+
+message ListSerialPoolNumbersResp {
+    repeated SerialNumberRecord serialnumbers = 1;
+    pagination.Pagination page                = 2;
+}
+
+message RegisterSerialNumberReq {
+    uint64 userID = 1;
+    // string poolIdentity = 2;
+    string serialNumber = 3;
+}
+
+message GetSerialInfoReq {
+    string serialNumber = 1;
+    uint64 userID       = 2;
+}

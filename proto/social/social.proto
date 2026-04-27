@@ -1,0 +1,208 @@
+syntax = "proto3";
+package social;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/social";
+
+import "google/protobuf/empty.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+service SocialService {
+    rpc CreateChatRoom(CreateChatRoomRequest) returns (CreateChatRoomResponse);
+    rpc GetChatRoom(GetChatRoomRequest) returns (GetChatRoomResponse);
+    rpc GetAmountCoin(GetAmountCoinRequest) returns (GetAmountCoinResponse);
+    rpc ListChatRoom(ListChatRoomRequest) returns (ListChatRoomResponse);
+    rpc ListRoomAmount(google.protobuf.Empty) returns (ListRoomAmountResponse);
+
+    rpc ListRecommendChatRoom(ListRecommendChatRoomRequest) returns (ListRecommendChatRoomResponse);
+    rpc UpdateChatRoom(UpdateChatRoomRequest) returns (UpdateChatRoomResponse);
+    rpc AddToChatRoom(AddToChatRoomRequest) returns (AddToChatRoomResponse);
+    rpc InviteToChatRoom(InviteToChatRoomRequest) returns (InviteToChatRoomResponse);
+
+    rpc ConfirmAddMember(ConfirmAddMemberRequest) returns (ConfirmAddMemberResponse);
+    rpc ConfirmInviteMember(ConfirmInviteMemberRequest) returns (ConfirmInviteMemberResponse);
+    rpc UpdatePosition(UpdatePositionRequest) returns (google.protobuf.Empty);
+    rpc Leave(LeaveRequest) returns (LeaveResponse);
+    rpc DeleteChatRoom(DeleteChatRoomRequest) returns (google.protobuf.Empty);
+
+}
+
+enum Position {
+    POSITION_UNKNOWN       = 0;
+    POSITION_DIRECTOR      = 1;
+    POSITION_VICE_DIRECTOR = 2;
+    POSITION_MEMBER        = 3;
+}
+
+message CreateChatRoomRequest {
+    string name        = 1;
+    string profile     = 2;
+    uint64 amountLimit = 3;
+    uint64 userID      = 4;
+    string roomID      = 5;
+}
+
+message CreateChatRoomResponse {
+    ChatRoom chatRoom = 1;
+}
+
+message GetChatRoomRequest {
+    string roomID = 1;
+}
+
+message GetChatRoomResponse {
+    ChatRoom chatRoom                        = 1;
+    repeated RoomAmountLimit roomAmountLimit = 2;
+}
+message GetAmountCoinRequest {
+    uint64 previousAmount = 1;
+    uint64 amount         = 2;
+}
+message GetAmountCoinResponse {
+    uint64 coin = 1;
+}
+message ListChatRoomRequest {
+    string roomID           = 1;
+    string name             = 2;
+    uint32 page             = 3;
+    uint32 perPage          = 4;
+    uint64 userID           = 5;
+    repeated string roomIDs = 6;
+}
+
+message ListChatRoomResponse {
+    repeated ChatRoom chatRooms = 1;
+    pagination.Pagination page  = 2;
+}
+
+message ListRecommendChatRoomRequest {
+    repeated string roomID = 1;
+    uint64 userID          = 2;
+}
+
+message ListRecommendChatRoomResponse {
+    repeated ChatRoom chatRooms = 1;
+}
+
+message UpdateChatRoomRequest {
+    string roomID           = 1;
+    string name             = 2;
+    string profile          = 3;
+    string announcement     = 4;
+    yesno.YesNo openSearch  = 5;
+    yesno.YesNo needConfirm = 6;
+    uint64 amountLimit      = 7;
+    uint64 OperatorID       = 8;
+}
+
+
+message DeleteChatRoomRequest {
+    string roomID           = 1;
+
+}
+
+
+message UpdateChatRoomResponse {
+    yesno.YesNo needPush   = 1;
+    string previousName    = 2;
+    repeated uint64 member = 3;
+    string roomID          = 4;
+    string Name            = 5;
+}
+
+message AddToChatRoomRequest {
+    string roomID     = 1;
+    uint64 userID     = 2;
+    uint64 OperatorID = 3;
+}
+
+message AddToChatRoomResponse {
+    NewMemberPush newMemberPush = 1;
+}
+
+message InviteToChatRoomRequest {
+    string roomID          = 1;
+    repeated uint64 userID = 2;
+    uint64 OperatorID      = 3;
+}
+
+message InviteToChatRoomResponse {
+    string roomID   = 1;
+    string roomName = 2;
+}
+
+message ConfirmAddMemberRequest {
+    string roomID     = 1;
+    uint64 userID     = 2;
+    yesno.YesNo apply = 4;
+    uint64 OperatorID = 3;
+}
+
+message ConfirmAddMemberResponse {
+    NewMemberPush newMemberPush = 1;
+}
+
+message ConfirmInviteMemberRequest {
+    string roomID     = 1;
+    uint64 userID     = 2;
+    yesno.YesNo apply = 3;
+}
+
+message ConfirmInviteMemberResponse {
+    NewMemberPush newMemberPush = 1;
+}
+
+message UpdatePositionRequest {
+    uint64 OperatorID = 3;
+    string roomID     = 1;
+    uint64 userID     = 2;
+    Position position = 4;
+}
+
+message LeaveRequest {
+    string roomID = 1;
+    uint64 userID = 2;
+}
+
+message LeaveResponse {
+    MemberLeavePush memberLeavePush = 1;
+}
+
+message ChatRoom {
+    string roomID                   = 1;
+    string name                     = 2;
+    uint64 director                 = 3;
+    repeated uint64 viceDirector    = 4;
+    yesno.YesNo openSearch          = 5;
+    yesno.YesNo needConfirm         = 6;
+    string profile                  = 7;
+    string announcement             = 8;
+    uint64 amountLimit              = 9;
+    repeated uint64 pendingMembers  = 10;
+    repeated uint64 invitingMembers = 12;
+    repeated uint64 members         = 11;
+    int64 createdAtMS               = 13;
+}
+
+message RoomAmountLimit {
+    uint64 amountLimit      = 1;
+    uint64 amountLimitPrice = 2;
+}
+
+message ListRoomAmountResponse {
+    repeated RoomAmountLimit roomAmountLimits = 1;
+}
+
+message NewMemberPush {
+    yesno.YesNo needPush   = 1;
+    repeated uint64 member = 2;
+    string roomID          = 3;
+    string name            = 4;
+    uint64 newMemberID     = 5;
+}
+
+message MemberLeavePush {
+    repeated uint64 member = 1;
+    string roomID          = 2;
+    string name            = 3;
+    uint64 newMemberID     = 4;
+}

@@ -1,0 +1,101 @@
+/**
+ * 全站配色與品牌色票（#242946 底、主按鈕為藍→紫漸層／#6b4cff 單色基準、#ffffff 文、#fde201 強調、局部 accent 見 --crown-locale-green：switch／頭像／Shop 副標等）。
+ *
+ * 檔期換色：
+ * 1. 在 theme-seasonal.css 新增 [data-theme="檔名"] { … } 覆寫下方變數
+ * 2. 設環境變數 VITE_APP_THEME=檔名（見 .env.example），或執行時對 <html> 設 data-theme
+ *
+ * 亦可只改此檔 :root 數值作全域一次性調整。
+ */
+:root {
+  /* —— 頁面表面 —— */
+  --color-bg: #242946;
+  --color-surface: #242946;
+  --color-elevated: #242946;
+  --color-border: color-mix(in srgb, #ffffff 12%, #242946);
+  --session-chrome-surface: #242946;
+  --session-fab-surface: #242946;
+  --color-text: #ffffff;
+  --color-text-muted: rgb(255 255 255 / 68%);
+  --color-accent: var(--crown-gold);
+  --color-accent-hover: var(--crown-gold-hover);
+
+  /* 主按鈕（crown-theme、多頁內聯鈕）；檔期可覆寫 gradient 與 bg */
+  --crown-button-primary-gradient: linear-gradient(
+    95deg,
+    #5eb8ff 0%,
+    #6b4cff 50%,
+    #8b5cf6 100%
+  );
+  --crown-button-primary-bg: #6b4cff;
+  --crown-button-primary-fg: #ffffff;
+  --crown-gold: #fde201;
+  --crown-gold-hover: #ffec4d;
+  --crown-gold-shadow: color-mix(in srgb, #000000 42%, #6b4cff);
+  --crown-primary-gradient-end: #1a1f35;
+
+  /* Auth：忘記密碼連結（主色 default／hover 輔色，與主按鈕＋金強調一致） */
+  --auth-forgot-link: var(--crown-locale-green);
+  --auth-forgot-link-hover: var(--crown-gold);
+
+  /* 局部 accent（舊稱局部綠）：Profile switch、頭像、Shop 副標等 */
+  --crown-locale-green: #7b6dfd;
+  --crown-mint: var(--crown-locale-green);
+  --crown-mint-shadow: color-mix(
+    in srgb,
+    #000000 45%,
+    var(--crown-locale-green)
+  );
+
+  /* 次按鈕階：亮黃漸層＋深字 */
+  --crown-purple: #fde201;
+  --crown-purple-deep: #b89f00;
+  --crown-purple-shadow: #4a3f00;
+  --crown-secondary-gradient-top: #fff59d;
+
+  --crown-surface-dark: #1a1f35;
+
+  /* —— 卡片表面 —— */
+  --crown-surface-card-bg: #242946;
+  --crown-surface-card-border: transparent;
+  --crown-surface-card-shadow:
+    0 14px 44px rgb(0 0 0 / 0.38), inset 0 1px 0 rgb(0 0 0 / 22%);
+
+  --crown-benefit-card-bg: var(--crown-surface-card-bg);
+  --crown-benefit-card-border: var(--crown-surface-card-border);
+
+  /* —— 全站／大廳背景霧光（site-background、LobbyPage） —— */
+  --theme-radial-green-body: rgb(36 41 70 / 6%);
+  --theme-radial-gold-body: rgb(253 226 1 / 6%);
+  --theme-radial-green-lobby: rgb(36 41 70 / 7%);
+  --theme-radial-gold-lobby: rgb(253 226 1 / 8%);
+
+  /* —— 彈窗外殼（與 AppModal.css 共用） —— */
+  --modal-overlay-scrim: rgb(0 0 0 / 72%);
+  --modal-overlay-blur: 6px;
+  --modal-z-index: 5000;
+  /* Toast / global alert 需蓋在一般 modal 之上 */
+  --alert-z-index: 6000;
+  --modal-radius: 1.1rem;
+  --modal-shadow: 0 1.5rem 3rem rgb(0 0 0 / 55%);
+  --modal-panel-bg: var(--color-elevated);
+  --modal-panel-border: 1px solid var(--color-border);
+  --modal-header-min-height: 3.25rem;
+  /* 全站彈窗標題同字級 */
+  --modal-title-size: 1rem;
+  --modal-title-tracking: 0.06em;
+  /* 關閉鈕外圈與 × 字級 */
+  --modal-close-size: 2.65rem;
+  --modal-close-glyph-size: 1.75rem;
+  --modal-rule-inset: var(--space-5);
+  --modal-rule-color: rgb(0 0 0 / 35%);
+  --modal-backdrop-scrim: var(--modal-overlay-scrim);
+  /* 捲動彈窗高度上限；平板見下方 media */
+  --modal-scroll-max-height: min(90dvh, 640px);
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --modal-scroll-max-height: min(90dvh, 40rem);
+  }
+}

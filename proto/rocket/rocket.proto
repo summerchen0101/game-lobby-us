@@ -1,0 +1,321 @@
+syntax = "proto3";
+package rocket;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/rocket";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+// 遊戲回合階段
+enum GameRoundStage {
+    UNKNOWN_GAME_ROUND_STAGE = 0;
+    PLACE_BET                = 1;  // 下注階段
+    PLACE_CASHOUT            = 2;  // 火箭運行階段
+    SETTLEMENT               = 3;  // 派彩階段
+}
+
+// 下注區
+enum BetArea {
+    UNKNOWN_BET_AREA = 0;
+    BET_AREA_A       = 1;  // A 區
+    BET_AREA_B       = 2;  // B 區
+}
+
+// 自動下注回合數
+enum AutoBetGameRoundNumber {
+    UNKNOWN_AUTO_BET_GAME_ROUND_NUMBER = 0;
+    TEN                                = 10;
+    FIFTY                              = 50;
+    ONE_HUNDRED                        = 100;
+    TWO_HUNDRED                        = 200;
+    INFINITE                           = 2147483647;  // Max Int32
+}
+
+// 時間區間
+enum TimeRange {
+    UNKNOWN_TIME_RANGE = 0;
+    DAY                = 1;  // 日
+    MONTH              = 2;  // 月
+    YEAR               = 3;  // 年
+}
+
+// 結算方式
+enum CashoutAction {
+    UNKNOWN_CASHOUT_ACTION = 0;
+    MANUAL                 = 1;
+    AUTO                   = 2;
+}
+
+enum MessageType {
+    PingPong = 0;
+    JoinRoom = 1;  // 加入遊戲
+
+    // [RPC] Game
+    GetGame   = 11;  // 取得遊戲資訊
+    LeaveGame = 12;  // 離開遊戲
+
+    // [RPC] Bet
+    PlaceBet         = 21;  // 押分
+    PlaceCashOut     = 22;  // 結算
+    AutoPlaceBet     = 23;  // 自動押分
+    StopAutoPlaceBet = 24;  // 停止自動押分
+
+    // [RPC] Player
+    ListGamePlayers    = 31;  // 取得玩家列表
+    ListGameBestRecord = 33;  // 取得玩家歷史最高紀錄
+
+    // [RPC] GameRTP Setting
+    GetGameRTPSetting    = 41;  // 取得遊戲 RTP 配置
+    UpsertGameRTPSetting = 42;  // 新增or修改遊戲 RTP 配置
+
+    // [Push] GameInfo
+    GameInfo   = 1011;  // 推送遊戲詳情
+    GameClosed = 1012;  // 推送遊戲關閉
+
+    // [Push] BetOrder
+    BetOrderCreated  = 1021;  // 推送玩家下注消息
+    BetOrderSetteled = 1022;  // 推送玩家派彩結果消息
+
+    // [Push] Player
+    PlayerBalance = 1031;  // 推送玩家金幣餘額
+    KickPlayer    = 1032;  // 遊戲剔除玩家
+
+    // [Push] Bet
+    AutoPlaceBetStopped = 1041;  // 推送自動下注已停止
+
+    JackPot = 1042;  // 推送百人ＪＰ
+}
+
+message JackPotPush {
+    uint64 userID   = 1;  // 請求者 ID
+    uint64 amount   = 2;
+    string nickname = 3;  // 暱稱
+    uint64 vipLevel = 4;  // vip level
+    string imageURL = 5;  // 頭像 URL
+    uint64 balance  = 6;
+    uint64 level    = 7;
+}
+
+// [RPC] JoinRoom 加入遊戲
+message JoinRoomRequest {
+    string roomID        = 1;
+    repeated int32 tiles = 2;
+    uint64 tokenAmount   = 3;
+}
+message JoinRoomResponse {
+    GameInfoMessage gameInfo = 1;  // 遊戲資訊
+}
+
+// [RPC] GetGame 取得遊戲資訊
+message GetGameRequest {}
+message GetGameResponse {
+    string roundID                             = 1;  // 局號
+    GameRoundStage gameRoundStage              = 2;  // 當前遊戲局階段
+    int64 startAt                              = 3;  // 開始時間戳，單位毫秒
+    int64 endAt                                = 4;  // 結束時間戳，單位毫秒
+    map<int32, int64> betAreaTotalAmounts      = 5;  // 押注區金額
+    repeated double historyGameRoundResults    = 6;  // 前 50 局開獎倍數
+    GetGameResponseRequesterInfo requesterInfo = 8;  // 請求者資訊
+}
+
+message GetGameResponseRequesterInfo {
+    int64 userID                                                            = 1;  // 請求者 ID
+    string nickname                                                         = 2;  // 暱稱
+    string imageURL                                                         = 3;  // 頭像 URL
+    repeated AutoGameSetting autoGameSettings                               = 4;  // 自動遊戲設定
+    repeated GetGameResponseRequesterInfoBetOrder currentGameRoundBetOrders = 5;  // 當前遊戲局下的注單
+    uint64 vipLevel                                                         = 6;  // vip level
+}
+message AutoGameSetting {
+    yesno.YesNo isAutoBetting          = 1;  // 請求者是否正在此遊戲自動下注
+    int32 remainAutoBetGameRoundNumber = 2;  // 剩餘自動下注局數
+    BetArea betArea                    = 3;  // 押注區
+    int64 betAmount                    = 4;  // 注額
+    yesno.YesNo isAutoCashouting       = 5;  // 請求者是否正在此遊戲自動結算
+    double autoCashoutOdds             = 6;  // 自動結算倍率
+}
+message GetGameResponseRequesterInfoBetOrder {
+    BetArea betArea             = 1;  // 押注區
+    int64 betAmount             = 2;  // 注額
+    double cashoutOdds          = 3;  // 結算倍率
+    CashoutAction cashoutAction = 4;  // 結算方式
+    int64 gainAmount            = 5;  // 得分
+}
+
+// [RPC] LeaveGame 離開遊戲
+message LeaveGameRequest {
+}
+message LeaveGameResponse {
+}
+
+// [RPC] PlaceBet 下注
+message PlaceBetRequest {
+    int64 betAmount = 1;  // 注額
+    BetArea betArea = 2;  // 押注區
+}
+message PlaceBetResponse {
+    BetArea betArea = 1;  // 押注區
+}
+
+// [RPC] PlaceCashOut 結算
+message PlaceCashOutRequest {
+    BetArea betArea    = 1;  // 押注區
+    double cashoutOdds = 2;  // 獲取倍率
+}
+message PlaceCashOutResponse {
+    int64 gainAmount = 1;  // 收益
+    BetArea betArea  = 2;  // 押注區
+}
+
+// [RPC] AutoPlaceBet 自動下注
+message AutoPlaceBetRequest {
+    AutoBetGameRoundNumber autoBetGameRoundNumber = 1;  // 下注局數
+    int64 initialBetAmount                        = 2;  // 起始下注代幣
+    BetArea betAreas                              = 3;  // 押注區
+    int64 minBalance                              = 4;  // 餘額最低值 (可選)
+    int64 maxBalance                              = 5;  // 餘額最高值 (可選)
+    int64 singleGainAmount                        = 6;  // 單場贏分最高值 (可選)
+    double cashoutOdds                            = 7;  // 自動結算的倍率
+}
+message AutoPlaceBetResponse {
+    BetArea betAreas = 1;  // 押注區
+}
+
+// [RPC] StopAutoPlaceBet 停止自動下注
+message StopAutoPlaceBetRequest {
+    BetArea betAreas = 1;  // 押注區
+}
+message StopAutoPlaceBetResponse {
+    BetArea betAreas = 1;  // 押注區
+}
+
+// [RPC] ListGamePlayers 取得在遊戲裡的玩家列表
+message ListGamePlayersRequest {
+}
+message ListGamePlayersResponse {
+    repeated ListGamePlayersResponsePlayer gamePlayers = 1;
+}
+message ListGamePlayersResponsePlayer {
+    int64 playerUserID  = 1;  // 玩家 UserID
+    string avatarURL    = 2;  // 頭像 URL
+    string name         = 3;  // 暱稱
+    uint64 vipLevel     = 4;  // vip level
+    double cashoutOdds  = 5;  // 倍率
+    int64 gainAmount    = 6;  // 得分
+    BetArea betAreaType = 7;  // 下注區
+    int64 betAmount     = 8;  // 押分
+}
+
+// [RPC] ListGameBestRecord 取得遊戲歷史最高紀錄 (最多10筆)
+message ListGameBestRecordRequest {
+    TimeRange timeRange = 1;
+}
+message ListGameBestRecordResponse {
+    repeated GameBestRecord gameBestRecords = 1;
+}
+message GameBestRecord {
+    int64 playerUserID = 1;  // 玩家 UserID
+    string avatarURL   = 2;  // 頭像 URL
+    string name        = 3;  // 暱稱
+    int64 betAmount    = 4;  // 押分
+    double cashoutOdds = 5;  // 倍率
+    int64 gainAmount   = 6;  // 得分
+    int64 createdTime  = 7;  // 時間
+    double roundOdds   = 8;  // 倍率
+    uint64 vipLevel    = 9;  // vip level
+}
+
+// [RPC] GetGameRTPSetting 取得遊戲 RTP 配置
+message GetGameRTPSettingRequest {
+}
+message GetGameRTPSettingResponse {
+    GameRTPSetting gameRTPSetting = 1;
+}
+message GameRTPSetting {
+    uint64 GameRTPSettingID = 1;
+    double RTPMin           = 2;
+    double RTPMax           = 3;
+}
+
+// [RPC] UpsertGameRTPSetting 新增or修改遊戲 RTP 配置
+message UpsertGameRTPSettingRequest {
+    GameRTPSetting gameRTPSetting = 1;
+}
+message UpsertGameRTPSettingResponse {
+    uint64 GameRTPSettingID = 1;
+}
+
+// [Push] GameInfo 推送遊戲詳情
+message GameInfoMessage {
+    string roundID                             = 1;  // 局號
+    GameRoundStage gameRoundStage              = 2;  // 當前遊戲局階段
+    int64 startAt                              = 3;  // 開始時間戳，單位毫秒
+    int64 endAt                                = 4;  // 結束時間戳，單位毫秒
+    map<int32, int64> betAreaTotalAmounts      = 5;  // 押注區金額
+    repeated double historyGameRoundResults    = 6;  // 前50局開獎倍數
+    double currentOdds                         = 7;  // 當局倍率
+    GetGameResponseRequesterInfo requesterInfo = 8;  // 請求者資訊
+}
+
+// [Push] BetOrderCreated 推送玩家下注消息
+message BetOrderCreatedMessage {
+    string gameRoundID                        = 1;  // 遊戲局號
+    int64 playerUserID                        = 2;  // 下注的玩家 UserID
+    map<int32, uint64> betAreaTotalAmounts    = 3;  // 押注區金額
+    string nickname                           = 4;  // 暱稱
+    string imageURL                           = 5;  // 頭像 URL
+    uint64 vipLevel                           = 6;  // vip level
+    map<int32, double> autobetAreaCashoutOdds = 7;  // 押注區自動結算倍率
+}
+
+// [Push] BetOrderSetteled 推送玩家結算消息
+message BetOrderSetteledMessage {
+    string gameRoundID                    = 1;  // 遊戲局號
+    int64 gainAmount                      = 2;  // 收益
+    int64 playerUserID                    = 3;  // 下注的玩家 UserID
+    map<int32, double> betAreaCashoutOdds = 4;  // 押注區結算倍率
+    map<int32, int64> betAreaGainAmount   = 5;  // 押注區贏分
+}
+
+// [Push] PlayerBalance 推送玩家金幣餘額
+message PlayerBalanceMessage {
+    int64 playerUserID = 1;  // 玩家 UserID
+    uint64 balance     = 2;  // 玩家當前金幣餘額
+}
+
+// [Push] KickPlayerMessage 推送遊戲踢除玩家訊息
+message KickPlayerMessage {
+    int64 playerUserID = 1;  // 玩家 UserID
+}
+
+// [Push] GameClosedMessage 推送遊戲關閉訊息
+message GameClosedMessage {
+}
+
+// [Push] AutoPlaceBetStoppedMessage 推送自動下注已停止
+message AutoPlaceBetStoppedMessage {
+    int64 playerUserID                    = 1;  // 玩家 UserID
+    map<int32, int64> betAreaTotalAmounts = 2;  // 押注區金額
+}
+
+message WinLose {
+    yesno.YesNo AreaAAmount = 1;
+    yesno.YesNo AreaBAmount = 2;
+    uint64 odds             = 3;
+}
+
+message CountCoin {
+    WinLose winLose                    = 1;
+    map<uint64, WinLoseAmounts> amount = 2;  // 玩家在各個下注區的下注紀錄
+    uint64 systemBalance               = 3;  // 系統餘額
+    int64 totalWinLose                 = 4;  // 總輸贏
+    uint64 selfBalance                 = 5;  // 玩家餘額
+}
+
+message WinLoseAmounts {
+    repeated WinLoseAmount amount = 1;
+}
+
+message WinLoseAmount {
+    int64 amount        = 1;
+    BetArea betAreaType = 2;
+    uint64 betAmount    = 3;
+}

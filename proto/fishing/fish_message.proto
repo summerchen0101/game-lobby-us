@@ -1,0 +1,58 @@
+/*
+Fish Messsage Proto  version: v1.1
+場景:服務器向客戶端傳送的 事件資料同步資訊
+此類為 sever 主動 push 的資料，類型為 gateway/gateway.proto response type = `ServerPushMsg`
+-----------------------------------------------------------------------
+fish_message.proto      定義了捕魚遊戲 srever push 的通用格式
+fish_message_data.proto 定義了事件類型的 Data結構
+-----------------------------------------------------------------------
+*/
+
+syntax = "proto3";
+package fish;
+
+option go_package       = 'gitlab.ffglobaltech.com/us888/pluto/protos/fishing;fishpb';
+option csharp_namespace = "FishingProto";
+
+// 資料包
+message Message {
+    string id       = 1;  // 資料包id
+    int64 timestamp = 2;  //服務器推送時間搓 millisecond
+
+    int64 messageLen      = 3;  //資料筆數
+    repeated Event events = 4;  // 事件資料
+
+    string roomID =5; //房間ID
+}
+
+message Event {
+    string id       = 1;  // 事件id
+    int64 timestamp = 2;  //事件時間搓 millisecond
+
+    EventType type = 3;  //事件類型
+    bytes data     = 4;  //各種 EventData 請見 fish_message_data.proto
+}
+
+enum EventType {
+    EventTypeUnknow = 0;
+
+    //----保留但 不使用
+    EventPlayerInOut  = 1;  //玩家進離場
+    EventFire         = 3;  //開火
+    EventGetWeapon    = 4;  //獲得武器
+    EventPlayerStatus = 7;  // 玩家狀態變更, 包含: 玩家餘額 砲管角度 瞄準類型 子彈類型  注額
+    //----
+
+    EventSyncGame    = 2;   //同步整間房間 包含魚池的資訊
+    EventHit         = 5;   //命中
+    EventBounds      = 6;   //中獎通知
+    EventNotice      = 8;   //預告通知
+    EventSettle      = 9;   //玩家分數統計
+    EventBulletPoint = 10;  //子彈得分總計(特殊武器使用)
+
+    //cmd類型 客戶端收到後依照定義執行相應動作
+    EventForceLeave      = 101;  //由服務器強制讓某玩家離開
+    EventServerShoutDown = 102;  //由服務器發起 告知即將關閉服務器
+    EventRoomClose       = 103;  //房間關閉預告
+    EventIdleConfirm     = 104;  //玩家閒置確認
+}

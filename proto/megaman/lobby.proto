@@ -1,0 +1,238 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "proto/wallet/wallet.proto";
+import "proto/gamemanager/gamemanager.proto";
+import "proto/playerinfo/model.proto";
+import "proto/kaixilo/kaixilo.proto";
+import "proto/megaman/campaign.proto";
+import "proto/virtualgood/virtualgood.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+message LobbyGetResponse {
+    wallet.Bag bag                                     = 1;
+    gamemanager.ListGameResponse games                 = 2;
+    playerinfo.PlayerInfo playerInfo                   = 3;
+    kaixilo.ListParasitesResp parasite                 = 4;
+    playerinfo.PlayerInfo kaixiloOwner                 = 5;
+    bool isEnterSecondPasswordSetting                  = 6;
+    megaman.ListHomePageCampaignResponse campaign      = 7; //首頁inbox
+    bool isEnterLoginAwardSetting                      = 8; //領取登入獎勵進入設定
+    bool canSendStrangerMsg                            = 9;
+    bool isNew                                         = 10;
+    bool isDiamond                                     = 11;
+    bool canSendCondition                              = 12;
+    int64 currency                                     = 13; // 幣值 default     =1
+    repeated uint64 jackPotGameList                    = 14; // 活動ＪＰ開起ＧＡＭＥＩＤ
+    bool isSummonedPlayer                              = 15;
+    string version                                     = 16;
+    string versionDetail                               = 17;
+    bool canShowRichDaddies                            = 18; // 能否顯示金主霸霸 UI
+    wallet.Bag bagGC                                   = 19;
+    string email                                       = 20;
+    string phone                                       = 21;
+    repeated ThirdPartyGameInfo thirdPartyGameInfoList = 22;
+}
+
+enum WalletType {
+    UNKNOWN_WALLET_TYPE = 0;
+    GC                  = 1; // GC
+    SC                  = 2; // SC
+}
+
+message WalletGetRequest {
+    WalletType walletType = 1;
+}
+message WalletGetResponse {
+    wallet.Bag bag = 1;
+}
+
+message WalletUseRequest {
+    WalletType walletType = 1;
+}
+message WalletUseResponse {
+    wallet.Bag bag = 1;
+}
+
+message SystemGetResponse {
+    int64 timeMs = 1;
+}
+
+message BetLevelGetRequest {
+    uint64 gameID = 1;
+}
+
+message BetLevelGetResponse {
+    gamemanager.GetBetLevelResponse config = 1;
+}
+
+message LastJudanResp {
+    uint64 gameID = 1;
+    int64 timeMs  = 2;
+    int64 amount  = 3;
+}
+message GetLoginAwardRequest {
+    uint64 userID = 1;
+}
+message GetLoginAwardResponse {
+    repeated virtualgood.ProductContent productContent = 1;
+    int64 receiveTimes                                 = 2; // 領取次數
+}
+message ReceiveLoginAwardRequest {
+    uint64 userID              = 1;
+    bool isEnterAccountBinding = 2;
+}
+message ReceiveLoginAwardResponse {
+    int64 id                             = 1; //第幾個項目
+    uint64 itemID                        = 2;
+    virtualgood.VirtualGoodType goodType = 3;
+    int64 amount                         = 4;
+    string itemName                      = 5; // 商品名稱
+}
+
+message ReceiveLoginAwardMessageResponse {
+    uint64 itemID   = 1;
+    int64 amount    = 2;
+    string itemName = 3;
+}
+
+message GetSummonedAwardListRequest {
+    uint64 userID = 1;
+}
+message GetSummonedAwardListResponse {
+    repeated virtualgood.ProductContent productContent = 1;
+}
+
+message ReceiveSummonedAwardRequest {
+    uint64 userID = 1;
+}
+message ReceiveSummonedAwardResponse {
+    int64 id                             = 1; //第幾個項目
+    uint64 itemID                        = 2;
+    virtualgood.VirtualGoodType goodType = 3;
+    int64 amount                         = 4;
+    string itemName                      = 5; // 商品名稱
+}
+message ReceiveSummonedAwardMessage {
+    uint64 itemID   = 1;
+    int64 amount    = 2;
+    string itemName = 3;
+}
+
+message GetDailyScoreAwardRequest {
+    uint64 userID = 1;
+}
+message GetDailyScoreAwardResponse {
+    int64 yesterDayAward        = 1; // 可領取獎勵
+    int64 receiveTime           = 2; // 領取時間
+    int64 score                 = 3; // 今日累積分數
+    int64 rate                  = 4; // 返利
+    int64 backScore             = 5; //累積積分數值
+    yesno.YesNo isReceive       = 6; // 是否領取
+    ReceiveStatus receiveStatus = 7;
+    int64 createdTime           = 8;
+}
+message ReceiveDailyScoreAwardRequest {
+    uint64 userID = 1;
+}
+message ReceiveDailyScoreAwardResponse {
+    uint64 amount                            = 1;
+    repeated DailyScoreAwardBonus awardBonus = 2;
+}
+message ListDailyDetailScoreRequest {
+    int64 startDate = 1;
+    int64 endDate   = 2;
+}
+message ListDailyDetailScoreResponse {
+    repeated DailyDetailScore dailyDetailScore = 1;
+}
+message DailyDetailScore {
+    int64 gameID  = 1;
+    int64 winCoin = 2; // 下注贏分
+    int64 score   = 3; // 獲得分數
+}
+message ListDailyScoreRequest {
+    int64 startDate = 1;
+    int64 endDate   = 2;
+}
+message ListDailyScoreResponse {
+    repeated DailyScore dailyScore = 1;
+}
+message DailyScore {
+    int64 createTime            = 1; // 時間
+    int64 awardScore            = 2; // 回饋獎勵
+    int64 backRate              = 3; // 返利
+    int64 score                 = 4; // 分數
+    ReceiveStatus receiveStatus = 5;
+}
+
+enum ReceiveStatus {
+    RECEIVE_STATUS_UNKNOWN    = 0;
+    RECEIVE_STATUS_UNSETTLE   = 1; // 未結算
+    RECEIVE_STATUS_UN_RECEIVE = 3; // 未領取
+    RECEIVE_STATUS_OK         = 2; // 已領取
+    RECEIVE_STATUS_FAILED     = 4; // 已過期
+}
+
+message GetDailyScoreAwardBonusRequest {
+    uint64 userID = 1;
+}
+message ListDailyScoreAwardBonusResponse {
+    repeated DailyScoreAwardBonus dailyScoreAwardBonus = 1;
+}
+
+message DailyScoreAwardBonus {
+    int64 bonusType        = 1; // 1 :小 2:大
+    int64 unLockTime       = 2; // 解鎖時間
+    int64 receiveTime      = 3; // 領取時間
+    int64 awardBonus       = 4; // 金額
+    int64 createdTime      = 5; // 創立時間
+    int64 endTime          = 6; // 到期時間
+    int64 bonusID          = 7;
+    int64 awardBeforeBonus = 8; // 比例前金額
+    int64 awardRate        = 9; // 比例
+}
+
+message ReceiveDailyScoreAwardBonusRequest {
+    uint64 userID   = 1;
+    int64 bonusType = 2;
+    int64 bonusID   = 3;
+}
+message ReceiveDailyScoreAwardBonusResponse {
+    uint64 amount   = 1;
+    int64 bonusType = 2;
+}
+
+message ReceiveDailyScoreAwardBonusMsgPush {
+    int64 amount    = 1;
+    int64 bonusType = 2;
+}
+
+message RichDaddyOnlineMsgPush {
+    uint64 userID    = 1;
+    string nickname  = 2;
+    string avatarURL = 3; // 頭像 URL
+    uint64 vipLevel  = 4;
+    uint64 level     = 5;
+    uint64 rank      = 6;
+    string kind      = 7; // 目前 180days
+}
+
+message GetThirdPartyGameInfoRequest {
+    string platform = 1;
+    string gameUID  = 2;
+}
+
+message GetThirdPartyGameInfoResponse {
+    ThirdPartyGameInfo thirdPartyGameInfo = 1;
+}
+
+message ThirdPartyGameInfo {
+    string platform      = 1;
+    string gameType      = 2;
+	string gameName      = 3;
+	string gameUID       = 4;
+	string status        = 5;
+    string gameLaunchURL = 6;
+}

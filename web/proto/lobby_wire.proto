@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package megaman;
+
+// 與 proto/megaman/lobby.proto 之 LobbyGetResponse 欄位 2、proto/gamemanager/gamemanager.proto
+// 之 ListGameResponse / Game 編號對齊，供前端解碼；若主 repo 變更請同步。
+
+enum YesNo {
+  NO = 0;
+  YES = 1;
+}
+
+enum GameStatus {
+  UNKNOWN_GAME_STATUS = 0;
+  ENABLE = 1;
+  DISABLE = 2;
+  MAINTAINING = 3;
+  COMING = 4;
+}
+
+enum GameCategory {
+  UNKNOWN_CATEGORY = 0;
+  SLOT = 1;
+  TABLE = 2;
+  OTHER = 3;
+  SCRATCHOFF = 4;
+}
+
+enum GameLabel {
+  UNKNOWN_LABEL = 0;
+  HOT = 1;
+  LATEST = 2;
+  UNDER_MAINTENANCE = 3;
+  COMING_SOON = 4;
+  GENERAL = 5;
+}
+
+enum GameLogoPictureSize {
+  UNKNOWN_GAME_LOGO_PICTURE_SIZE = 0;
+  BIG = 1;
+  MEDIUM = 2;
+  SMALL = 3;
+}
+
+enum GameJoinRoomPolicy {
+  GAME_JOIN_UNKNOWN = 0;
+  GAME_JOIN_OCCUPIED = 1;
+  GAME_JOIN_RESERVE = 2;
+}
+
+message Game {
+  uint64 ID = 1;
+  string displayName = 2;
+  GameStatus status = 3;
+  GameCategory category = 4;
+  GameLabel label = 5;
+  int64 updateTimeMS = 8;
+  uint64 updater = 9;
+  string iconURL = 10;
+  uint64 roomMinNums = 16;
+  int32 sort = 14;
+  GameJoinRoomPolicy joinRoomPolicy = 15;
+  int64 maintainTime = 17;
+  string maintainReason = 18;
+  string path = 19;
+  YesNo gameLockByToken = 20;
+  YesNo isBlockchain = 21;
+  int64 hotSort = 22;
+  int64 slotSort = 23;
+  int64 cardSort = 24;
+  GameLogoPictureSize logoPictureSize = 25;
+  int64 otherSort = 26;
+  int64 videoSort = 27;
+  int64 fishSort = 28;
+  int64 arcadeSort = 29;
+  int64 lotterySort = 30;
+  int64 battleSort = 31;
+  int64 classicSort = 32;
+  int64 rtpMin = 33;
+  int64 rtpMax = 34;
+  int64 unlockLevel = 35;
+  int64 unlockVipLevel = 36;
+  int64 rtpMinGC = 37;
+  int64 rtpMaxGC = 38;
+}
+
+message ListGameResponse {
+  repeated Game games = 1;
+}
+
+message LobbyGetResponse {
+  ListGameResponse games = 2;
+}

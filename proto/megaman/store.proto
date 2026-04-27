@@ -1,0 +1,172 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "proto/store/store.proto";
+import "proto/virtualgood/virtualgood.proto";
+
+message BuyStoreItemRequest {
+    store.Order order = 1;
+}
+
+message BuyStoreItemResponse {
+    yesno.YesNo is_success              = 1;
+    repeated StoreItemInfo result_items = 2;
+}
+
+message StoreItemInfo {
+    uint64 item_id           = 1;  // 對應 ItemData 的 id
+    yesno.YesNo is_exchanged = 2;  // 是否因為重複而被轉換成金幣
+    uint64 chest_id          = 4;  // 寶箱ID
+    uint64 exchanged_item_id = 5;  // 替換重複卡片的物品ID
+    uint64 amount            = 6;  // 替換物數量
+}
+
+// 會向 VirtualGood 拿資料並過濾不需要返回的物品
+message ListStoreItemsRequest {
+    virtualgood.PayType payType                         = 1;
+    repeated virtualgood.PayType payTypes               = 4;
+    uint64 PaymentType                                  = 2;
+    virtualgood.PaymentGateway PaymentGateway           = 3;
+    repeated virtualgood.PaymentGateway PaymentGateways = 5;
+    repeated uint64 PaymentTypes                        = 6;
+}
+
+message ListStoreItemsResponse {
+    repeated virtualgood.Products items = 1;
+}
+
+// 會向 Payment 詢問玩家是否達到近期儲值上限
+message CheckUserBuyLimitResponse {
+    yesno.YesNo is_pass         = 1;
+    int64 expected_refresh_time = 2;
+}
+
+
+message GetAuctionSettingsRequest {}
+message GetAuctionSettingsResponse {
+    repeated GetAuctionSettingsResponseSetting settings = 1;
+    int64 dailyTimes                                    = 2;
+    int64 completedAuctionAmount                        = 3;
+    int64 expiredAuctionAmount                          = 4;
+    bool isUnderMaintenance                             = 5;
+    int64 requireUserLevel                              = 6;
+}
+message GetAuctionSettingsResponseSetting {
+    int64 requireVipLevel      = 1;
+    int64 requireAmount        = 2;
+    int64 dailyLimit           = 3;
+    int64 option1day           = 4;
+    int64 option2day           = 5;
+    int64 option3day           = 6;
+    string option1feeRate      = 7;
+    string option2feeRate      = 8;
+    string option3feeRate      = 9;
+    int64 maxLimit             = 10;
+    string feeRate             = 11;
+    int64 requireAmountForSale = 12;
+}
+
+
+// 取得拍賣中心列表
+message ListAuctionsRequest {
+    int64 itemID    = 1;
+    string keyword  = 2;
+
+    int64 page     = 10;
+    int64 perPage  = 11;
+}
+message ListAuctionsResponse {
+    int64 total                                           = 1;
+    repeated ListAuctionsResponseAuction auctions         = 2; // 拍賣列表
+    repeated ListAuctionsResponseAuction receivedAuctions = 3; // 領取完成的拍賣
+}
+message ListAuctionsResponseAuction {
+    int64 id                                                    = 1;
+    store.AuctionType auctionType                               = 2;
+    int64 sellerUserID                                          = 3;
+    string sellerNickname                                       = 4;
+    int64 buyerUserID                                           = 5;
+    string buyerNickname                                        = 6;
+    repeated ListAuctionsResponseAuctionItem sellerAuctionItems = 7;
+    repeated ListAuctionsResponseAuctionItem buyerAuctionItems  = 8;
+    int64 expiredAt                                             = 9;
+    int64 createdAt                                             = 10;
+    store.AuctionStatus auctionStatus                           = 11;
+    int64 sellerActivityLevel                                   = 12;
+}
+message ListAuctionsResponseAuctionItem {
+    int64 itemID   = 1;
+    int64 goodType = 2;
+    int64 amount   = 3;
+}
+
+
+// 取得我的拍賣列表
+message MyAuctionsRequest {
+    repeated store.AuctionStatus auctionStatusIn = 1;
+
+    int64 page                        = 10;
+    int64 perPage                     = 11;
+}
+message MyAuctionsResponse {
+    int64 total                                 = 1;
+    repeated MyAuctionsResponseAuction auctions = 2;
+}
+message MyAuctionsResponseAuction {
+    int64 id                                                    = 1;
+    store.AuctionType auctionType                               = 2;
+    store.AuctionStatus auctionStatus                           = 3;
+    string otp                                                  = 4;
+    int64 sellerUserID                                          = 5;
+    string sellerNickname                                       = 6;
+    int64 buyerUserID                                           = 7;
+    string buyerNickname                                        = 8;
+    repeated ListAuctionsResponseAuctionItem sellerAuctionItems = 9;
+    repeated ListAuctionsResponseAuctionItem buyerAuctionItems  = 10;
+    int64 expiredAt                                             = 11;
+    int64 createdAt                                             = 12;
+    int64 completedAt                                           = 13;
+}
+message MyAuctionsResponseAuctionITem {
+    int64 itemID   = 1;
+    int64 goodType = 2;
+    int64 amount   = 3;
+}
+
+
+// 新增/上架拍賣
+message AddAuctionRequest {
+    int64 sellerUserID                                = 1;
+    store.AuctionType auctionType                     = 2;
+    string otp                                        = 3;
+    int64 saleDayOption                               = 4; // 天數選項 1,2,3
+    repeated AddAuctionRequestAuctionItem sellerItems = 5;
+    repeated AddAuctionRequestAuctionItem buyerItems  = 6;
+    int64 oldAuctionID                                = 7;
+}
+message AddAuctionRequestAuctionItem {
+    int64 itemID   = 1;
+    int64 goodType = 2;
+    int64 amount   = 3;
+}
+message AddAuctionResponse {
+    int64 id = 1;
+}
+
+
+// 下架拍賣
+message DiscontinueAuctionRequest {
+    int64 auctionID = 1;
+}
+message DiscontinueAuctionResponse {}
+
+
+// 成交拍賣
+message DealAuctionRequest {
+    int64 auctionID   = 1;
+    int64 buyerUserID = 2;
+    string otp        = 3;
+}
+message DealAuctionResponse {}

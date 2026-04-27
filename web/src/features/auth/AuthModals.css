@@ -1,0 +1,384 @@
+/* 外殼在 AppModal.css（app-modal*）；此檔只保留 auth 內容與寬度 */
+.app-modal.auth-modal {
+  max-width: 26rem;
+}
+
+.auth-modal__text {
+  margin: 0 0 var(--space-3);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  text-align: center;
+  color: rgb(255 255 255 / 92%);
+}
+
+.auth-modal__text:last-child {
+  margin-bottom: 0;
+}
+
+.auth-modal__link {
+  color: var(--crown-gold);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-modal__link:hover {
+  color: var(--crown-gold-hover);
+}
+
+.auth-modal__accept {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-5);
+}
+
+.auth-modal__btn-accept {
+  min-width: 11rem;
+  padding: 0.65rem 1.75rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--crown-button-primary-gradient);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 4px 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 16%);
+}
+
+.auth-modal__btn-accept:hover {
+  filter: brightness(1.08);
+}
+
+.auth-modal__social-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.auth-modal__social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 3rem;
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.auth-modal__social-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.auth-modal__social-btn--apple {
+  background: #fff;
+  color: #111;
+}
+
+.auth-modal__social-btn--google {
+  background: #f0f0f0;
+  color: #111;
+}
+
+.auth-modal__social-btn--facebook {
+  background: #1877f2;
+  color: #fff;
+}
+
+.auth-modal__social-btn--email {
+  background: linear-gradient(
+    180deg,
+    var(--crown-secondary-gradient-top) 0%,
+    var(--crown-purple) 42%,
+    var(--crown-purple-deep) 100%
+  );
+  color: #1a1a0a;
+  box-shadow: 0 3px 0 var(--crown-purple-shadow);
+}
+
+.auth-modal__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-5) 0;
+  color: rgb(255 255 255 / 85%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.auth-modal__divider::before,
+.auth-modal__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgb(255 255 255 / 25%);
+}
+
+.auth-modal__field-label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgb(255 255 255 / 85%);
+}
+
+.auth-modal__input {
+  width: 100%;
+  min-height: 3rem;
+  margin-bottom: var(--space-3);
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: 999px;
+  background: #1a1f35;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.auth-modal__input::placeholder {
+  color: rgb(156 170 162 / 85%);
+}
+
+.auth-modal__input:focus {
+  outline: 2px solid var(--crown-gold);
+  outline-offset: 1px;
+}
+
+.auth-modal__submit {
+  width: 100%;
+  margin-top: var(--space-2);
+  min-height: 3rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--crown-button-primary-gradient);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 4px 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 16%);
+}
+
+.auth-modal__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.auth-modal__footer {
+  margin-top: var(--space-4);
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgb(255 255 255 / 85%);
+}
+
+.auth-modal__footer-link {
+  color: var(--crown-gold);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  padding: 0;
+}
+
+.auth-modal__footer-link:hover {
+  color: var(--crown-gold-hover);
+}
+
+.auth-modal__error {
+  margin: 0 0 var(--space-2);
+  color: #ff8a8a;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.auth-modal__stub-toast {
+  margin-top: var(--space-2);
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--crown-gold-hover);
+}
+
+/* —— 註冊／登入彈窗：黑膠囊欄位（與舊 auth-modal__input 區隔） —— */
+.auth-modal--register .auth-modal__field-label--register,
+.auth-modal--login .auth-modal__field-label--register {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+}
+
+.auth-modal--register .auth-modal__input--register,
+.auth-modal--login .auth-modal__input--register {
+  background: #000000;
+  border: 1px solid color-mix(in srgb, #6b4cff 35%, #000000);
+  color: #ffffff;
+}
+
+.auth-modal--register .auth-modal__input--register::placeholder,
+.auth-modal--login .auth-modal__input--register::placeholder {
+  color: #a18cd1;
+  opacity: 0.9;
+}
+
+.auth-modal--register .auth-modal__input--register:focus,
+.auth-modal--login .auth-modal__input--register:focus {
+  outline: 2px solid var(--crown-locale-green);
+  outline-offset: 1px;
+}
+
+.auth-modal__password-wrap {
+  position: relative;
+  margin-bottom: var(--space-3);
+}
+
+.auth-modal--register .auth-modal__input--password,
+.auth-modal--login .auth-modal__input--password {
+  padding-right: 3rem;
+  margin-bottom: 0;
+}
+
+.auth-modal--register .auth-modal__password-wrap .auth-modal__input--register,
+.auth-modal--login .auth-modal__password-wrap .auth-modal__input--register {
+  margin-bottom: 0;
+}
+
+.auth-modal__password-toggle {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: none;
+  border-radius: 0.35rem;
+  background: none;
+  color: rgb(255 255 255 / 55%);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.auth-modal__password-toggle:hover {
+  color: rgb(255 255 255 / 80%);
+}
+
+.auth-modal__password-toggle:focus-visible {
+  outline: 2px solid var(--crown-locale-green);
+  outline-offset: 2px;
+}
+
+.auth-modal__legal {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.auth-modal__checkbox {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
+  border-radius: 0.3rem;
+  border: 1px solid color-mix(in srgb, #ffffff 25%, #000000);
+  background: #0a0a0f;
+  accent-color: var(--crown-button-primary-bg);
+  cursor: pointer;
+}
+
+.auth-modal__legal-text {
+  font-size: 0.7rem;
+  line-height: 1.5;
+  font-weight: 500;
+  color: rgb(255 255 255 / 95%);
+  cursor: pointer;
+}
+
+/* —— 登入彈窗：標題列、忘記密碼連結、說明文案 —— */
+.auth-modal__head-row.auth-modal__head-row {
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+
+.auth-modal__title--natural {
+  text-transform: none;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.auth-modal__head-btn--close {
+  font-size: var(--modal-close-glyph-size);
+  line-height: 1;
+  font-weight: 300;
+}
+
+.auth-modal__footer--center {
+  margin-top: var(--space-3);
+}
+
+.auth-modal__link--forgot {
+  color: var(--auth-forgot-link);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  padding: 0;
+  font-size: 0.88rem;
+}
+
+.auth-modal__link--forgot:hover {
+  color: var(--auth-forgot-link-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-modal__link--forgot:focus-visible {
+  outline: 2px solid var(--auth-forgot-link);
+  outline-offset: 3px;
+  border-radius: 0.2rem;
+}
+
+.auth-modal__forgot-instruction {
+  margin: 0 0 var(--space-4);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--crown-gold);
+}
+
+.auth-modal__forgot-toast {
+  margin: 0 0 var(--space-3);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  text-align: center;
+  color: rgb(255 255 255 / 88%);
+}
+
+@media (min-width: 48rem) {
+  .app-modal.auth-modal {
+    max-width: min(25rem, calc(100vw - 2 * var(--page-pad-inline)));
+  }
+}

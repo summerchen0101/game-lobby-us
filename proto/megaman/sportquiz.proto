@@ -1,0 +1,19 @@
+syntax = "proto3";
+package megaman;
+
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+message GameEndPush {
+    uint64 gameID   = 1;
+    string homeTeam = 2;
+    string awayTeam = 3;
+    MsgType msgType = 4;
+    int64 amount    = 5;
+}
+
+enum MsgType {
+    UNKNOWN_MSG_TYPE = 0;
+    GAME_CANCEL      = 1;
+    PLAYER_LOSE      = 2;
+    PLAYER_WIN       = 3;
+}

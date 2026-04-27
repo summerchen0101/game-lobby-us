@@ -1,0 +1,400 @@
+syntax = "proto3";
+package roomcontroller;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/roomcontroller";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+message CheckRoomAuthRequest {
+    string roomID = 1;
+    uint64 userID = 2;
+}
+//
+
+message GetNowPlayingCountReq {
+    uint64 gameID = 1;
+}
+
+message GetNowPlayingCountResp {
+    uint64 playingCount = 1;
+}
+
+message ListRoomsRequest {
+    uint64 gameID                = 1;
+    uint64 userID                = 5;
+    RoomLevel roomLevel          = 2;
+    uint32 page                  = 3;
+    uint32 perPage               = 4;
+    repeated RoomType roomTypeIn = 6;
+}
+
+message ListRoomsResponse {
+    Room privateRoom           = 3;
+    repeated Room rooms        = 1;
+    pagination.Pagination page = 2;
+}
+
+message GetRoomRequest {
+    string roomID = 1;
+    uint64 gameID = 2;
+}
+
+message GetRoomResponse {
+    Room room = 1;
+}
+
+message CheckRoomIDStatusRequest {
+    string roomID = 1;
+    uint64 gameID = 2;
+    string host   = 3;
+}
+
+message RegisterPodRequest {
+    uint64 gameID       = 1;
+    string host         = 2;
+    int32 portWebsocket = 3;
+    int32 portGrpc      = 4;
+}
+
+message Room {
+    string roomID           = 1;
+    string host             = 3;
+    repeated UserInfo users = 2;
+    uint64 gameID           = 4;
+    RoomLevel roomLevel     = 5;
+    string pass             = 6;
+    uint64 createdAtMs      = 7;
+    bytes data              = 8;
+    UserInfo keepUser       = 9;
+    uint64 keepUserID       = 10;
+    int64 roomIndex         = 11;  // 房間編號
+    RoomType roomType       = 12;
+    uint64 roomSeat         = 13;
+}
+
+// 將玩家加入房間請求
+message CreatePrivateRoomRequest {
+    uint64 gameID       = 1;
+    RoomLevel roomLevel = 2;
+    uint64 userID       = 3;
+    uint64 vipLevel     = 4;
+    bytes data          = 5;
+}
+
+// 將玩家加入房間請求
+message CreatePrivateRoomResponse {
+    Room room = 1;
+}
+
+message CreateRepoRoomReq {
+    uint64 gameID   = 1;
+    string roomID   = 2;
+    uint64 roomSeat = 3;
+}
+
+message DeleteRepoRoomReq {
+    uint64 gameID = 1;
+    string roomID = 2;
+}
+
+// 將玩家加入房間請求
+message CreatePasswordRoomReq {
+    uint64 gameID       = 1;
+    RoomLevel roomLevel = 2;
+    uint64 userID       = 3;
+    uint64 vipLevel     = 4;
+    bytes data          = 5;
+}
+
+// 將玩家加入房間請求
+message CreatePasswordRoomResp {
+    Room room = 1;
+}
+
+// 將玩家加入房間請求
+message JoinPasswordRoomReq {
+    string password = 1;
+    uint64 gameID   = 2;
+    uint64 userID   = 3;
+    string imageURL = 4;
+    string nickname = 6;
+    uint64 vipLevel = 8;
+    uint64 level    = 7;
+    int64 baseID    = 5;
+}
+
+// 將玩家加入房間請求
+message JoinPasswordRoomResp {
+    Room room = 1;
+}
+
+message JoinRandomRoomRequest {
+    uint64 gameID       = 1;
+    RoomLevel roomLevel = 2;
+    uint64 userID       = 3;
+    string imageURL     = 4;
+    string nickname     = 5;
+    uint64 vipLevel     = 6;
+    uint64 level        = 7;
+}
+// 將玩家加入房間請求
+message JoinRandomRoomResponse {
+    Room room     = 1;
+    uint64 BaseID = 2;
+}
+
+message ChangeRoomTypeRequest {
+    uint64 gameID         = 1;
+    string roomID         = 2;
+    RoomType roomType     = 3;
+    yesno.YesNo needClose = 4;
+    bytes data            = 5;
+}
+
+message LockRoomRequest {
+    string roomID   = 1;
+    uint64 userID   = 2;
+    uint64 vipLevel = 3;
+    uint64 gameID   = 4;
+    bytes data      = 5;
+}
+
+// 將玩家加入房間請求
+message AddUserToRoomRequest {
+    string roomID           = 1;
+    uint64 gameID           = 2;
+    yesno.YesNo isJoined    = 3;
+    RoomLevel roomLevel     = 6;
+    RoomType roomType       = 8;
+    UserType userType       = 4;
+    UserInfo userInfo       = 5;
+    string host             = 7;
+    yesno.YesNo isFake      = 9;
+    yesno.YesNo ignoreCheck = 10;
+}
+
+message ChangeUserTypeRequest {
+    string roomID     = 1;
+    uint64 gameID     = 2;
+    UserType userType = 3;
+    UserInfo userInfo = 4;
+}
+
+message JoinRoomRequest {
+    string roomID       = 1;
+    uint64 gameID       = 2;
+    uint64 userID       = 3;
+    string imageURL     = 4;
+    string nickname     = 6;
+    uint64 vipLevel     = 8;
+    uint64 level        = 7;
+    int64 baseID        = 5;
+    RoomType type       = 9;
+    RoomLevel roomLevel = 10;
+    bytes data          = 11;
+}
+
+// 將玩家移出房間請求
+message RemoveUserFromRoomRequest {
+    string roomID       = 1;
+    uint64 gameID       = 2;
+    UserType userType   = 3;
+    RoomType type       = 6;
+    uint64 userID       = 4;
+    RoomLevel roomLevel = 5;
+    uint64 vipLevel     = 7;
+}
+
+// 列出房間玩家
+message ListRoomUsersRequest {
+    string roomID     = 1;
+    UserType userType = 2;
+}
+
+message ListRoomUsersResponse {
+    repeated UserInfo users = 1;
+}
+
+message UserInfo {
+    uint64 userID   = 1;
+    string nickname = 2;
+    string imageURL = 3;
+    uint64 vipLevel = 6;
+    uint64 level    = 5;
+    int64 baseID    = 4;
+    bytes data      = 7;
+}
+
+// 查詢玩家所在房間
+message GetUserGameRequest {
+    uint64 userID = 1;
+}
+
+// 查詢玩家所在房間
+message GetUserGameResp {
+    repeated roomcontroller.Room rooms = 1;
+}
+
+// 開啟房間
+message CreateRoomRequest {
+    uint64 gameID = 1;
+    RoomType type = 2;
+}
+
+// 關閉房間請求
+message CloseRoomRequest {
+    uint64 gameID = 1;
+    string roomID = 2;
+}
+
+message PlayerTogetherRequest {
+    uint64 gameID       = 1;
+    uint64 userID       = 2;
+    bytes filter        = 3;
+    string host         = 4;
+    RoomLevel roomLevel = 5;
+}
+
+message PlayerTogetherResponse {
+    repeated string userIDs = 1;
+    Room disposableRoom     = 2;
+}
+
+message PlayerTogetherTimeoutRequest {
+    uint64 gameID       = 1;
+    uint64 userID       = 2;
+    bytes filter        = 3;
+    string host         = 4;
+    RoomLevel roomLevel = 5;
+}
+
+message PlayerTogetherTimeoutResponse {
+    repeated Rooms rooms = 1;
+}
+
+message Rooms {
+    repeated string userIDs = 1;
+    Room disposableRoom     = 2;
+    yesno.YesNo onlyYou     = 3;
+}
+
+message PlayerTogetherCancelRequest {
+    uint64 gameID = 1;
+    uint64 userID = 2;
+    bytes filter  = 3;
+}
+
+enum RoomType {
+    UNKNOWN_ROOM_TYPE = 0;
+    PUBLIC            = 1;
+    PRIVATE           = 2;
+    LOCK              = 3;
+    PASSWORD          = 4;
+    TOURNAMENTS       = 5;  // 錦標賽專用房間，由錦標賽服務調度
+}
+
+enum UserType {
+    UNKNOWN_USER_TYPE = 0;
+    PLAYER            = 1;
+    WATCHER           = 2;
+}
+
+enum RoomLevel {
+    UNKNOWN_ROOM_LEVEL = 0;
+    ONE                = 1;
+    TWO                = 2;
+    THREE              = 3;
+    FOUR               = 4;
+    FIVE               = 5;
+}
+//
+////查詢遊戲 pod數量
+// message ListInstanceRequest {
+//     uint64 gameID   = 1;
+//     string imageTag = 2;
+// }
+//
+// message ListInstanceResponse {
+//     string id           = 1;
+//     Host host           = 2;
+//     string imageTag     = 3;
+//     int64 age           = 4;
+//     repeated Room rooms = 5;
+// }
+//
+////添加遊戲pod
+// message AddInstanceRequest {
+//     uint64 gameID   = 1;
+//     string imageTag = 2;  //default= latest
+//     uint32 increase = 3;  //增加數量
+// }
+
+//
+////擴容或縮容的閥值
+// message ScaleRules {
+//     int32 usageRate = 1;  //房間使用率
+// }
+//
+// message GameSetting {
+//     int32 privateRoomLimit = 1;  //私有房數量限制
+//     int32 publicRoomLimit  = 2;  //公開房數量限制
+//     int32 privateRoomCount = 3;  //現有私有房間數量
+//     int32 publicRoomCount  = 4;  //現有公有房間數量
+//
+//     bool autoScale   = 5;  //是否自動拓展
+//     ScaleRules rules = 6;  //拓展規則
+// }
+
+// message RoomSetting {
+//     int32 userLimit  = 1;
+//     int32 guestLimit = 2;
+//     int32 userCount  = 3;
+//     int32 guestCount = 4;
+// }
+
+/*
+message ListRoomGamesRequest {
+    uint64 gameID = 1;
+}
+
+message ListRoomGamesResponse {
+    repeated Game data = 1;
+    Meta meta = 2;
+}
+*/
+
+// message Game {
+//     uint64 gameID       = 1;  //遊戲ID
+//     string gameName     = 2;  //遊戲名稱
+//     string version      = 3;  //版本資訊
+//     GameSetting setting = 4;  //遊戲設定
+// }
+
+// message Host {
+//     uint64 ID   = 1;
+//     string name = 2;
+//     string addr = 3;
+// }
+
+message ListUserRoomRequest {
+    uint64 userID           = 1;
+    repeated uint64 userIDs = 2;
+    uint64 keeper           = 5;
+    uint32 page             = 3;
+    uint32 perPage          = 4;
+    uint64 gameID           = 6;  // 遊戲ID
+}
+
+message ListUserRoomResponse {
+    pagination.Pagination page = 1;
+    repeated Room rooms        = 2;
+}
+
+message TournamentsRoundStartReq {
+    uint64 tournamentsID    = 1;  // 錦標賽ID
+    uint64 gameID           = 2;  // 遊戲ID
+    repeated string roomIDs = 3;  // 房間編號
+}
+
+message TournamentsRoundStartResp {
+}

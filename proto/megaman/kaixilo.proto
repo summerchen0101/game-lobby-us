@@ -1,0 +1,130 @@
+syntax = "proto3";
+package megaman;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "proto/kaixilo/kaixilo.proto";
+import "proto/wallet/wallet.proto";
+import "proto/playerinfo/model.proto";
+import "proto/judan/dividends.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+
+message UpdateKaixiloThingReq {
+    uint64 thingID = 1;
+    uint64 typeID  = 2;
+}
+
+//message ListModelIDsReq {
+//    uint64 modelType = 1;
+//}
+
+//message ListModelIDsResp {
+//    repeated uint64 modelIDs = 1;
+//}
+
+message GetKaixiloReq {
+    uint64 userID = 1;
+}
+
+message GetKaixiloResp {
+    kaixilo.GetKaixiloResp Kaixilo = 1;
+}
+
+message LevelUpReq {
+    uint64 thingID = 1;
+}
+
+message LevelUpResp {
+    kaixilo.Thing thing   = 1;
+    uint64 bargainingChip = 2;
+}
+
+//message ThingCompleteReq {
+//    uint64 thingID   = 1;
+//    uint64 kaixiloID = 2;
+//}
+
+message GetThingReq {
+    uint64 thingID = 1;
+}
+
+message GetThingResp {
+    kaixilo.GetThingResp thing = 1;
+}
+
+message ListParasitesReq {
+    uint64 ParasiteID = 1;
+}
+
+message ListParasitesResp {
+    kaixilo.ListParasitesResp parasiteIDs = 1;
+    playerinfo.PlayerInfo kaixiloOwner    = 2;
+}
+
+message CreatParasiteReq {
+    uint64 userID     = 1;
+    uint64 parasiteID = 2;
+}
+
+message CountIncomeReq {
+    uint64 userID = 1;
+}
+
+message CountIncomeResp {
+    wallet.Bag bag = 1;
+    uint64 amount  = 2;
+}
+
+message GetRandomPlayerResp {
+    playerinfo.PlayerInfo player = 1;
+}
+
+message ListRecommendsResp {
+    repeated playerinfo.PlayerInfo specialPlayers = 1;  // 5位特約玩家
+    repeated playerinfo.PlayerInfo normalPlayers  = 2;  // 5位一般玩家
+}
+
+// 每日分紅資訊列表請求
+message DaliyDividendsReportRequest {
+    uint64 userID = 1;
+    uint64 year   = 2;
+    uint64 month  = 3;
+    uint64 day    = 4;
+
+    uint32 page    = 5;  //頁數
+    uint32 perPage = 6;  //每頁幾筆
+}
+
+// 每日分紅資訊列表響應
+message DaliyDividendsReportResponse {
+    uint64 points         = 1;
+    uint64 totalBetAmount = 2;  //總注額
+    uint64 dividendRatio  = 3;  //紅利比例
+    uint64 vipLevel       = 4;  //vip level
+
+    pagination.Pagination pagination      = 5;  //分頁資訊
+    repeated judan.DividendsData dividens = 6;
+}
+
+// 取得可分紅點數請求
+message GetAvailableDividendsRequest {
+    uint64 userID = 1;
+    bool detail   = 2;  //是否需要明細
+}
+
+// 取得可分紅點數響應
+message GetAvailableDividendsResponse {
+    uint64 points                         = 1;
+    uint64 totalBetAmount                 = 2;  //總注額
+    uint64 dividendRatio                  = 3;  //紅利比例
+    uint64 vipLevel                       = 4;  //vip level
+    repeated judan.DividendsData dividens = 5;  //明細
+}
+
+// 領取分紅
+message PayDividendsRequest {
+    uint64 userID = 1;
+}
+
+message PayDividendsRsponse {
+    uint64 amount = 1;
+}

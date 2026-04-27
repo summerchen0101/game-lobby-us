@@ -1,0 +1,378 @@
+syntax = "proto3";
+package slot;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/slot";
+import "proto/playerinfo/model.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "proto/slot/jackPot.proto";
+import "google/protobuf/empty.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+service SlotService {
+    rpc ListGameJpInfo(google.protobuf.Empty) returns (ListGameJpInfoResponse);
+    rpc GetRoomInfo(GetRoomInfoRequest) returns (GetRoomInfoResponse);
+    rpc GetSlotMoneyPool(google.protobuf.Empty) returns (GetSlotMoneyPoolResponse);                   // 取得水庫的錢
+    rpc ListSlotGameInPlay(google.protobuf.Empty) returns (ListSlotGameInPlayResponse);               // 取得每款遊戲的遊玩人數
+    rpc ListSlotGameInPlayV2(ListSlotGameInPlayRequest) returns (ListSlotGameInPlayResponse);         // 取得每款遊戲的遊玩人數
+    rpc SetJackPotStatus(SetJackPotStatusRequest) returns (google.protobuf.Empty);                    // 設定 jackPot 開關
+    rpc ResetJackPot(ResetJackPotRequest) returns (google.protobuf.Empty);                            // 重置 jackPot
+    rpc ListJpInfoToBackStage(ListJpInfoToBackStageRequest) returns (ListJpInfoToBackStageResponse);  // jp 相關資訊 for 後台
+    rpc ListJpBingo(ListJpBingoRequest) returns (ListJpBingoResponse);                                // jp 中獎資訊 for 後台
+
+    rpc ListUserRoomInfo(ListUserRoomInfoRequest) returns (ListUserRoomInfoResponse);
+}
+enum SlotType {
+    PING_PONG          = 0;
+    JOIN_ROOM          = 1;  // 加入房間
+    USER_KICK_BEFORE   = 2;
+    SERVER_UPDATE      = 3;
+    LIST_ROOM          = 4;        // 房間清單
+    LEAVE_ROOM         = 5;        // 離開房間
+    LOCK_ROOM          = 6;        // 鎖房間
+    UNLOCK_ROOM        = 8;        // 解鎖房間
+    USER_LOCK_ROOM     = 9;        // user 鎖房間資訊
+    SPIN               = 10;       // slot game spin
+    FREE_GAME          = 11;       // 金手指外掛 free game
+    ROOM_DETAIL        = 12;       // 房間明細
+    GAME_INFO          = 13;       // 遊戲資訊
+    JACK_POT_INFO      = 14;       // jackPot 資訊
+    REST_JACK_POT_INFO = 15;       // 重置 jackPot 資訊
+    QUICKLY_SPIN       = 16;       // 快速遊玩
+    LIST_ROOM_DETAIL   = 17;       // 房間明細清單
+    SPIN_TEST          = 999999;   // spin測試
+    SPIN_TEST2         = 9999999;  // spin測試
+    QA_TEST            = 888;      // qa 測試
+    SIMULATION         = 8888;     // 模擬盤面 job
+    SPIN_EXPERIENCE    = 18;       // 體驗房 spin
+    QA_SPIN_TEST    = 19;       // qa 盤面設定
+
+}
+
+enum RoomType {
+    UNKNOWN_ROOM_TYPE = 0;
+    EXPERIENCE        = 1;  // 試玩廳
+    NEWBIE            = 2;  // 新手廳
+    GENERALLY         = 3;  // 一般廳
+    VIP               = 4;  // 貴賓廳
+    BOSS              = 5;  // 頭家廳
+}
+// 房間清單 request
+message ListRoomRequest {
+    uint64 gameID     = 1;
+    uint32 page       = 2;
+    uint32 perPage    = 3;
+    RoomType roomType = 4;
+}
+
+// 房間清單 response
+message ListRoomResponse {
+    repeated RoomInfo roomInfo = 1;
+    pagination.Pagination page = 2;
+}
+
+// 加入房間 request
+message JoinRoomRequest {
+    uint64 gameID     = 1;
+    string roomID     = 2;
+    RoomType roomType = 3;
+}
+
+// 離開房間 request
+message LeaveRoomRequest {
+    uint64 gameID = 1;
+    string roomID = 2;
+}
+
+// 鎖房間 request
+message LockRoomRequest {
+    uint64 gameID = 1;
+    string roomID = 2;
+}
+
+// 解鎖房間 request
+message UnLockRoomRequest {
+    uint64 gameID = 1;
+    string roomID = 2;
+}
+
+// user 鎖房間 request
+message UserLockRoomInfoRequest {
+    uint64 gameID     = 1;
+    RoomType roomType = 2;
+}
+
+// 取得房間明細資訊
+message GetRoomDetailRequest {
+    uint64 gameID = 1;
+    string roomID = 2;
+}
+
+// 房間資訊
+message RoomInfo {
+    int64 id                   = 1;
+    uint64 gameID              = 2;
+    string roomID              = 3;
+    float rtp                  = 4;
+    float bet                  = 5;
+    float settle               = 6;
+    playerinfo.PlayerInfo user = 7;
+    RoomType roomType          = 8;
+}
+
+// user 鎖房間資訊
+message UserLockRoomInfo {
+    uint64 gameID              = 1;
+    int64 id                   = 2;
+    string roomID              = 3;
+    int64 lockTime             = 4;
+    playerinfo.PlayerInfo user = 5;
+    RoomType roomType          = 6;
+}
+
+// slot game spin request
+message SpinRequest {
+    uint64 userID = 1;
+    int64 amount  = 2;
+    uint64 gameID = 3;
+    string roomID = 4;
+    uint64 itemID = 5;  // 給使用fg 卷使用
+}
+
+// slot game spin result
+message SpinResult {
+    uint64 roundID = 1;
+    message RollTable {
+        repeated string row = 1;
+    }
+    repeated RollTable symbolResult = 2;
+    int64 winCoin                   = 3;
+    repeated EventSet eventSet      = 4;
+    int64 balance                   = 5;
+    float rtp                       = 6;
+    BuyBonusSet buyBonusSet         = 7;
+    int64 betAmount                 = 8;
+    yesno.YesNo isHoldAndSpin       = 9;
+}
+// slot game 的事件設定
+message EventSet {
+    int64 code      = 1;  // 990 : jackPart  991: miniGame 992: money
+    int64 winCoin   = 2;
+    bytes extraData = 3;
+}
+// buy bonus 的事件設定
+message BuyBonusSet {
+    int64 code = 1;  // 1:激一下版 2:鼓勵版
+}
+message RoomDetail {
+    RoomDetailInfo today        = 1;
+    RoomDetailInfo week         = 2;
+    RoomDetailInfo month        = 3;
+    RoomDetailInfo until        = 4;
+    int64 noInterFgCount        = 5;
+    int64 lastTimeFgCount       = 6;
+    int64 lastSecondTimeFgCount = 7;  // 前兩轉未進fg 次數
+    int64 lastThirdTimeFgCount  = 8;  // 前三轉未進fg 次數
+}
+
+message RoomDetailInfo {
+    float rtp      = 1;
+    int64 freeGame = 2;
+}
+
+message GameInfoRequest {
+    int64 amount      = 1;
+    RoomType roomType = 2;
+}
+message GameInfoResponse {
+    bytes gameInfo = 1;
+}
+
+message JackPotInfoResponse {
+    repeated JackPotDetail jackPots = 1;
+    repeated MiniDetail miniDetails = 2;
+}
+
+message ResetJackPotInfoResponse {
+    int64 awards = 1;  // 獎項
+}
+
+message ListGameJpInfoResponse {
+    repeated ListGameJpInfo info = 1;
+}
+message ListGameJpInfo {
+    uint64 gameID       = 1;
+    float amount        = 2;  // 現在金額倍率
+    uint64 upperLimit   = 3;  // 上限值
+    float rate          = 4;  // 速率
+    uint64 initialValue = 5;  // 初始值
+    int64 award         = 6;  // 獎項
+}
+
+message QuicklySpinRequest {
+    uint64 gameID     = 1;
+    RoomType roomType = 2;
+}
+message QuicklySpinResponse {
+    uint64 gameID = 1;
+    string roomID = 2;
+}
+message GetRoomInfoRequest {
+    uint64 userID = 1;
+}
+message GetRoomInfoResponse {
+    RoomInfo roomInfo = 1;
+}
+
+message ListRoomDetailRequest {
+    uint64 gameID                         = 1;
+    uint32 page                           = 2;
+    uint32 perPage                        = 3;
+    RoomDetailConditionType conditionType = 4;
+    RoomType roomType                     = 5;
+}
+message ListRoomDetailResponse {
+    repeated RoomDetailData roomDetailData = 1;
+    pagination.Pagination page             = 2;
+}
+
+message RoomDetailData {
+    string roomID                       = 1;  // 房間 ID
+    int64 id                            = 2;  // 台號
+    int64 noInterFgCount                = 3;  // 未開 fg 次數
+    int64 avgFgCount                    = 4;  // 平均 fg 次數
+    float rtp                           = 5;  // rtp
+    int64 monthSuperMegaWinCount        = 6;  // 30 內 SuperMegaWin 次數
+    int64 monthMegaWinCount             = 7;  // 30 內 MegaWin 次數
+    RoomDetailStateType roomDetailState = 8;  // 狀態
+}
+enum RoomDetailConditionType {
+    UNKNOWN_ROOM_DETAIL_CONDITION_TYPE = 0;
+    ALL                                = 1;  // 全機台
+    EMPTY                              = 2;  // 空機台
+}
+enum RoomDetailStateType {
+    UNKNOWN_ROOM_DETAIL_STATE_TYPE = 0;
+    GENERAL                        = 1;  // 正常(空房)
+    IN_PLAY                        = 2;  // 正有人在玩(已滿)
+    LOCK                           = 3;  // 鎖房間(保留)
+}
+
+message GetSlotMoneyPoolResponse {
+    int64 jp1Money  = 1;
+    int64 jp2Money  = 2;
+    int64 jp3Money  = 3;
+    int64 miniMoney = 4;
+}
+
+message ListSlotGameInPlayResponse {
+    repeated SlotGameInPlay slotGameInPlays = 1;
+}
+message SlotGameInPlay {
+    uint64 gameID           = 1;  // 遊戲ID
+    int64 peopleCount       = 2;  // 人數
+    repeated uint64 userIDs = 3;
+}
+message ListSlotGameInPlayRequest {
+    repeated uint64 gameIDs = 1;  // 遊戲 ID
+}
+message SetJackPotStatusRequest {
+    uint64 gameID      = 1;  // 遊戲ID
+    yesno.YesNo enable = 2;  // 狀態開關
+}
+message ResetJackPotRequest {
+    uint64 gameID = 1;  // 遊戲ID
+    int64 award   = 2;  // 獎項 (1:super mega 2:mega 3:major 4:minor 5:mini)
+}
+
+message ListJpInfoToBackStageRequest {
+    uint64 gameID = 1;  // 遊戲ID
+}
+
+message ListJpInfoToBackStageResponse {
+    repeated JpInfoToBackStage data = 1;
+}
+message JpInfoToBackStage {
+    yesno.YesNo enable               = 1;  // 開關
+    repeated JpAwardInfo jpAwardInfo = 2;  // 個獎項倍率
+    uint64 gameID                    = 3;  // 遊戲ID
+}
+message JpAwardInfo {
+    int64 award = 1;  // 獎項
+    int64 rate  = 2;  // 倍率
+}
+
+message ListJpBingoRequest {
+    int64 award           = 1;  // 獎項
+    int64 page            = 2;
+    int64 perPage         = 3;
+    repeated int64 awards = 4;  // 獎項
+}
+
+message ListJpBingoResponse {
+    repeated JpBingo jpBingo   = 1;
+    pagination.Pagination page = 2;
+}
+
+message JpBingo {
+    uint64 gameID     = 1;  // 遊戲 ID
+    int64 award       = 2;  // 獎項
+    int64 money       = 3;  // 金幣
+    uint64 userID     = 4;  // 使用者 id
+    int64 number      = 5;  // 第幾次
+    int64 createdTime = 6;  // 時間
+}
+
+message ListUserRoomInfoRequest {
+    uint32 page             = 1;
+    uint32 perPage          = 2;
+    uint64 userID           = 3;
+    repeated uint64 userIDs = 4;
+}
+
+message ListUserRoomInfoResponse {
+    pagination.Pagination page = 1;
+    repeated RoomInfo roomInfo = 2;
+}
+message QaSpinTestRequest{
+    int64 betAmount                 = 1;
+    message RollTable {
+        repeated string row = 1;
+    }
+    repeated RollTable symbolResult = 2;
+
+}
+
+enum PayDirection {
+    UNKNOWN = 0;
+    LEFT_TO_RIGHT = 1; // 左連線（標準 slot 賠付方向）
+    RIGHT_TO_LEFT = 2; // 右連線
+}
+
+// 表示一條「賠付線（Line）」中成功連線的結果
+message MatchedLine {
+    string symbol           = 1; // 符號名稱，例如 "A", "W"
+    uint32 count            = 2; // 從第一輪開始，賠付線上連續命中的格數（可由 Wild 替代）
+    uint32 lineIndex        = 3; // 所屬的賠付線索引（從 0 開始編號）
+    PayDirection direction  = 4; // 賠付方向（如：左→右、右→左）
+}
+
+// 表示一種「ways」中成功連線的結果（適用於 243-way、1024-way 等遊戲）
+message MatchedWay {
+    string symbol          = 1; // 符號名稱，例如 "A", "W"
+    uint32 reelCount       = 2; // 從第一輪開始，連續命中的輪軸數（包含可替代的 Wild）
+    uint32 waysCount       = 3; // 實際命中的 ways 組合數（各輪符合的符號數相乘，如 1×2×1×1 = 2）
+    PayDirection direction = 4; // 賠付方向（如：左→右、右→左）
+}
+
+// 同圖標組（無需相鄰）
+// e.g. 盤面上共有 10 個 "A"，觸發 10-A 的消除
+message MatchedGroup {
+  string symbol           = 1; // 圖標名稱，例如 "A", "W"
+  uint32 count            = 2; // 此群組被消除的格數總數
+}
+
+// 相鄰同圖標組
+message MatchedAdjacentGroup {
+    uint32 id     = 1; // 標誌符ID
+    string symbol = 2; // 這坨的圖標，例如 "A", "SA"
+    uint32 count  = 3; // 此群組被消除的格數總數
+}

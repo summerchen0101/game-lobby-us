@@ -1,0 +1,403 @@
+syntax = "proto3";
+package tournaments;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/tournaments";
+
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+
+import "proto/virtualgood/virtualgood.proto";
+
+import "google/protobuf/wrappers.proto";
+
+// Tournaments 錦標賽
+message Tournaments {
+    uint64 id                           = 1;
+    string name                         = 2;                       // 名稱
+    string description                  = 3;                       // 賽事簡介
+    TournamentsStatus tournamentsStatus = 4;                       // 賽事狀態
+    TournamentsType tournamentsType     = 5;                       // 賽事類型
+    uint64 tournamentsGameID            = 6;                       // 賽事遊戲ID
+    int64 publishedAtMs                 = 7;                       // 賽事發布時間
+    int64 startAtMs                     = 8;                       // 賽事開始時間
+    Qualifications qualifications       = 9;                       // 報名資格
+    int64 minNumOfReg                   = 10 [deprecated = true];  // 參賽人數下限
+    int64 maxNumOfReg                   = 11;                      // 參賽人數上限
+    uint64 guaranteedPrizeMoney         = 12;                      // 保底獎金
+    int64 belowNumOfBuyInWillOverlay    = 13 [deprecated = true];  // 保底買入人數 (當買入次數少於多少時，賽事方將產生虧損)
+    uint64 creatorID                    = 18;                      // 建立者ID
+    uint64 updaterID                    = 19;                      // 更新者ID
+    int64 createdAtMs                   = 20;                      // 建立時間
+    int64 updatedAtMs                   = 21;                      // 更新時間
+    int64 nowBlindLevel                 = 22;                      // 當前的盲注級別
+    yesno.YesNo isItm                   = 23;                      // 是否進入錢圈
+    // 統計相關(開賽後動態更新)
+
+    int64 totalPrizeMoney   = 41;  // 總獎金
+    int64 registerPlayerCnt = 42;  // 報名人數
+    int64 buyInCnt          = 43;  // 買入數
+    int64 rebuyCnt          = 44;  // 總rebuy次數
+    int64 addOnCnt          = 45;  // 總addOn次數
+
+    repeated PrizeSetting prizeSettings               = 71;  // 獎項設定
+    HoldemTournamentsSetting holdemTournamentsSetting = 72;  // 德州樸克錦標賽設定
+}
+
+enum TournamentsStatus {
+    UNKNOWN_TOURNAMENTS_STATUS = 0;
+    UNPUBLISHED                = 1;  // 未發布-> 遊戲端不會看到該賽事，超過發佈時間將會轉換成STAY_TUNED
+    STAY_TUNED                 = 2;  // 敬請期待 -> 遊戲端會看到該賽事，並對玩家開放報名，超過開賽時間會變成
+    ONGOING                    = 3;  // 競賽中/進行中 -> 遊戲端會看到該賽事，錦標賽賽程開始進行
+    END                        = 4;  // 已結束
+}
+
+enum TournamentsType {
+    UNKNOWN_TOURNAMENTS_TYPE = 0;
+    HOLDEM                   = 1;  // 德州樸克
+    MAHJONG                  = 2;  // 麻將
+    QIUQIU                   = 3;  //  秋秋
+}
+
+message TournamentsOptions {
+    repeated uint64 idIn                           = 1;
+    string name                                    = 2;
+    repeated TournamentsStatus tournamentsStatusIn = 4;
+    repeated TournamentsType tournamentsTypeIn     = 5;
+    uint64 tournamentsGameID                       = 6;
+    int64 publishedAtMsGte                         = 7;
+    int64 publishedAtMsLte                         = 8;
+    int64 startAtMsGte                             = 9;
+    int64 startAtMsLte                             = 10;
+}
+
+message UpdateTournamentsParams {
+    string name                      = 2;
+    string description               = 3;
+    int64 publishedAtMs              = 7;
+    int64 startAtMs                  = 8;
+    Qualifications qualifications    = 9;
+    int64 minNumOfReg                = 10;
+    int64 maxNumOfReg                = 11;
+    uint64 guaranteedPrizeMoney      = 12;
+    int64 belowNumOfBuyInWillOverlay = 13;
+    int64 totalPrizeMoney            = 15;
+    int64 nowBlindLevel              = 16;
+
+    google.protobuf.Int64Value addRegisterPlayerCnt = 51;
+    google.protobuf.Int64Value addBuyInCnt          = 52;
+    google.protobuf.Int64Value addRebuyCnt          = 53;
+    google.protobuf.Int64Value addAddOnCnt          = 54;
+}
+
+message UpdateHoldemTournamentsSettingParams {
+    google.protobuf.Int64Value seatPerTable                    = 2;   // 每桌座位數
+    google.protobuf.Int64Value startingChip                    = 3;   // 起始籌碼量，預設為大盲注的100倍
+    yesno.YesNo rebuyEnable                                    = 4;   // 可否重買，預設為可重買
+    google.protobuf.Int64Value rebuyTimesLimit                 = 5;   // 重買次數上限，如果值為-1時，表示重買次數無上限
+    google.protobuf.Int64Value stopRebuyAfterLevelN            = 6;   // 在盲注等級多少後停止開放買入 -> 5: 代表等級1,2,3,4,5 時都能重買
+    yesno.YesNo addOnEnable                                    = 7;   // 可否addOn
+    google.protobuf.Int64Value addOnChipMultiplier             = 8;   // add on 籌碼增加倍數
+    google.protobuf.Int64Value addOnRegFeeMultiplier           = 9;   // add on 報名費增加倍數
+    google.protobuf.Int64Value addOnOpenAtLevelN               = 10;  // add on 將於第N個level開放
+    google.protobuf.Int64Value takeBreakAfterEveryNBlindLevels = 11;  // 每過N個盲注等級後，休息一次
+    google.protobuf.Int64Value breaksMin                       = 12;  // 休息時間(分) 5/10/15/20
+    google.protobuf.Int64Value blindLevelUpAfterNMin           = 13;  // 經過幾分鐘後升盲
+    uint64 blindStructureSetID                                 = 14;  // 該賽事使用的盲住結構組合
+}
+
+// Qualifications 報名資格
+message Qualifications {
+    QualificationsOperator qualificationsOperator = 1;
+    repeated RegFee regFees                       = 2;
+    string serviceFeePercentage                   = 3;  // 服務費(抽水)趴數(如果是券的話，會換算成等值的金幣) 1.10 -> 1.1%
+}
+
+// QualificationsOperator 報名資格運算符號
+enum QualificationsOperator {
+    UNKNOWN_QUALIFICATIONS_OPERATOR = 0;
+    AND                             = 1;
+    OR                              = 2;
+}
+
+// RegFee 報名費用
+message RegFee {
+    virtualgood.VirtualGoodType goodType = 1;  // 報名所需的道具類型
+    uint64 itemID                        = 2;  // 道具ID, 這邊只支援金幣、錦標賽金券、錦標賽銀券、錦標賽銅券
+    int64 amount                         = 3;  // 該道具所需數量
+}
+
+// PrizeSetting 獎項設置(後台設定用)
+message PrizeSetting {
+    uint64 tournamentsID        = 1;  // 錦標賽ID
+    int64 rank                  = 2;  // 排名
+    string fixedPrizePercentage = 3;  // 固定獎金比率
+    // string floatingPrizePercentage  = 4;  // 浮動獎金比率 (超過保底人數的報名費，才會拿來支付浮動獎金)
+    repeated Award additionalAwards = 5;  // 額外的獎勵 -> 這裡不包含計算完獎勵的金額，只有物品
+}
+
+// Award 獎項
+message Award {
+    virtualgood.VirtualGoodType goodType = 1;  // 贈送的道具類型
+    uint64 itemID                        = 2;  // 贈送的道具ID
+    int64 amount                         = 3;  // 該道具贈與的數量
+}
+
+message PrizeSettingOptions {
+    repeated uint64 tournamentsIDIn = 1;
+}
+
+// HoldemTournamentsSetting 德州樸克錦標賽設置
+message HoldemTournamentsSetting {
+    uint64 tournamentsID                             = 1;   // 錦標賽ID
+    int64 seatPerTable                               = 2;   // 每桌座位數
+    int64 startingChip                               = 3;   // 起始籌碼量，預設為大盲注的100倍
+    yesno.YesNo rebuyEnable                          = 4;   // 可否重買，預設為可重買
+    Qualifications rebuyQualifications               = 5;   // rebuy報名資格
+    int64 rebuyTimesLimit                            = 6;   // 重買次數上限，如果值為-1時，表示重買次數無上限
+    google.protobuf.Int64Value stopRebuyAfterLevelN  = 7;   // 在盲注等級多少後停止開放買入 -> 5: 代表等級1,2,3,4,5 時都能重買
+    yesno.YesNo addOnEnable                          = 8;   // 可否addOn
+    google.protobuf.Int64Value addOnChipMultiplier   = 9;   // add on 籌碼增加倍數
+    google.protobuf.Int64Value addOnRegFeeMultiplier = 10;  // add on 報名費增加倍數
+    google.protobuf.Int64Value addOnOpenAtLevelN     = 11;  // add on 將於第N個level開放
+    int64 takeBreakAfterEveryNBlindLevels            = 12;  // 每過N個盲注等級後，休息一次
+    int64 breaksMin                                  = 13;  // 休息時間(分) 5/10/15/20
+    google.protobuf.Int64Value blindLevelUpAfterNMin = 14;  // 經過幾分鐘後升盲
+    uint64 blindStructureSetID                       = 15;  // 該賽事使用的盲住結構組合
+    int64 selectedBlindLevel                         = 16;  // 選擇的預設盲注級別(給後台顯示用)
+
+    BlindStructureSet blindStructureSet = 200;  // preload BlindStructureSet
+}
+
+// BlindStructureSet 盲住結構組合
+message BlindStructureSet {
+    uint64 id            = 1;
+    string remark        = 2;
+    repeated string tags = 3;
+    uint64 creatorID     = 4;  // 建立者ID
+    uint64 updaterID     = 5;  // 更新者ID
+    int64 createdAtMs    = 6;  // 建立時間
+    int64 updatedAtMs    = 7;  // 更新時間
+
+    repeated BlindStructure blindStructures = 200;  // preload BlindStructure
+}
+
+// BlindStructure 盲住結構
+message BlindStructure {
+    uint64 setID                                = 1;   // 組合ID
+    int64 level                                 = 2;   // 等級
+    google.protobuf.Int64Value blindDurationMin = 3;   // 盲注持續時間(分鐘) 如果為null，代表沒有下一個盲注階級
+    int64 smallBlind                            = 4;   // 小盲
+    int64 bigBlind                              = 5;   // 大盲
+    int64 bigBlindAnte                          = 6;   // 大盲前注
+    int64 breaksMin                             = 7;   // 休息時間(分鐘)
+    uint64 creatorID                            = 8;   // 建立者ID
+    uint64 updaterID                            = 9;   // 更新者ID
+    int64 createdAtMs                           = 10;  // 建立時間
+    int64 updatedAtMs                           = 11;  // 更新時間
+    google.protobuf.Int64Value startAtMs        = 12;  // 該盲注級別開始於(毫秒) null 表示未開始
+    google.protobuf.Int64Value finishAtMs       = 13;  // 該盲注級別結束於(毫秒) null 表示未結束
+}
+
+// 錦標賽報名玩家資訊
+message TournamentsRegisterPlayers {
+    uint64 id                              = 1;
+    uint64 tournamentsID                   = 2;   // 錦標賽ID
+    uint64 userID                          = 3;   // UID
+    int64 timesOfBuying                    = 4;   // 第幾次買入
+    string nickName                        = 5;   // 暱稱
+    yesno.YesNo isItm                      = 6;   // 是否進入錢圈
+    google.protobuf.Int64Value outPosition = 7;   // 出局名次 1 第一名, null 未出局
+    int64 totalBuyingWhenOut               = 8;   // 出局時的總買入數
+    yesno.YesNo isBuyAddOn                 = 9;   // 是否購買過addOn
+    yesno.YesNo isReachRebuyTimesLimit     = 10;  // 是否已達到重買上限
+    google.protobuf.StringValue roomID     = 11;  // 玩家目前所在的roomID 如果為null 則表示未joinRoom
+    int64 createdAtMs                      = 12;  // 建立時間
+    int64 updatedAtMs                      = 13;  // 更新時間
+}
+
+message TournamentsRegisterPlayersOptions {
+    repeated uint64 idIn            = 1;
+    repeated uint64 tournamentsIDIn = 2;
+    repeated uint64 userIDIn        = 3;
+}
+
+// 錦標賽獎勵派發紀錄
+message TournamentsAwardWinningRecord {
+    uint64 tournamentsID                 = 1;  // 錦標賽ID
+    uint64 userID                        = 2;  // UID
+    int64 ranking                        = 3;  // 排名 (進itm後排名不會重複)
+    repeated Award rankingPrizeAwards    = 4;  // 排名獎金與額外報酬
+    int64 createdAtMs                    = 5;  // 建立時間
+    int64 updatedAtMs                    = 6;  // 更新時間
+    uint64 id                            = 7;
+    yesno.YesNo isSend                   = 8;   // 是否已派發獎勵
+    google.protobuf.Int64Value auditAtMs = 9;   // 審核時間
+    google.protobuf.UInt64Value auditBy  = 10;  // 由誰審核
+    // yesno.YesNo isShared                 = 11;  // 玩家是否已分享截圖
+}
+
+message TournamentsAwardWinningRecordOptions {
+    repeated uint64 tournamentsIDIn = 1;
+    repeated uint64 idIn            = 2;
+    yesno.YesNo isSend              = 3;
+    yesno.YesNo isAuditNull         = 4;
+    // yesno.YesNo isShared            = 5;
+    repeated uint64 userIDIn = 6;
+}
+
+message GameSideTournamentsInfo {
+    uint64 tournamentsID                = 1;                       // 錦標賽id
+    string name                         = 2;                       // 名稱
+    string description                  = 3;                       // 賽事簡介
+    TournamentsStatus tournamentsStatus = 4;                       // 賽事狀態
+    TournamentsType tournamentsType     = 5;                       // 賽事類型
+    uint64 tournamentsGameID            = 6;                       // 賽事遊戲ID
+    uint64 guaranteedPrizeMoney         = 7;                       // 保底獎金
+    int64 belowNumOfBuyInWillOverlay    = 8 [deprecated = true];   // 保底買入人數 (當買入次數少於多少時，賽事方將產生虧損)
+    Qualifications qualifications       = 9;                       // 報名資格
+    int64 publishedAtMs                 = 10;                      // 賽事發布時間
+    int64 startAtMs                     = 11;                      // 賽事開始時間
+    yesno.YesNo rebuyEnable             = 12;                      // 可否重買，預設為可重買
+    yesno.YesNo addOnEnable             = 13;                      // 可否addOn
+    int64 minNumOfReg                   = 14 [deprecated = true];  // 參賽人數下限
+    int64 maxNumOfReg                   = 15;                      // 參賽人數上限
+    int64 nowBlindLevel                 = 16;                      // 當前的盲注級別
+    yesno.YesNo isItm                   = 17;                      // 是否進入錢圈
+
+    google.protobuf.Int64Value moneyOfRegFee = 41;  // 報名費金額(金幣部分)
+    google.protobuf.Int64Value waterOfRegFee = 42;  // 報名費抽水(金幣部分)
+
+    int64 totalPrizeMoney   = 50;  // 總獎金
+    int64 registerPlayerCnt = 51;  // 報名人數
+    int64 buyInCnt          = 52;  // 買入數
+    int64 rebuyCnt          = 53;  // 總rebuy次數
+    int64 addOnCnt          = 54;  // 總addOn次數
+
+    repeated Award totalPrizeAwards    = 60;  // 總獎金與額外報酬
+    int64 numOfAward                   = 61;  // 獎勵人數
+    Qualifications rebuyQualifications = 62;  // rebuy報名資格
+
+    repeated GameSidePrizeSetting gameSidePrizeSettings = 71;  // 獎項設定
+    HoldemTournamentsSetting holdemTournamentsSetting   = 72;  // 德州樸克錦標賽設定
+}
+
+message GameSideTournamentsInfoOptions {
+    repeated uint64 tournamentsIDIn                = 1;
+    repeated TournamentsStatus tournamentsStatusIn = 4;
+    repeated TournamentsType tournamentsTypeIn     = 5;
+    uint64 tournamentsGameID                       = 6;
+}
+
+// GameSidePostTournamentsRanking 德州樸克錦標賽賽後排名 -> 只會顯示在錢圈內的人
+message GameSidePostTournamentsRanking {
+    // [tournaments.tournaments]
+    uint64 tournamentsID            = 1;  // 錦標賽id
+    TournamentsType tournamentsType = 2;  // 賽事類型
+    uint64 tournamentsGameID        = 3;  // 賽事遊戲ID
+    string tournamentsName          = 4;  // 賽事名稱
+    int64 startAtMs                 = 5;  // 賽事開始時間
+
+    // [tournaments.tournaments_award_winning_record]
+    uint64 userID                     = 41;  // UID
+    int64 ranking                     = 42;  // 排名 (進itm後排名不會重複)
+    repeated Award rankingPrizeAwards = 43;  // 排名獎金與額外報酬
+    // 競賽積分 -> 確定之後有再加
+
+    // [playerinfo.player_infos]
+    string nickName  = 70;  // 玩家暱稱
+    uint64 vipLevel  = 71;  // 當前玩家vip等級
+    uint64 avatarID  = 72;  // 當前玩家頭像ID
+    string avatarURL = 73;  // 當前玩家頭像URL 分隔符號@@  格式: avatarID@@avatarURL
+    uint64 level     = 74;  // 當前玩家等級
+}
+
+// MyBestTournamentsRanking 我的錦標賽最佳排行 -> 只計算完賽的
+message MyBestTournamentsRanking {
+    // [tournaments.tournaments]
+    uint64 tournamentsID            = 1;  // 錦標賽id
+    TournamentsType tournamentsType = 2;  // 賽事類型
+    uint64 tournamentsGameID        = 3;  // 賽事遊戲ID
+    string tournamentsName          = 4;  // 賽事名稱
+    int64 startAtMs                 = 5;  // 賽事開始時間
+
+    // [tournaments.tournaments_register_players]
+    uint64 userID     = 41;  // UID
+    int64 bestRanking = 42;  // 最佳排名
+
+    // [tournaments.tournaments_award_winning_record]
+    repeated Award rankingPrizeAwards = 71;  // 排名獎金與額外報酬
+
+    // [playerinfo.player_infos]
+    string nickName  = 100;  // 玩家暱稱
+    uint64 vipLevel  = 101;  // 當前玩家vip等級
+    uint64 avatarID  = 102;  // 當前玩家頭像ID
+    string avatarURL = 103;  // 當前玩家頭像URL 分隔符號@@  格式: avatarID@@avatarURL
+    uint64 level     = 104;  // 當前玩家等級
+}
+
+message MyBestTournamentsRankingOptions {
+    uint64 userID                   = 1;
+    repeated uint64 tournamentsIDIn = 2;
+}
+
+// GameSideRealTimeTournamentsRanking 德州樸克錦標賽即時排名 -> 錢圈內外的人都會顯示
+message GameSideRealTimeTournamentsRanking {
+    // [tournaments.tournaments]
+    uint64 tournamentsID = 1;  // 錦標賽id
+
+    // [tournaments.tournaments_register_players]
+    uint64 userID                          = 40;  // UID
+    int64 timesOfBuying                    = 41;  // 第幾次買入
+    string nickName                        = 42;  // 暱稱
+    yesno.YesNo isItm                      = 43;  // 是否進入錢圈
+    yesno.YesNo isBuyAddOn                 = 44;  // 是否購買過addOn
+    google.protobuf.Int64Value outPosition = 45;  // 出局名次 1 第一名, null 未出局
+    int64 totalBuyingWhenOut               = 46;  // 出局時的總買入數
+
+    // [wallet.tournaments_wallets]
+    int64 remainingChip = 70;  // 剩餘籌碼量
+
+    // 聚合資料
+    google.protobuf.Int64Value ranking = 100;  // 排名，null表示已出局
+    repeated Award rankingPrizeAwards  = 101;  // 排名獎金與額外報酬
+}
+
+message GameSidePrizeSetting {
+    uint64 tournamentsID        = 1;  // 錦標賽ID
+    int64 rank                  = 2;  // 排名
+    string fixedPrizePercentage = 3;  // 固定獎金比率
+    // string floatingPrizePercentage = 4;  // 浮動獎金比率 (超過保底人數的報名費，才會拿來支付浮動獎金)
+    repeated Award awards = 5;  // 排名的的獎勵 -> 包含計算完彩池獎勵分配的金額和額外獎勵的物品
+}
+
+message MyRegisteredTournaments {
+    // tournaments
+    uint64 tournamentsID                = 1;  // 錦標賽id
+    string tournamentsName              = 2;  // 錦標賽名稱
+    TournamentsStatus tournamentsStatus = 3;  // 賽事狀態
+    TournamentsType tournamentsType     = 4;  // 賽事類型
+    uint64 tournamentsGameID            = 5;  // 賽事遊戲ID
+    int64 startAtMs                     = 6;  // 賽事開始時間
+    // tournaments_register_players
+    uint64 userID                          = 42;  // UID
+    int64 timesOfBuying                    = 43;  // 第幾次買入
+    yesno.YesNo isItm                      = 45;  // 是否進入錢圈
+    google.protobuf.Int64Value outPosition = 46;  // 出局名次 1 第一名, null 未出局
+    int64 totalBuyingWhenOut               = 47;  // 出局時的總買入數
+    google.protobuf.StringValue roomID     = 48;  // 玩家所在的房間編號
+    yesno.YesNo isBuyAddOn                 = 49;  // 是否購買過addOn
+    yesno.YesNo isReachRebuyTimesLimit     = 50;  // 是否已達到重買上限
+
+    // tournaments_award_winning_record
+    repeated Award rankingPrizeAwards = 84;  // 排名獎金與額外報酬
+
+    // tournaments_room
+    string gameHost = 110;  // 遊戲連線的host
+    string path     = 111;  // 遊戲連線的path
+}
+
+message MyRegisteredTournamentsOptions {
+    uint64 userID                                  = 1;  // UID
+    repeated TournamentsStatus tournamentsStatusIn = 2;
+    repeated TournamentsType tournamentsTypeIn     = 3;
+    repeated uint64 tournamentsIDIn                = 4;
+    repeated uint64 tournamentsGameIDIn            = 5;
+}

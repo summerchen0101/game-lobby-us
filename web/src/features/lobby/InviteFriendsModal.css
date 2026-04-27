@@ -1,0 +1,257 @@
+/* Invite Friends — 外殼在 AppModal.css；此檔只保留內容與寬度 */
+.app-modal.invite-friends-modal {
+  max-width: 22rem;
+  max-height: min(90dvh, 640px);
+}
+
+.invite-friends-modal__info {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.7rem;
+  height: 1.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  /* 黃色局部色（與全站 --crown-gold 一致） */
+  background: var(--crown-gold, #fde201);
+  color: #1a1a1a;
+  font-size: 0.95rem;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 1;
+  cursor: pointer;
+  font-family: Georgia, "Times New Roman", serif;
+  box-shadow: 0 1px 0 color-mix(in srgb, #000000 35%, transparent);
+}
+
+.invite-friends-modal__info:hover {
+  background: var(--crown-gold-hover, #ffec4d);
+  filter: brightness(1.02);
+}
+
+.invite-friends-modal__body {
+  padding: var(--space-4) var(--space-4) var(--space-5);
+  text-align: center;
+}
+
+.invite-friends-modal__reward-head {
+  margin: 0 0 0.6rem;
+  font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.05rem);
+  font-weight: 800;
+  color: var(--crown-gold, #e8b339);
+  letter-spacing: 0.02em;
+}
+
+.invite-friends-modal__reward-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.5rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.invite-friends-modal__coin {
+  display: block;
+  width: 1.4rem;
+  height: 1.4rem;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.invite-friends-modal__reward-sub {
+  margin: 0 0 var(--space-4);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--crown-gold, #e8b339);
+  letter-spacing: 0.02em;
+}
+
+.invite-friends-modal__stats {
+  margin: 0 0 var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.invite-friends-modal__link-label {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  color: #fff;
+}
+
+.invite-friends-modal__link-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: var(--space-4);
+}
+
+.invite-friends-modal__link-pill {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.4rem;
+  padding: 0.35rem 0.6rem 0.35rem 0.9rem;
+  border: none;
+  border-radius: 999px;
+  background: #0a0a0f;
+  color: #fff;
+  font-size: 0.7rem;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.invite-friends-modal__link-pill span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invite-friends-modal__copy {
+  flex-shrink: 0;
+  width: clamp(1.85rem, 1.6rem + 0.7vw, 2.35rem);
+  height: clamp(1.85rem, 1.6rem + 0.7vw, 2.35rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  /* 局部綠（與 Profile / Shop 副標等一致） */
+  color: var(--crown-locale-green);
+  cursor: pointer;
+}
+
+.invite-friends-modal__copy-icon {
+  flex-shrink: 0;
+  width: var(--icon-rwd-md);
+  height: var(--icon-rwd-md);
+}
+
+.invite-friends-modal__copy:hover {
+  color: color-mix(in srgb, var(--crown-locale-green) 88%, #ffffff 12%);
+  filter: brightness(1.06);
+}
+
+.invite-friends-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* 主色按鈕：與 .btn-crown-primary / theme-palette 主按鈕一致 */
+.invite-friends-modal__btn-invite {
+  min-height: 2.6rem;
+  border: none;
+  border-radius: var(--crown-btn-radius, 999px);
+  background: var(--crown-button-primary-gradient);
+  color: var(--crown-button-primary-fg, #ffffff);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 var(--crown-btn-shadow-h, 2.5px) 0 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 20%);
+  transition:
+    filter 0.15s ease,
+    transform 0.08s ease;
+}
+
+.invite-friends-modal__btn-invite:hover {
+  filter: brightness(1.08);
+}
+
+.invite-friends-modal__btn-invite:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 calc(var(--crown-btn-shadow-h, 2.5px) - 1px) 0 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 15%);
+}
+
+.invite-friends-modal__btn-claim {
+  min-height: 2.6rem;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: #2a2a2a;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.invite-friends-modal__btn-claim:hover {
+  filter: brightness(0.98);
+}
+
+.invite-friends-modal__foot {
+  margin: var(--space-3) 0 0;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--crown-locale-green) 92%, #fff 8%);
+}
+
+/* One frame only; opaque panel — match default .info-popover (Profile) */
+.info-popover.invite-friends-modal__info-popover-wrap {
+  padding: var(--space-3);
+  max-width: min(20rem, calc(100vw - 1rem));
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 88%);
+  background: #1e2438;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 12%);
+  box-shadow:
+    0 0.5rem 1.5rem rgb(0 0 0 / 45%),
+    0 0 0 1px rgb(0 0 0 / 20%);
+}
+
+.invite-friends-modal__qualified {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3);
+  text-align: left;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 88%);
+  background: rgb(0 0 0 / 28%);
+  border-radius: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 8%);
+}
+
+.invite-friends-modal__qualified--popover {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media (min-width: 48rem) {
+  .app-modal.invite-friends-modal {
+    max-width: min(30rem, calc(100vw - 2 * var(--page-pad-inline)));
+    max-height: var(--modal-scroll-max-height);
+  }
+}

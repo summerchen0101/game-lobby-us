@@ -1,0 +1,411 @@
+syntax = "proto3";
+package megaman;
+
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/megaman";
+
+import "proto/guild/guild.proto";
+import "proto/playerinfo/model.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/pagination/pagination.proto";
+import "gitlab.ffglobaltech.com/us888/ciri/commonpb/yesno/yesno.proto";
+import "proto/judan/dividends.proto";
+
+message Guild {
+    string guildID                          = 1;
+    string name                             = 2;   // 名稱
+    uint64 directorID                       = 3;   // 會長 ID
+    string directorName                     = 4;   // 會長名稱
+    yesno.YesNo autoPush                    = 5;   // 自動推播
+    string profile                          = 6;   // 介紹
+    string announcement                     = 7;   // 公告
+    repeated GuildMember members            = 8;   // 會員
+    int64 extendTime                        = 9;   // 到期時間
+    int64 total                             = 10;  // 公會分數
+    string pushContent                      = 11;  // 推播內容
+    yesno.YesNo isApply                     = 12;  // 是否被申請
+    string imageUrl                         = 13;  // 徽章
+    guild.Level level                       = 14;  // 公會層級
+    yesno.YesNo isApplyLeave                = 15;  // 是否申請離開
+    int64 memberCount                       = 16;  // 工會總人數
+    int64 yesterdayTotalScore               = 17;  // 工會昨日總積分
+    string lineLinkUrl                      = 18;  // line url
+    guild.GuildCreateLevel guildCreateLevel = 19;  // 俱樂部建立模式
+}
+
+message GuildMember {
+    playerinfo.PlayerInfo playerInfo    = 1;
+    yesno.YesNo isOnline                = 2;
+    guild.Position position             = 3;   // 職位
+    uint64 referrerID                   = 4;   // 上級
+    string referrerName                 = 5;   // 上級名稱
+    int64 totalScore                    = 6;   // 總積分
+    int64 score                         = 7;   // 個人積分
+    yesno.YesNo isRecommended           = 8;   // 是否有下級
+    guild.Position referrerPosition     = 9;   // 上級職位
+    int64 points                        = 10;  // 俱樂部分紅
+    int64 coinAmount                    = 11;  // 金幣數
+    int64 recommendedCount              = 12;  // 下級人數
+    yesno.YesNo isManager               = 13;  // 是否為管理員
+    int64 referrerScore                 = 14;  // 上級積分
+    guild.Position recommendMaxPosition = 15;  // 下級最高職位
+    int64 lineReferralCode              = 16;  // line 推薦碼
+}
+
+// 創立公會 request
+message CreateGuildRequest {
+    string name       = 1;
+    string profile    = 2;
+    int64 amount      = 3;
+    uint64 userID     = 4;
+    yesno.YesNo isPay = 5;  // 是否要付費
+}
+
+// 創立公會 response
+message CreateGuildResponse {
+    Guild guild = 1;
+}
+
+// 取得公會(單筆) request
+message GetGuildRequest {
+    string guildID = 1;
+}
+
+// 取得公會(單筆) response
+message GetGuildResponse {
+    Guild guild = 1;
+}
+
+// 取得公會(多筆) request
+message ListGuildRequest {
+    string guildID           = 1;
+    string name              = 2;
+    uint32 page              = 3;
+    uint32 perPage           = 4;
+    repeated string guildIDs = 5;  // 多個公會 id
+}
+
+// 取得公會(多筆) response
+message ListGuildResponse {
+    repeated Guild guilds      = 1;
+    pagination.Pagination page = 2;
+}
+
+// 更新公會 request
+message UpdateGuildRequest {
+    string guildID       = 1;
+    string name          = 2;  // 名稱
+    string profile       = 3;  // 介紹
+    string announcement  = 4;  // 公告
+    yesno.YesNo autoPush = 5;  // 自動推播
+    string pushContent   = 6;  // 推播內容
+}
+
+// 申請公會 request
+message ApplyGuildRequest {
+    string guildID    = 1;
+    uint64 userID     = 2;
+    uint64 referrerID = 3;
+}
+
+// 公會延長時間 request
+message ExtendGuildTimeRequest {
+    string guildID = 1;
+    int64 amount   = 2;  // 金額
+}
+
+// 待審核會員清單 request
+message ListConfirmMemberRequest {
+    string guildID = 1;
+}
+
+// 待審核會員清單 response
+message ListConfirmMemberResponse {
+    repeated playerinfo.PlayerInfo confirmMember = 1;
+}
+
+// 邀請會員 request
+message InviteMemberRequest {
+    string guildID    = 1;
+    uint64 userID     = 2;
+    uint64 referrerID = 3;  //推薦人
+}
+// 邀請會員 response
+message InviteMemberResponse {
+    string guildID = 1;
+    string name    = 2;  // 公會名稱
+}
+
+// 確認會員加入 request
+message ConfirmAddGuildMemberRequest {
+    string guildID   = 1;
+    uint64 userID    = 2;
+    yesno.YesNo join = 3;
+}
+
+// 更換會員職位 request
+message ChangeMemberPositionRequest {
+    string guildID          = 1;
+    uint64 userID           = 2;
+    guild.Position position = 3;
+    uint64 operatorID       = 4;  //操作者 ID
+}
+
+// 請離公會 request
+message LeaveGuildRequest {
+    string guildID                = 1;
+    uint64 userID                 = 2;
+    repeated uint64 userIDs       = 3;
+    uint64 operatorID             = 4;  //操作者 ID
+    guild.LeaveReason leaveReason = 5;  // 退出原因
+}
+
+// 調配會員上級人員清單 request
+message ListReferrerRequest {
+    string guildID    = 1;
+    uint64 operatorID = 2;  // 操作者
+    uint64 userID     = 3;  // userID
+}
+
+// 調配會員上級人員清單 response
+message ListReferrerResp {
+    repeated GuildMember guildMembers = 1;
+}
+// 下級人員清單 request
+message ListRecommendedRequest {
+    string guildID = 1;
+    uint64 userID  = 2;  // userID
+}
+
+// 下級人員清單 response
+message ListRecommendedResp {
+    repeated GuildMember guildMembers = 1;
+}
+
+message ListMemberScoreRequest {
+    uint64 userID = 1;
+}
+message ListMemberScoreResponse {
+    repeated MemberScore memberScore = 5;  // 個人積分清單
+}
+message MemberScore {
+    int64 createdTime = 1;  // 時間
+    int64 score       = 2;  // 個人積分
+    int64 points      = 3;  // 分潤
+}
+
+message GetGuildReportRequest {
+    uint64 userID  = 1;
+    string guildID = 2;
+    int64 start    = 3;  // 開始日
+    int64 end      = 4;  // 結束日
+}
+message GetGuildReportResponse {
+    repeated GuildMember data = 1;
+}
+message ChangeMemberReferrerRequest {
+    string guildID    = 1;
+    uint64 referrerID = 2;  // 上級 ID
+    uint64 userID     = 3;  // 使用者 ID
+}
+message AddOrLeaveGuildMessageResponse {
+    string guildID                = 1;
+    string guildName              = 2;  // 俱樂部名稱
+    yesno.YesNo isLeave           = 3;  // 是否離開
+    guild.LeaveReason leaveReason = 4;  // 退出原因
+}
+
+message ApplyLeaveGuildMessageResponse {
+    string guildID      = 1;
+    string guildName    = 2;  // 俱樂部名稱
+    yesno.YesNo isApply = 3;  // 是否申請成功
+}
+
+message ChangeGuildMemberPositionMessageResponse {
+    string guildID          = 1;
+    guild.Position position = 2;
+    string guildName        = 3;  // 俱樂部名稱
+    yesno.YesNo isPromoted  = 4;  // 是否被提拔
+}
+message DividendsGuildMessageResponse {
+    int64 settleDate     = 1;  // 結算日期
+    uint64 totalScore    = 2;  // 總積分
+    uint64 score         = 3;  // 積分
+    uint64 rate          = 4;  // 比例
+    int64 dividendAmount = 5;  // 金幣
+}
+message GuildAutoMessageResponse {
+    string pushContent = 1;  // 推播內容
+    string guildID     = 2;
+}
+message ApplyLeaveRequest {
+    string guildID                = 1;
+    uint64 userID                 = 2;
+    guild.LeaveReason leaveReason = 3;  // 離開原因
+}
+
+message ListApplyLeaveRequest {
+    string guildID = 1;
+}
+message ListApplyLeaveResponse {
+    repeated UserApplyLeave data = 1;
+}
+message UserApplyLeave {
+    int64 joinDate                = 1;  // 加入日期
+    int64 applyDate               = 2;  // 申請日期
+    guild.LeaveReason leaveReason = 3;  // 退出原因
+    int64 recommendCount          = 4;  // 下級人數
+    guild.Position position       = 5;  // 職位
+    int64 weekScore               = 6;  // 七日內積分
+    uint64 userID                 = 7;  // 玩家ID
+    uint64 vipLevel               = 8;
+    string avatarUrl              = 9;
+    playerinfo.Gender gender      = 10;
+    string name                   = 11;
+    yesno.YesNo isOnline          = 12;
+}
+message ConfirmLeaveMemberRequest {
+    string guildID    = 1;
+    uint64 userID     = 2;
+    yesno.YesNo apply = 3;
+}
+message GetGuildReportDetailRequest {
+    uint64 userID          = 1;
+    int64 reportDetailTime = 2;
+}
+
+message GetGuildReportDetailResponse {
+    repeated GuildReportDetail getReportDetails = 1;
+}
+
+message GuildReportDetail {
+    uint64 gameID = 1;
+    int64 winCoin = 2;  // 下注贏分
+    int64 score   = 3;  // 積分
+    int64 rate    = 4;  // 紅利
+}
+
+message CreateGuildQrCodeLinkRequest {
+    uint64 userID = 1;
+}
+message CreateGuildQrCodeLinkResponse {
+    string qrCodeLink = 1;
+}
+
+message GetGuildQrCodeLinkRequest {
+    uint64 userID = 1;
+}
+message GetGuildQrCodeLinkResponse {
+    string qrCodeLink = 1;
+}
+message ListGuildInviteInfoRequest {
+    uint64 userID = 1;
+}
+message ListGuildInviteInfoResponse {
+    uint64 userID                 = 1;
+    string nickName               = 2;
+    guild.Position position       = 3;  // 職位
+    int64 inviteCount             = 4;  // 邀請人數
+    int64 inviteLimit             = 5;  // 邀請上限人數
+    repeated GuildInviteInfo info = 6;
+    int64 maxValue                = 7;
+}
+message GuildInviteInfo {
+    int64 dateTime    = 1;  // 日期
+    int64 inviteCount = 2;  // 邀請人數
+}
+message ListGuildInviteInfoDetailRequest {
+    uint64 userID  = 1;
+    int64 dateTime = 2;
+}
+
+message ListGuildInviteInfoDetailResponse {
+    repeated playerinfo.PlayerInfo inviteMember = 1;
+}
+
+message UpdateGuildUserInviteRequest {
+    uint64 userID     = 1;
+    int64 inviteLimit = 2;  // 邀請上限人數
+}
+
+message AddGuildToDeepLinkRequest {
+    string authenticationCode = 1;  // 認證碼
+}
+
+message QrCodeAddGuildMessageResponse {
+    uint64 userID   = 1;
+    uint64 amount   = 2;  // 金額
+    string nickName = 3;  // 玩家暱稱
+}
+
+message ListOwnReferrerRequest {
+    string guildID = 1;
+    uint64 userID  = 2;
+}
+message ListOwnReferrerResponse {
+    repeated GuildMember guildMembers = 1;
+}
+
+// 取得聯盟(多筆) request
+message ListAlliancesReq {
+    string guildID = 1;
+}
+
+// 取得聯盟(多筆) response
+message ListAlliancesResp {
+    repeated guild.Alliance alliances = 1;
+}
+message UpdateUserToManagerRequest {
+    uint64 userID         = 1;
+    yesno.YesNo isManager = 2;  // 是否為管理員
+    string guildID        = 3;
+}
+
+message UpdateUserToManagerMessageResponse {
+    yesno.YesNo isManager = 1;  // 是否為管理員
+    string guildName      = 2;  // 俱樂部名稱
+}
+
+message ListUserToReferrerPointRequest {
+    uint64 userID          = 1;
+    uint64 referrerID      = 2;
+    int64 createdStartTime = 3;
+    int64 createdEndTime   = 4;
+    string guildID         = 5;
+}
+message ListUserToReferrerPointResponse {
+    repeated UserToReferrerPoint userToReferrerPoint = 1;
+}
+
+message UserToReferrerPoint {
+    playerinfo.PlayerInfo user        = 1;
+    judan.ReferrerLevel referrerLevel = 2;  // 代數
+    string referrerName               = 3;  // 上級名稱
+    int64 score                       = 4;  // 積分
+    int64 rate                        = 5;  // 分紅比例
+    int64 points                      = 6;  // 分紅
+    guild.Position position           = 7;  // 職位
+    guild.Position referrerPosition   = 8;  // 上級職位
+    yesno.YesNo isManager             = 9;  // 是否為管理員
+}
+message ListGuildTotalScoreRequest {
+    string guildID         = 1;
+    int64 createdStartTime = 2;
+    int64 createdEndTime   = 3;
+}
+
+message ListGuildTotalScoreResponse {
+    repeated judan.GuildDailyTotalScore guildDailyTotalScore = 1;
+}
+
+message GetMemberRequest {
+    string userIDOrNickName = 1;
+}
+message GetMemberResponse {
+    GuildMember guildMember = 1;
+}
+
+message ListMemberRequest {
+    string userIDOrNickName = 1;
+}
+message ListMemberResponse {
+    repeated GuildMember guildMember = 1;
+}

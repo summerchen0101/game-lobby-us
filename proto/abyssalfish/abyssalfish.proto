@@ -1,0 +1,405 @@
+syntax = "proto3";
+package abyssalfish;
+option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/abyssalfish";
+
+// RequestType 用於 gateway.Request.Type
+enum RequestType {
+    PingPong = 0;
+    JoinRoom = 1;  // *黑魔法* 連上進入機台時要先打這個並帶上序列化的 protoMegaman.JoinGameRoomRequest 放在 protoGateway.Request.Data
+
+    // [RPC] Deliver 傳遞
+    Deliver = 11;
+
+    // [RPC] Machine
+    GetMachine = 21;  // 取得機台資訊
+
+    // [RPC] MachinePlayer
+    // 使用時會產生對應的 FrameMessageFrameEvent
+    MachinePlayerEnter        = 101;  // 機台玩家進入
+    MachinePlayerExit         = 102;  // 機台玩家離開
+    MachinePlayerFire         = 103;  // 機台玩家發射子彈/使用武器
+    MachinePlayerCatch        = 104;  // 機台玩家射到目標 (抽獎)
+    MachinePlayerUpdate       = 105;  // 機台玩家更新自身資訊
+    MachinePlayerBulletSettle = 106;  // [Deprecated] 機台玩家子彈結算
+    MachinePlayerCatchMany    = 107;  // 機台玩家一發射到多個目標 (抽獎)
+
+    // [RPC] Target
+    TargetUpdate                        = 702;  // 機台更新目標資訊
+    TestOnlyMachinePlayerTargetSettings = 799;  // 列出機台玩家的目標設定值
+
+    // [RPC] Frame
+    ListFrames = 901;
+
+    // [Push] Frame
+    Frame = 1001;
+}
+
+// 幀事件類型
+enum FrameEventType {
+    UNKNOWN_FRAME_EVENT_TYPE = 0;
+
+    // Delivered
+    Delivered = 11;
+
+    // MachinePlayer
+    MachinePlayerEntered       = 101;  // 機台玩家進入
+    MachinePlayerExited        = 102;  // 機台玩家離開
+    MachinePlayerFired         = 103;  // 機台玩家發射子彈/使用武器
+    MachinePlayerCatched       = 104;  // 機台玩家射到目標 (抽獎)
+    MachinePlayerUpdated       = 105;  // 機台玩家資訊
+    MachinePlayerBulletSettled = 106;  // 機台玩家子彈結算
+
+    // Scene
+    SceneUpdated = 601;  // 場景更新
+
+    // Target
+    TargetCreated = 701;  // 目標建立
+    TargetUpdated = 702;  // 機台更新目標資訊
+}
+
+// BulletKind 子彈類型
+enum BulletKind {
+    UNKNOWN_BULLET_KIND = 0;
+
+    Normal             = 1;   // 普通
+    BlasterCannon      = 2;   // 波動砲
+    SpreadCannon       = 3;   // 分身砲
+    Missile            = 11;  // 瘋狂導彈
+    NavalMine          = 12;  // 星爆水雷
+    ElectricJellyfish  = 13;  // 放電水母
+    FlameCore          = 14;  // 火魔方
+    FrozenCore         = 15;  // 冰魔方
+    LaserCannon        = 16;  // 激光砲
+    SmashHammer        = 17;  // 雷神錘
+    Mermaid            = 18;  // 美人魚神獸覺醒
+    MechanicalShark    = 19;  // 機械鯊魚嘴炮
+    ThunderTyrannosaur = 20;  // 雷霸龍
+    Trident            = 21;  // 海王神器
+    Monkey314          = 22;  // 314 猴
+    Monkey315          = 23;  // 315 猴
+}
+
+// TargetLevel 目標等級
+enum TargetLevel {
+    UNKNOWN_TARGET_LEVEL = 0;
+
+    S       = 100;  // 小
+    M       = 200;  // 中
+    L       = 300;  // 大
+    Special = 400;  // 特殊
+    Boss    = 500;  // 王
+}
+
+// TargetShowLevel 目標演出等級
+enum TargetShowLevel {
+    UNKNOWN_TARGET_SHOW_LEVEL = 0;
+
+    SS = 100;  // 小
+    SM = 200;  // 中
+    SL = 300;  // 大
+}
+
+// [RPC] Deliver 傳遞
+message DeliverRequest {
+    map<string, string> meta = 1;
+    bytes data               = 2;
+}
+message DeliverResponse {}
+
+// [RPC] GetMachine 取得機台資訊
+message GetMachineRequest {}
+message GetMachineResponse {
+    string machineID                                           = 1;  // 機台 ID
+    map<int32, GetMachineResponseSeat> seats                   = 2;  // 機台座位 seatID => GetMachineResponseSeat
+    map<string, GetMachineResponseTargetSetting> targetSetting = 3;  // 目標設定值列表 targetKind => GetMachineResponseTargetSetting
+    map<string, GetMachineResponseTarget> targets              = 4;  // 機台目前的目標們 targetID => GetMachineResponseTarget
+}
+message GetMachineResponseSeat {
+    int32 seatID                 = 1;  // 機台座位編號
+    int64 machinePlayerUserID    = 2;  // 機台玩家用戶 ID
+    string machinePlayerNickname = 3;  // 機台玩家用戶暱稱
+    int64 machinePlayerBetLevel  = 4;  // TODO 機台玩家押注等級
+    int64 machinePlayerBetAmount = 5;  // TODO 機台玩家押注金額
+}
+message GetMachineResponseTargetSetting {
+    string targetKind = 1;  // 目標類型 001 之類的
+    string name       = 2;  // 目標名稱
+    int64 minOdds     = 3;  // 最小倍率
+    int64 maxOdds     = 4;  // 最大倍率
+}
+message GetMachineResponseTarget {
+    string targetID                                         = 1;   // 目標 ID
+    string targetKind                                       = 2;   // 目標類型
+    TargetLevel targetLevel                                 = 3;   // 目標等級
+    int64 pathID                                            = 4;   // 路徑 ID
+    int64 enteredAtTimestampMillisecond                     = 5;   // 進入時間戳 毫秒
+    int64 exitedAtTimestampMillisecond                      = 6;   // 離開時間戳 毫秒
+    bool isDead                                             = 7;   // 是否死亡
+    TargetShowLevel targetShowLevel                         = 8;   // 死亡中獎演出等級
+    TargetShowLevel weakTargetShowLevel                     = 9;   // 小獎中獎演出等級
+    repeated GetMachineResponseTargetStopPeriod stopPeriods = 10;  // 停止時間段列表
+    int64 displayOdds                                       = 11;  // 顯示倍率 只有目標 308 活著時有用處
+    int64 finalOdds                                         = 12;  // 最終倍率 只有目標 308 死掉後有用處
+    map<int64, int64> specialOddsTimesMap                   = 13;  // 倍率 -> 次數 只有目標死掉後 308 有用處
+}
+message GetMachineResponseTargetStopPeriod {
+    int64 startedAtTimestampMillisecond = 1;  // 停止的開始時間戳 毫秒
+    int64 endedAtTimestampMillisecond   = 2;  // 停止的結束時間戳 毫秒
+}
+
+// [RPC] MachinePlayerEnter 機台玩家進入
+message MachinePlayerEnterRequest {
+    int32 seatID             = 1;
+    int64 betAmount          = 2;  // 下注金額
+    map<string, string> meta = 101;
+}
+message MachinePlayerEnterResponse {
+    int64 serverTimestampMillisecond = 1;  // 機台當下時間戳 毫秒
+}
+// [FrameEventData] MachinePlayerEnteredFrameEventData 機台玩家進入
+message MachinePlayerEnteredFrameEventData {
+    int32 seatID                 = 1;  // 座位編號
+    int64 machinePlayerUserID    = 2;  // 機台玩家用戶 ID
+    string machinePlayerNickname = 3;  // 機台玩家用戶暱稱
+    int64 machinePlayerBalance   = 4;  // 機台玩家餘額
+    int64 machinePlayerBetLevel  = 5;  // TODO 機台玩家押注等級
+    int64 machinePlayerBetAmount = 6;  // TODO 機台玩家押注金額
+}
+
+// [RPC] MachinePlayerExit 機台玩家離開
+message MachinePlayerExitRequest {
+    map<string, string> meta = 101;
+}
+message MachinePlayerExitResponse {}
+// [FrameEventData] MachinePlayerExitedFrameEventData 機台玩家離開
+message MachinePlayerExitedFrameEventData {
+    int32 seatID                 = 1;  // 座位編號
+    int64 machinePlayerUserID    = 2;  // 機台玩家用戶 ID
+    string machinePlayerNickname = 3;  // 機台玩家用戶暱稱
+    bool isKicked                = 4;  // 是否被踢
+}
+
+// [RPC] MachinePlayerFire 機台玩家發射子彈/使用武器
+message MachinePlayerFireRequest {
+    BulletKind bulletKind    = 1;  // 子彈類型
+    double angle             = 2;  // 從座位發射的角度
+    int64 betAmount          = 3;  // 下注金額
+    string targetID          = 4;  // 目標 ID
+    map<string, string> meta = 101;
+}
+message MachinePlayerFireResponse {
+    string bulletID = 1;  // (暫時棄用) 子彈 ID
+}
+// [FrameEventData] MachinePlayerFiredFrameEventData 機台玩家發射子彈/使用武器
+message MachinePlayerFiredFrameEventData {
+    int32 seatID              = 1;  // 座位編號
+    int64 machinePlayerUserID = 2;  // 機台玩家用戶 ID
+    string bulletID           = 3;  // (暫時棄用) 子彈 ID
+    BulletKind bulletKind     = 4;  // 子彈類型
+    double angle              = 5;  // 從座位發射的角度
+    string targetID           = 6;  // 目標 ID
+}
+
+// [RPC] MachinePlayerCatch 機台玩家射到目標 (抽獎)
+message MachinePlayerCatchRequest {
+    string bulletID          = 1;  // 子彈 ID (非唯一值)
+    BulletKind bulletKind    = 2;  // 子彈類型
+    int64 betAmount          = 3;  // 下注金額
+    string targetID          = 4;  // 目標 ID
+    int64 costAmount         = 5;  // 消費金額 用於特殊花費子彈
+    map<string, string> meta = 101;
+}
+message MachinePlayerCatchResponse {
+    string bulletID            = 1;  // 子彈 ID (非唯一值)
+    int64 machinePlayerBalance = 2;  // 機台玩家餘額
+    int64 gainAmount           = 3;  // 獲獎金額
+    int64 betAmount            = 4;  // 下注金額
+    string targetID            = 5;  // 目標 ID
+    string targetKind          = 6;  // 目標類型
+    int64 nextCatchTimes       = 7;  // 接下來攻擊幾次
+    int64 costAmount           = 8;  // 消費金額 用於特殊花費子彈
+}
+// [FrameEventData] MachinePlayerCatchedFrameEventData 機台玩家射到目標 (抽獎)
+message MachinePlayerCatchedFrameEventData {
+    int32 seatID                          = 1;   // 座位編號
+    int64 machinePlayerUserID             = 2;   // 機台玩家用戶 ID
+    string bulletID                       = 3;   // 子彈 ID (非唯一值)
+    string targetID                       = 4;   // 目標 ID
+    string targetKind                     = 5;   // 目標類型
+    int64 gainAmount                      = 6;   // 獲獎金額
+    bool isTargetDead                     = 7;   // 目標是否死亡
+    string specialBulletID                = 8;   // 特殊子彈 ID (當打死特殊子彈的特殊目標值會產生此值)
+    int64 odds                            = 9;   // 獲獎倍率
+    int64 nextCatchTimes                  = 10;  // 接下來攻擊幾次
+    int64 displayOdds                     = 11;  // 顯示倍率 只有目標 308 活著時有用處
+    int64 finalOdds                       = 12;  // 最終倍率 只有目標 308 死掉後有用處
+    map<int64, int64> specialOddsTimesMap = 13;  // 倍率 -> 次數 只有目標 308 死掉後有用處
+    int64 deadDisplayOdds                 = 14;  // 顯示倍率 只有目標 308 死掉後有用處
+    int64 betAmount                       = 15;  // 下注金額
+    int64 weakOddsNo                      = 16;  // 龍的倍數 額外倍數 奇怪的來源
+}
+
+// [RPC] MachinePlayerCatchMany 機台玩家一發射到多個目標 (一次抽多獎)
+message MachinePlayerCatchManyRequest {
+    string bulletID           = 1;  // 子彈 ID (非唯一值)
+    BulletKind bulletKind     = 2;  // 子彈類型
+    int64 betAmount           = 3;  // 下注金額
+    repeated string targetIDs = 4;  // 目標 ID
+    map<string, string> meta  = 101;
+}
+message MachinePlayerCatchManyResponse {
+    int64 machinePlayerBalance                                = 1;  // 機台玩家餘額
+    map<string, MachinePlayerCatchManyResponseTarget> targets = 2;  // targetID -> MachinePlayerCatchManyResponseTarget
+    BulletKind bulletKind                                     = 3;  // 子彈類型
+}
+message MachinePlayerCatchManyResponseTarget {
+    string bulletID   = 1;  // 子彈 ID (非唯一值)
+    string targetID   = 2;  // 目標 ID
+    string targetKind = 3;  // 目標類型
+    int64 gainAmount  = 4;  // 獲獎金額
+    int64 betAmount   = 5;  // 下注金額
+}
+// message MachinePlayerCatchedManyFrameEventData {}
+
+// [RPC] MachinePlayerUpdate 機台玩家更新自身資訊
+message MachinePlayerUpdateRequest {
+    int64 machinePlayerBetAmount = 1;  // 下注金額
+    map<string, string> meta     = 101;
+}
+message MachinePlayerUpdateResponse {}
+// [FrameEventData] MachinePlayerUpdatedFrameEventData 機台玩家更新自身資訊
+message MachinePlayerUpdatedFrameEventData {
+    int32 seatID                 = 1;  // 座位編號
+    int64 machinePlayerUserID    = 2;  // 機台玩家用戶 ID
+    string machinePlayerNickname = 3;  // 機台玩家用戶暱稱
+    int64 machinePlayerBalance   = 4;  // 機台玩家餘額
+    int64 machinePlayerBetAmount = 5;  // 機台玩家基本注額
+}
+
+// [Deprecated][RPC] MachinePlayerBulletSettleRequest 機台玩家結算某一個子彈的獲獎結果
+message MachinePlayerBulletSettleRequest {
+    string bulletID          = 1;  // 子彈 ID (非唯一值)
+    map<string, string> meta = 101;
+}
+message MachinePlayerBulletSettleResponse {}
+// [Deprecated][FrameEventData] MachinePlayerBulletSettledFrameEventData 機台玩家結算某一個子彈的獲獎結果
+message MachinePlayerBulletSettledFrameEventData {
+    int32 seatID                 = 1;  // 座位編號
+    int64 machinePlayerUserID    = 2;  // 機台玩家用戶 ID
+    string machinePlayerNickname = 3;  // 機台玩家用戶暱稱
+    int64 machinePlayerBalance   = 4;  // 機台玩家餘額
+    string bulletID              = 5;  // 子彈 ID (非唯一值)
+    BulletKind bulletKind        = 6;  // 子彈類型
+    int64 gainAmount             = 7;  // 這個子彈總共獲獎金額
+}
+
+// [FrameEventData] SceneUpdatedFrameEventData 場景更新
+message SceneUpdatedFrameEventData {
+    int32 sceneID        = 1;  // 場景編號
+    int64 numberOfFrames = 2;  // 總共多少幀 (非幀同步的幀)
+    int64 frameNumber    = 3;  // 當前在第幾幀 (非幀同步的幀)
+}
+
+// [FrameEventData] TargetCreatedFrameEventData 目標建立
+message TargetCreatedFrameEventData {
+    string targetID                     = 1;  // 目標 ID
+    string targetKind                   = 2;  // 目標類型
+    TargetLevel targetLevel             = 3;  // 目標等級
+    int64 pathID                        = 4;  // 路徑 ID
+    int64 enteredAtTimestampMillisecond = 5;  // 進入時間戳 毫秒
+    int64 exitedAtTimestampMillisecond  = 6;  // 離開時間戳 毫秒
+    int64 displayOdds                   = 7;  // 顯示倍率 只有目標 308 活著時有用處
+}
+
+// [RPC] TargetUpdate 目標更新
+message TargetUpdateRequest {
+    string targetID                                    = 1;  // 目標 ID
+    repeated TargetUpdateRequestStopPeriod stopPeriods = 2;  // 停止時間段列表
+    map<string, string> meta                           = 101;
+}
+message TargetUpdateRequestStopPeriod {
+    int64 StartedAtTimestampMillisecond = 1;  // 停止的開始時間戳 毫秒
+    int64 EndedAtTimestampMillisecond   = 2;  // 停止的結束時間戳 毫秒
+}
+message TargetUpdateResponse {}
+// [FrameEventData] TargetUpdatedFrameEventData 目標更新
+message TargetUpdatedFrameEventData {
+    string targetID                                            = 1;  // 目標 ID
+    int64 enteredAtTimestampMillisecond                        = 2;  // 進入時間戳 毫秒
+    int64 exitedAtTimestampMillisecond                         = 3;  // 離開時間戳 毫秒
+    repeated TargetUpdatedFrameEventDataStopPeriod stopPeriods = 4;  // 停止時間段列表
+}
+message TargetUpdatedFrameEventDataStopPeriod {
+    int64 startedAtTimestampMillisecond = 1;  // 停止的開始時間戳 毫秒
+    int64 endedAtTimestampMillisecond   = 2;  // 停止的結束時間戳 毫秒
+}
+
+// [RPC] TestOnlyMachinePlayerTargetSettings 列出機台玩家的目標設定值
+message TestOnlyMachinePlayerTargetSettingsRequest {}
+message TestOnlyMachinePlayerTargetSettingsResponse {
+    repeated TestOnlyMachinePlayerTargetSettingsResponseTarget machinePlayerTargetSettings = 1;
+    int64 machinePlayerTotalBetAmount                                                      = 2;
+    int64 machinePlayerTotalGainAmount                                                     = 3;
+}
+message TestOnlyMachinePlayerTargetSettingsResponseTarget {
+    string targetKind    = 1;  // 目標類型
+    int64 probabilty     = 2;  // 死亡時的中獎率 單位百萬分之一
+    int64 weakProbabilty = 3;  // 小獎時的中獎率 單位百萬分之一
+}
+
+// [Push] Frame
+message FrameMessage {
+    string machineID                            = 1;
+    repeated FrameMessageFrameEvent frameEvents = 2;
+    int64 timestampMilliSecond                  = 3;
+}
+message FrameMessageFrameEvent {
+    string id                     = 1;
+    FrameEventType frameEventType = 2;
+    map<string, string> meta      = 3;
+
+    // Used by FrameEventType:
+    // Delivered
+    bytes data = 4;
+
+    MachinePlayerEnteredFrameEventData machinePlayerEnteredFrameEventData             = 11;
+    MachinePlayerExitedFrameEventData machinePlayerExitedFrameEventData               = 12;
+    MachinePlayerFiredFrameEventData machinePlayerFiredFrameEventData                 = 13;
+    MachinePlayerCatchedFrameEventData machinePlayerCatchedFrameEventData             = 14;
+    MachinePlayerUpdatedFrameEventData machinePlayerUpdatedFrameEventData             = 15;
+    SceneUpdatedFrameEventData sceneUpdatedFrameEventData                             = 16;
+    TargetCreatedFrameEventData targetCreatedFrameEventData                           = 17;
+    MachinePlayerBulletSettledFrameEventData machinePlayerBulletSettledFrameEventData = 18;  // Deprecated
+    TargetUpdatedFrameEventData targetUpdatedFrameEventData                           = 19;
+
+    // 暫時還沒啟用
+    oneof frameEventData {
+        MachinePlayerEnteredFrameEventData machinePlayerEntered             = 111;
+        MachinePlayerExitedFrameEventData machinePlayerExited               = 112;
+        MachinePlayerFiredFrameEventData machinePlayerFired                 = 113;
+        MachinePlayerCatchedFrameEventData machinePlayerCatched             = 114;
+        MachinePlayerUpdatedFrameEventData machinePlayerUpdated             = 115;
+        SceneUpdatedFrameEventData sceneUpdated                             = 116;
+        TargetCreatedFrameEventData targetCreated                           = 117;
+        MachinePlayerBulletSettledFrameEventData machinePlayerBulletSettled = 118;  // Deprecated
+        TargetUpdatedFrameEventData targetUpdated                           = 119;
+    }
+}
+
+// [Tape] BetOrderTape 用來將多筆子彈的抽獎結果序列化後儲存
+message BetOrderTape {
+    int32 machineLevel                  = 1;  // 機台等級
+    repeated BetOrderTapeBullet bullets = 2;  // 子彈
+}
+message BetOrderTapeBullet {
+    BulletKind bulletKind   = 1;   // 子彈類型
+    string targetKind       = 2;   // 目標類型
+    string targetName       = 3;   // 目標名稱
+    TargetLevel targetLevel = 4;   // 目標等級
+    int64 betAmount         = 5;   // 下注金額
+    int64 gainAmount        = 6;   // 這個子彈總共獲獎金額
+    int64 odds              = 7;   // 獲獎倍率
+    bool isTargetDead       = 8;   // 目標是否死亡
+    string bulletID         = 9;   // 子彈 ID (Debug)
+    string requestID        = 10;  // 請求 ID (Debug)
+}

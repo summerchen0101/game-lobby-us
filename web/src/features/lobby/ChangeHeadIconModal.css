@@ -1,0 +1,83 @@
+/* Change head icon — 外殼在 AppModal.css；內容網格與底色 */
+.app-modal.change-head-icon-modal {
+  max-width: 20.5rem;
+  max-height: min(90dvh, 540px);
+}
+
+.change-head-icon-modal__body {
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  background: #1e2542;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.change-head-icon-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45rem;
+}
+
+.change-head-icon-modal__tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 0.4rem;
+  border: 2px solid rgb(0 0 0 / 45%);
+  padding: 0;
+  background: #14182a;
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.change-head-icon-modal__tile--selected {
+  border-color: #22d3ee;
+  box-shadow:
+    0 0 0 1px #22d3ee,
+    0 0 0.5rem rgb(34 211 238 / 35%);
+}
+
+.change-head-icon-modal__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.change-head-icon-modal__footer {
+  padding: 0 var(--space-3) var(--space-4);
+  background: var(--modal-panel-bg);
+  flex-shrink: 0;
+}
+
+.change-head-icon-modal__confirm {
+  width: 100%;
+  min-height: 2.6rem;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+  cursor: pointer;
+  background: var(--crown-button-primary-gradient);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.change-head-icon-modal__confirm:hover {
+  filter: brightness(1.05);
+}
+
+.change-head-icon-modal__confirm:active {
+  filter: brightness(0.97);
+}
+
+@media (min-width: 48rem) {
+  .app-modal.change-head-icon-modal {
+    max-width: min(28rem, calc(100vw - 2 * var(--page-pad-inline)));
+    max-height: var(--modal-scroll-max-height);
+  }
+}
