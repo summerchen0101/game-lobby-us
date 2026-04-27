@@ -18,6 +18,7 @@ import {
   trustpilotBusinessUnitId,
   unityWebEntryDefaultGameId,
   isSlotWebEntryEnabled,
+  isWsLobbyGamesEnabled,
 } from "../../lib/env";
 import { GATEWAY_API_LOBBY_GET } from "../../realtime/gatewayApi";
 import {
@@ -107,6 +108,20 @@ export function LandingPage() {
   const { activeWallet } = useWallet();
   const { open: openShell } = useGameShell();
 
+  const wsLobbyEnabled = isWsLobbyGamesEnabled();
+  const gatewayWsEnabled =
+    devGatewayWsProbeEnabled() || (wsLobbyEnabled && !!token);
+  const shouldRunLobbyGetOnOpen =
+    (import.meta.env.DEV && import.meta.env.VITE_DEV_LOBBY_GET !== "false") ||
+    (wsLobbyEnabled && !!token);
+
+  const [wsLobbyGames, setWsLobbyGames] = useState<Game[] | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [apiItems, setApiItems] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lobbyFilter, setLobbyFilter] = useState<LobbyFilterTab>("all");
+
   const getRequestBasicExtras = useCallback((): Record<string, unknown> => {
     const uid = user?.id;
     if (!uid || !/^\d+$/.test(uid)) {
@@ -117,65 +132,105 @@ export function LandingPage() {
   }, [user?.id]);
 
   useGatewayWs({
-    enabled: devGatewayWsProbeEnabled(),
+    enabled: gatewayWsEnabled,
     wsToken: token ?? "",
     clientVer: import.meta.env.VITE_CLIENT_VER?.trim() || undefined,
     getRequestBasicExtras,
     onState: (s) => {
-      console.info(
-        "[gateway-ws][dev] state:",
-        s,
-        "url:",
-        getGatewayWsUrl({ token: token ?? "" }),
-      );
+      if (import.meta.env.DEV) {
+        console.info(
+          "[gateway-ws][dev] state:",
+          s,
+          "url:",
+          getGatewayWsUrl({ token: token ?? "" }),
+        );
+      }
     },
     onResponse: (msg) => {
-      console.info("[gateway-ws][dev] response:", msg);
+      if (import.meta.env.DEV) {
+        console.info("[gateway-ws][dev] response:", msg);
+      }
     },
     onOpen: async ({ request }) => {
-      if (!import.meta.env.DEV) return;
-      if (import.meta.env.VITE_DEV_LOBBY_GET === "false") return;
+      if (!shouldRunLobbyGetOnOpen) return;
       try {
         const r = await request({
           type: GATEWAY_API_LOBBY_GET,
           data: new Uint8Array(0),
+          debugLabel: "LOBBY_GET",
         });
         const raw = r.data;
         const len = raw instanceof Uint8Array ? raw.byteLength : 0;
-        console.info("[gateway-ws][dev] LOBBY_GET", {
-          code: r.code,
-          type: r.type,
-          errMessage: r.errMessage,
-          dataLength: len,
-          dataHexPreview24:
-            len > 0 && raw instanceof Uint8Array ? hexPreview(raw, 24) : "",
-        });
-        if (
-          len > 0 &&
-          raw instanceof Uint8Array &&
-          String(r.code) === "200"
-        ) {
-          try {
-            const decoded = decodeLobbyGetResponseBytes(raw)
-            const items = lobbyDecodedGamesToApiGames(decoded)
-            console.info(
-              "[gateway-ws][dev] LOBBY_GET decoded games:",
-              items.length,
-              items.slice(0, 3),
-            )
-          } catch (decodeErr) {
-            console.warn("[gateway-ws][dev] LOBBY_GET decode failed", decodeErr)
+        if (import.meta.env.DEV) {
+          console.info("[gateway-ws][dev] LOBBY_GET", {
+            code: r.code,
+            type: r.type,
+            errMessage: r.errMessage,
+            dataLength: len,
+            dataHexPreview24:
+              len > 0 && raw instanceof Uint8Array ? hexPreview(raw, 24) : "",
+          });
+        }
+        if (String(r.code) === "200") {
+          if (len > 0 && raw instanceof Uint8Array) {
+            try {
+              const decoded = decodeLobbyGetResponseBytes(raw);
+              const items = lobbyDecodedGamesToApiGames(decoded);
+              if (import.meta.env.DEV) {
+                console.info(
+                  "[gateway-ws][dev] LOBBY_GET decoded games:",
+                  items.length,
+                  items.slice(0, 3),
+                );
+              }
+              if (wsLobbyEnabled) {
+                setWsLobbyGames(items);
+                setError(null);
+              }
+            } catch (decodeErr) {
+              console.warn(
+                "[gateway-ws] LOBBY_GET decode failed",
+                decodeErr,
+              );
+              if (wsLobbyEnabled) {
+                setWsLobbyGames([]);
+                setError("Could not decode lobby games");
+              }
+            }
+          } else if (wsLobbyEnabled) {
+            setWsLobbyGames([]);
+            setError(null);
           }
+        } else if (wsLobbyEnabled) {
+          setWsLobbyGames([]);
+          setError(
+            r.errMessage?.trim() ||
+              `Lobby request failed (${String(r.code ?? "")})`,
+          );
         }
       } catch (e) {
-        console.warn("[gateway-ws][dev] LOBBY_GET failed", e);
+        console.warn("[gateway-ws] LOBBY_GET failed", e);
+        if (wsLobbyEnabled) {
+          setWsLobbyGames([]);
+          setError(
+            e instanceof Error ? e.message : "Lobby WebSocket request failed",
+          );
+        }
+      } finally {
+        if (wsLobbyEnabled) setLoading(false);
       }
     },
     onSocketError: (ev) => {
-      console.warn("[gateway-ws][dev] WebSocket error:", ev);
+      console.warn("[gateway-ws] WebSocket error:", ev);
+      if (wsLobbyEnabled && token) {
+        setLoading(false);
+        setError((prev) => prev ?? "WebSocket connection error");
+      }
     },
     onGatewayError: (msg) => {
-      console.warn("[gateway-ws][dev] non-success code:", msg);
+      if (import.meta.env.DEV) {
+        console.warn("[gateway-ws][dev] non-success code:", msg);
+      }
     },
   });
   const {
@@ -194,12 +249,6 @@ export function LandingPage() {
     onTermsAccepted,
   } = useAuthModals();
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [apiItems, setApiItems] = useState<Game[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lobbyFilter, setLobbyFilter] = useState<LobbyFilterTab>("all");
-
   const tpId = trustpilotBusinessUnitId();
   const sessionHeroSrc = useMemo(
     () => getSessionLobbyBannerImage(activeWallet),
@@ -207,10 +256,13 @@ export function LandingPage() {
   );
   const guestHeroSrc = getGuestHeroImage();
 
-  const displayGames = useMemo(
-    () => (token ? [UNITY_DEMO_LOBBY_GAME, ...apiItems] : GUEST_DEMO_GAMES),
-    [token, apiItems],
-  );
+  const displayGames = useMemo(() => {
+    if (!token) return GUEST_DEMO_GAMES;
+    if (wsLobbyEnabled && wsLobbyGames !== null) {
+      return [UNITY_DEMO_LOBBY_GAME, ...wsLobbyGames];
+    }
+    return [UNITY_DEMO_LOBBY_GAME, ...apiItems];
+  }, [token, apiItems, wsLobbyEnabled, wsLobbyGames]);
 
   /** 各分類一份列表（已登入分頁用） */
   const gamesByFilter = useMemo(() => {
@@ -249,8 +301,16 @@ export function LandingPage() {
   useEffect(() => {
     if (!token) {
       setApiItems([]);
+      setWsLobbyGames(null);
       setLoading(false);
       setError(null);
+      return;
+    }
+    if (wsLobbyEnabled) {
+      setError(null);
+      setLoading(true);
+      setApiItems([]);
+      void refreshUser();
       return;
     }
     let cancelled = false;
@@ -279,7 +339,7 @@ export function LandingPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, refreshUser]);
+  }, [token, refreshUser, wsLobbyEnabled]);
 
   useEffect(() => {
     const { documentElement, body } = document;

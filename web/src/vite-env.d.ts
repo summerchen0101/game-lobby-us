@@ -6,6 +6,15 @@ interface ImportMetaEnv {
   readonly VITE_API_BASE: string
   /** 設為 "true" 時使用內建假 API，不發網路請求 */
   readonly VITE_API_USE_MOCK: string
+  /**
+   * 設為 "true" 時登入改走 Gateway WebSocket `SERVER_LOGIN`（`ApiType` 4）；
+   * 回傳 `data` 需可解析出與 REST 相同的 `accessToken`（JSON 或 `ServerLoginData` proto，見 `gatewayAuthWire`）。
+   */
+  readonly VITE_AUTH_USE_GATEWAY_WS?: string
+  /**
+   * 可選，毫秒；覆寫 `VITE_AUTH_USE_GATEWAY_WS` 登入流程裡 `createGatewayWs` 的 `request()` 逾時（預設 25000）。
+   */
+  readonly VITE_GATEWAY_LOGIN_REQUEST_TIMEOUT_MS?: string
   /** 內嵌遊戲/金流：預設與新分頁。設為 "true" 則遊戲預設新分頁（可覆寫每款遊戲） */
   readonly VITE_OPEN_GAMES_IN_NEW_WINDOW: string
   readonly VITE_API_PATH_AUTH_REGISTER: string
@@ -36,6 +45,8 @@ interface ImportMetaEnv {
   readonly VITE_DEV_LOBBY_GET?: string
   /** 寫入 Gateway RequestBasic.clientVer */
   readonly VITE_CLIENT_VER?: string
+  /** 已登入時大廳遊戲列表改由 WS LOBBY_GET 解碼結果驅動（需能連上 Gateway） */
+  readonly VITE_USE_WS_LOBBY_GAMES?: string
   /** 大廳主視覺圖 URL（可覆寫預設 sample 圖） */
   readonly VITE_LOBBY_HERO_IMAGE?: string
   /** 訪客首頁 hero 圖；未設則沿用 VITE_LOBBY_HERO_IMAGE／預設 */

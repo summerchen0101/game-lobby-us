@@ -15,6 +15,10 @@ export type GatewayWsRequestPayload = {
   data?: Uint8Array
   /** 併入該次 Request 的 RequestBasic（會蓋過同鍵的 getRequestBasicExtras） */
   basicExtras?: Record<string, unknown>
+  /**
+   * 僅 `import.meta.env.DEV`：console 上辨識用途（如 `SERVER_LOGIN`、`LOBBY_GET`），不寫上線。
+   */
+  debugLabel?: string
 }
 
 export type GatewayWsRequestFn = (
@@ -49,6 +53,16 @@ export type GatewayWsOptions = {
   onSocketError?: (ev: Event) => void
   /** 業務 code 非 200/204 時觸發（仍會先呼叫 onResponse） */
   onGatewayError?: (msg: GatewayWsResponseObject) => void
+  /**
+   * 若為 true，`open` 時不送首包 `PING_PONG`（仍遵守 `heartbeatIntervalMs` 之後續心跳）。
+   * 用於臨時連線只發單一業務請求、避免兩筆 `pending` 與後端亂序回包。
+   */
+  skipInitialPing?: boolean
+  /**
+   * 若為 true：當回應之 `basic.requestID` 與任一 `pending` 不符，但 `code` 為成功且僅剩一筆 `pending` 時，
+   * 仍將該則回應配給那筆請求（因部分後端不會回寫與 Request 相同之 requestID）。
+   */
+  pairUnmatchedSuccessToSinglePending?: boolean
 }
 
 const PING_PONG = 0
@@ -57,6 +71,8 @@ type PendingEntry = {
   resolve: (v: GatewayWsResponseObject) => void
   reject: (e: Error) => void
   timer: ReturnType<typeof setTimeout> | null
+  /** 僅 DEV；與 `GatewayWsRequestPayload.debugLabel` 相同 */
+  debugLabel?: string
 }
 
 /** WebSocket `send` 在 DOM 型別上要求 `ArrayBuffer`，避免 `Uint8Array<ArrayBufferLike>` 不相容。 */
@@ -69,6 +85,22 @@ function randomRequestId(): string {
     return crypto.randomUUID()
   }
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+/** 與 `pending` 的 key（UUID 字串）比對用；避免 Long／number 邊角 */
+function normalizeResponseRequestId(raw: unknown): string {
+  if (raw == null) return ''
+  if (typeof raw === 'string') return raw
+  if (typeof raw === 'number' && Number.isFinite(raw)) return String(raw)
+  if (typeof raw === 'bigint') return raw.toString()
+  return String(raw).trim()
+}
+
+/** `toObject`／執行期可能為 `requestID` 或 `requestId`，需與送出之 `RequestBasic.requestID` 對齊 */
+function extractBasicRequestId(basic: unknown): string {
+  if (!basic || typeof basic !== 'object') return ''
+  const o = basic as Record<string, unknown>
+  return normalizeResponseRequestId(o.requestID ?? o.requestId)
 }
 
 export function createGatewayWs(options: GatewayWsOptions = {}) {
@@ -86,6 +118,8 @@ export function createGatewayWs(options: GatewayWsOptions = {}) {
   const maxDelay = options.maxReconnectDelayMs ?? 30_000
   const requestTimeoutMs = options.requestTimeoutMs ?? 15_000
   const defaultClientVer = options.clientVer?.trim() || 'web-alpha'
+  const skipInitialPing = options.skipInitialPing === true
+  const pairUnmatchedSuccessToSinglePending = options.pairUnmatchedSuccessToSinglePending === true
 
   function rejectAllPending(reason: Error) {
     for (const [, entry] of pending) {
@@ -114,29 +148,39 @@ export function createGatewayWs(options: GatewayWsOptions = {}) {
     }
   }
 
-  function buildPingRequest(): Uint8Array {
+  function buildPingRequest(): { payload: Uint8Array; requestID: string } {
     const extras = options.getRequestBasicExtras?.() ?? {}
     const tokenBasic =
       options.wsToken !== undefined
         ? (options.wsToken ?? '')
         : String((extras as { token?: string }).token ?? '')
-    return encodeGatewayRequest({
+    const requestID = randomRequestId()
+    const payload = encodeGatewayRequest({
       basic: {
         ...extras,
         clientVer: (extras as { clientVer?: string }).clientVer ?? defaultClientVer,
         token: tokenBasic,
         timestamp: Date.now(),
-        requestID: randomRequestId(),
+        requestID,
       },
       type: PING_PONG,
       data: new Uint8Array(0),
     })
+    return { payload, requestID }
   }
 
   function sendPing() {
     if (!ws || ws.readyState !== WebSocket.OPEN) return
     try {
-      ws.send(asWsBinaryPayload(buildPingRequest()))
+      const { payload, requestID } = buildPingRequest()
+      if (import.meta.env.DEV) {
+        console.info('[gateway-ws][dev] PING_PONG', '→ request', {
+          type: PING_PONG,
+          requestID,
+          dataLength: 0,
+        })
+      }
+      ws.send(asWsBinaryPayload(payload))
     } catch (e) {
       console.warn('[gateway-ws] ping send failed', e)
     }
@@ -148,24 +192,71 @@ export function createGatewayWs(options: GatewayWsOptions = {}) {
     heartbeatTimer = setInterval(sendPing, heartbeatIntervalMs)
   }
 
-  function handleMessage(data: ArrayBuffer) {
-    const buf = new Uint8Array(data)
-    const decoded = decodeGatewayResponse(buf)
-    const obj = gatewayResponseToObject(decoded)
-    const ridRaw = obj.basic?.requestID
-    const rid = typeof ridRaw === 'string' ? ridRaw : ''
-    if (rid && pending.has(rid)) {
-      const entry = pending.get(rid)!
-      pending.delete(rid)
+  function handleIncomingArrayBuffer(data: ArrayBuffer) {
+    let obj: GatewayWsResponseObject
+    try {
+      const buf = new Uint8Array(data)
+      const decoded = decodeGatewayResponse(buf)
+      obj = gatewayResponseToObject(decoded)
+    } catch (e) {
+      if (import.meta.env.DEV) {
+        console.warn('[gateway-ws] failed to decode binary as gateway.Response', e)
+      }
+      return
+    }
+    const rid = extractBasicRequestId((obj as { basic?: unknown }).basic)
+    const codeStr = String(obj.code ?? '')
+    const success = isGatewaySuccessCode(codeStr)
+
+    function completeEntry(requestKey: string, entry: PendingEntry) {
+      if (import.meta.env.DEV && entry.debugLabel) {
+        const d = (obj as { data?: Uint8Array }).data
+        console.info('[gateway-ws][dev]', entry.debugLabel, '← response', {
+          type: obj.type,
+          code: codeStr,
+          responseRequestId: extractBasicRequestId((obj as { basic?: unknown }).basic) || '(empty)',
+          dataLength: d instanceof Uint8Array ? d.byteLength : 0,
+        })
+      }
+      pending.delete(requestKey)
       if (entry.timer !== null) {
         clearTimeout(entry.timer)
         entry.timer = null
       }
       entry.resolve(obj)
     }
+
+    if (rid && pending.has(rid)) {
+      const entry = pending.get(rid)!
+      completeEntry(rid, entry)
+    } else if (
+      pairUnmatchedSuccessToSinglePending &&
+      success &&
+      pending.size === 1
+    ) {
+      const [onlyId, entry] = pending.entries().next().value!
+      completeEntry(onlyId, entry)
+    } else if (import.meta.env.DEV && pending.size > 0) {
+      const pendingSample = pending.size <= 3 ? [...pending.keys()].join(', ') : `${pending.size} keys`
+      console.warn('[gateway-ws] response did not match any pending request', {
+        responseRequestId: rid || '(empty)',
+        pendingKeysSample: pendingSample,
+        type: obj.type,
+        code: codeStr,
+        errMessage: (obj as { errMessage?: string }).errMessage,
+      })
+    }
+    if (import.meta.env.DEV && success && Number(obj.type) === 0) {
+      const d0 = (obj as { data?: Uint8Array }).data
+      console.info('[gateway-ws][dev] PING_PONG', '← response', {
+        type: 0,
+        code: codeStr,
+        responseRequestId: rid || '(empty)',
+        dataLength: d0 instanceof Uint8Array ? d0.byteLength : 0,
+      })
+    }
     options.onResponse?.(obj)
-    const code = String(obj.code ?? '')
-    if (code && !isGatewaySuccessCode(code)) {
+    if (codeStr && !isGatewaySuccessCode(codeStr)) {
       options.onGatewayError?.(obj)
     }
   }
@@ -209,13 +300,33 @@ export function createGatewayWs(options: GatewayWsOptions = {}) {
       let timer: ReturnType<typeof setTimeout> | null = null
       if (requestTimeoutMs > 0) {
         timer = setTimeout(() => {
+          const ent = pending.get(requestID)
+          if (import.meta.env.DEV && ent?.debugLabel) {
+            console.warn('[gateway-ws][dev] timeout', {
+              debugLabel: ent.debugLabel,
+              requestID,
+            })
+          }
           pending.delete(requestID)
           reject(new Error(`[gateway-ws] request timeout: ${requestID}`))
         }, requestTimeoutMs)
       }
-      pending.set(requestID, { resolve, reject, timer })
+      const dataForLen = req.data ?? new Uint8Array(0)
+      pending.set(requestID, {
+        resolve,
+        reject,
+        timer,
+        debugLabel: req.debugLabel,
+      })
       try {
         ws!.send(asWsBinaryPayload(payload))
+        if (import.meta.env.DEV && req.debugLabel) {
+          console.info('[gateway-ws][dev]', req.debugLabel, '→ request', {
+            type: req.type,
+            requestID,
+            dataLength: dataForLen.byteLength,
+          })
+        }
       } catch (e) {
         pending.delete(requestID)
         if (timer !== null) clearTimeout(timer)
@@ -244,14 +355,39 @@ export function createGatewayWs(options: GatewayWsOptions = {}) {
     socket.onopen = () => {
       attempt = 0
       setState('open')
-      sendPing()
+      if (!skipInitialPing) {
+        sendPing()
+      }
       startHeartbeat()
       options.onOpen?.({ request })
     }
 
     socket.onmessage = (ev) => {
-      if (ev.data instanceof ArrayBuffer) {
-        handleMessage(ev.data)
+      const d = ev.data
+      if (d instanceof ArrayBuffer) {
+        handleIncomingArrayBuffer(d)
+        return
+      }
+      if (typeof Blob !== 'undefined' && d instanceof Blob) {
+        void d.arrayBuffer().then(
+          (ab) => {
+            handleIncomingArrayBuffer(ab)
+          },
+          (e) => {
+            if (import.meta.env.DEV) {
+              console.warn('[gateway-ws] Blob.arrayBuffer() failed', e)
+            }
+          },
+        )
+        return
+      }
+      if (typeof d === 'string') {
+        if (import.meta.env.DEV) {
+          console.warn(
+            '[gateway-ws] text WebSocket frame (ignored; expected binary gateway.Response)',
+            d.length > 200 ? `${d.slice(0, 200)}…` : d,
+          )
+        }
       }
     }
 

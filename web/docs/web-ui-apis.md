@@ -9,8 +9,8 @@
 
 | 通道 | 用途 |
 |------|------|
-| **REST（JSON + `fetch`）** | 註冊、登入、目前使用者、大廳遊戲列表、忘記密碼；另有「儲值導轉」API 已封裝但尚未在 UI 串接。 |
-| **WebSocket + Gateway 二進位** | 連線存活 heartbeat（`PING_PONG`）、可選的大廳遊戲列表（`LOBBY_GET`）。 |
+| **REST（JSON + `fetch`）** | 預設：註冊、**登入**、目前使用者、大廳遊戲列表、忘記密碼等；另有「儲值導轉」API 已封裝但尚未在 UI 串接。若設 `VITE_AUTH_USE_GATEWAY_WS=true` 則**登入**改走下項 `SERVER_LOGIN`，不送 `POST /api/auth/login`。 |
+| **WebSocket + Gateway 二進位** | 連線存活 `PING_PONG`、可選大廳遊戲 `LOBBY_GET`、可選**帳密登入** `SERVER_LOGIN`（`ApiType` 4；見 [`gatewayAuthWire.ts`](../src/realtime/gatewayAuthWire.ts)、[`gatewayLogin.ts`](../src/realtime/gatewayLogin.ts)）。若回 `200` 且有 `data`：解析出 `accessToken`（JSON／`ServerLoginData` 等）。若回 **`code` `204` 且無 `data`**：前端產生 opaque `accessToken` 並以帳號字串暫作 `user.id`（不呼叫 `GET /api/user/me`），非真實 JWT。其餘成功碼而 `data` 空則錯。 |
 | **Mock 模式** | `VITE_API_USE_MOCK=true` 時不發真實 REST，由 [`web/src/lib/api/mock.ts`](../src/lib/api/mock.ts) 回傳。 |
 
 實作入口：[`apiRequest`](../src/lib/api/client.ts)、[`getApiPaths`](../src/lib/api/paths.ts)、[`useGatewayWs` / `createGatewayWs`](../src/realtime/useGatewayWs.ts)。
@@ -51,7 +51,7 @@
 
 ## 3. WebSocket Gateway（protobuf `Request` / `Response`）
 
-連線與二進位編解碼：[`gatewayWs.ts`](../src/realtime/gatewayWs.ts)、[`gatewayWire.ts`](../src/realtime/gatewayWire.ts)。`type` 對應 `proto/gateway/gateway.proto` 的 `ApiType`；常數見 [`gatewayApi.ts`](../src/realtime/gatewayApi.ts)。
+連線與二進位編解碼：[`gatewayWs.ts`](../src/realtime/gatewayWs.ts)、[`gatewayWire.ts`](../src/realtime/gatewayWire.ts)。`type` 對應 `proto/gateway/gateway.proto` 的 `ApiType`；常數見 [`gatewayApi.ts`](../src/realtime/gatewayApi.ts)。`GatewayWsRequestPayload` 可選的 `debugLabel` 僅在開發建置（Vite `import.meta.env.DEV`）寫入 console 辨識用，不影響上線行為。
 
 ### 3.1 目前專案會送出的 `type`
 
@@ -75,6 +75,10 @@
 
 若伺服器推播，可能出現與 [gateway-proto-api.md](./gateway-proto-api.md) 中 `ApiType` 1000+ 等一致之 `type`；目前大廳 **沒有** 針對各 push 寫專屬處理，多數僅經 `onResponse` 略過或 dev log。
 
+### 3.1 除錯：`[gateway-ws] request timeout`（登入／`request()`）
+
+表示在逾時時間內沒有收到 **可與該次 `RequestBasic.requestID` 配對** 的 `gateway.Response` 二進位訊息。請在 **DevTools → Network → 該 WebSocket → Messages** 檢查：登入前後是否有**進站**二進位訊息；若完全沒有，偏閘道未回或 `ApiType` 未實作。若回包之 `requestID` 與請求 UUID **不一致**（部分後端會回寫自訂 id），臨時登入連線在 [`gatewayLogin`](../src/realtime/gatewayLogin.ts) 啟用 **`pairUnmatchedSuccessToSinglePending` + 不送首包 PING`**，使僅一筆 `SERVER_LOGIN` 之成功回應仍會被配對。開發模式下 [`gatewayWs`](../src/realtime/gatewayWs.ts) 在仍無法配對時 `console.warn`。可設 `VITE_GATEWAY_LOGIN_REQUEST_TIMEOUT_MS` 拉長單次逾時（見下表）。
+
 ---
 
 ## 4. 環境變數與行為速查
@@ -86,6 +90,8 @@
 | `VITE_API_PATH_AUTH_REGISTER` / `LOGIN` / `LOBBY_GAMES` / `USER_ME` / `PAYMENT_DEPOSIT` | 覆寫預設 REST 路徑。 |
 | `VITE_WS_URL`、`VITE_WS_DEVICE_ID` | Gateway WebSocket 連線 URL（[`env.ts` `getGatewayWsUrl`](../src/lib/env.ts)）。 |
 | `VITE_USE_WS_LOBBY_GAMES` | 為 `true` 且已登入：啟用 WS、並以 `LOBBY_GET` 解出來的列表作為大廳遊戲來源。 |
+| `VITE_AUTH_USE_GATEWAY_WS` | 為 `true` 且非 mock：登入改送 Gateway `SERVER_LOGIN`（4），`req.data` 為 `LoginRequest`（username=帳號、password），見 [`gateway-proto-api.md`](./gateway-proto-api.md) 之 `ApiType`。 |
+| `VITE_GATEWAY_LOGIN_REQUEST_TIMEOUT_MS` | 可選；覆寫 Gateway 登入用 `createGatewayWs` 的 `request()` 逾時（毫秒），不設則 25000。 |
 | `VITE_DEV_GATEWAY_WS` / `VITE_DEV_LOBBY_GET` | 開發用：方便連上 Gateway / 送 `LOBBY_GET` 除錯。 |
 | `VITE_CLIENT_VER` | 寫入每則 `RequestBasic.clientVer`。 |
 

@@ -103,6 +103,8 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
       onClose();
       if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
         navigate(redirect, { replace: true });
+      } else {
+        navigate("/", { replace: true });
       }
     } catch (err) {
       const msg =
