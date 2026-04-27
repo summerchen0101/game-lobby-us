@@ -109,11 +109,12 @@ export function LandingPage() {
   const { open: openShell } = useGameShell();
 
   const wsLobbyEnabled = isWsLobbyGamesEnabled();
+  /** 與 login_flow：無 token 亦可連線 PING / LOBBY_GET；啟用 WS 大廳時訪客也維持連線 */
   const gatewayWsEnabled =
-    devGatewayWsProbeEnabled() || (wsLobbyEnabled && !!token);
+    devGatewayWsProbeEnabled() || wsLobbyEnabled;
   const shouldRunLobbyGetOnOpen =
     (import.meta.env.DEV && import.meta.env.VITE_DEV_LOBBY_GET !== "false") ||
-    (wsLobbyEnabled && !!token);
+    wsLobbyEnabled;
 
   const [wsLobbyGames, setWsLobbyGames] = useState<Game[] | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -672,7 +673,7 @@ export function LandingPage() {
       <PhoneVerificationModal
         open={phoneVerifyOpen}
         onClose={closePhoneVerify}
-        displayPhone={phoneVerifyPayload?.displayPhone ?? ""}
+        displayEmail={phoneVerifyPayload?.displayEmail ?? ""}
         pendingBody={phoneVerifyPayload?.body ?? null}
       />
     </div>

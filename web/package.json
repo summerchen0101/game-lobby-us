@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "proto:generate": "node scripts/generate-gateway-schema.mjs && node scripts/generate-lobby-schema.mjs && node scripts/generate-gateway-auth-schema.mjs",
+    "proto:generate": "node scripts/generate-gateway-schema.mjs && node scripts/generate-lobby-schema.mjs",
     "git:company-branch": "bash ../scripts/company-web-subtree.sh"
   },
   "dependencies": {

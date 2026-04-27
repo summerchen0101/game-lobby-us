@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IoChevronBack } from "react-icons/io5";
 import { useAuth } from "../../auth/useAuth";
-import { ApiError } from "../../lib/api/client";
+import { ApiError, ClientVersionError } from "../../lib/api/client";
 import { requestPasswordReset } from "../../lib/api/passwordReset";
 import "./AuthModals.css";
 
@@ -107,6 +107,13 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
         navigate("/", { replace: true });
       }
     } catch (err) {
+      if (err instanceof ClientVersionError) {
+        window.open(err.updateUrl, "_blank", "noopener,noreferrer");
+        setError(
+          "A new version is required. A download page was opened in a new tab.",
+        );
+        return;
+      }
       const msg =
         err instanceof ApiError
           ? err.message

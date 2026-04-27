@@ -2,7 +2,7 @@ import { type FormEvent, useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
-import { ApiError } from '../../lib/api/client'
+import { ApiError, ClientVersionError } from '../../lib/api/client'
 import type { RegisterBody } from '../../lib/api/types'
 import './AuthModals.css'
 import './PhoneVerificationModal.css'
@@ -14,12 +14,12 @@ const OTP_MAX_LEN = 6
 type Props = {
   open: boolean
   onClose: () => void
-  displayPhone: string
-  /** Cleared by provider when closed; when open this must be the pending register body */
+  displayEmail: string
+  /** Cleared by provider when closed; when open this must be the pending sign-up (second POST sets `answer`) */
   pendingBody: RegisterBody | null
 }
 
-export function PhoneVerificationModal({ open, onClose, displayPhone, pendingBody }: Props) {
+export function PhoneVerificationModal({ open, onClose, displayEmail, pendingBody }: Props) {
   const { register } = useAuth()
   const navigate = useNavigate()
   const formId = useId()
@@ -68,10 +68,15 @@ export function PhoneVerificationModal({ open, onClose, displayPhone, pendingBod
     }
     setSubmitting(true)
     try {
-      await register(pendingBody)
+      await register({ ...pendingBody, answer: code })
       onClose()
       navigate('/', { replace: true })
     } catch (err) {
+      if (err instanceof ClientVersionError) {
+        window.open(err.updateUrl, '_blank', 'noopener,noreferrer')
+        setError('A new version is required. A download page was opened in a new tab.')
+        return
+      }
       const msg =
         err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Registration failed'
       setError(msg)
@@ -88,28 +93,28 @@ export function PhoneVerificationModal({ open, onClose, displayPhone, pendingBod
         className="app-modal app-modal--col phone-verify-modal"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="phone-verify-title"
+        aria-labelledby="email-verify-title"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="app-modal__header phone-verify-modal__header">
           <button type="button" className="app-modal__close" onClick={onClose} aria-label="Close">
             ×
           </button>
-          <h2 id="phone-verify-title" className="app-modal__title">
-            Phone verification
+          <h2 id="email-verify-title" className="app-modal__title">
+            Verify your email
           </h2>
         </div>
         <hr className="app-modal__rule" />
         <div className="app-modal__body phone-verify-modal__body">
           <p className="auth-modal__text phone-verify-modal__sent">
-            The OTP has been sent to:{' '}
-            <span className="phone-verify-modal__phone">{displayPhone}</span>
+            We sent a verification code. Reference (email on file):{' '}
+            <span className="phone-verify-modal__email">{displayEmail}</span>
           </p>
 
           <form onSubmit={onSubmit} noValidate>
             <div className="phone-verify-modal__row">
               <label className="phone-verify-modal__otp-label" htmlFor={otpId}>
-                Code OTP :
+                Verification code
               </label>
               <div className="phone-verify-modal__input-wrap">
                 <input

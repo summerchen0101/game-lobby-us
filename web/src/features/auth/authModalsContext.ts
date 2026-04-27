@@ -3,10 +3,10 @@ import type { RegisterBody } from '../../lib/api/types'
 
 export type PostTermsAction = 'login' | 'register'
 
-/** Data carried from Register modal into the phone/OTP step (display only; API may omit phone). */
+/** Data carried from Register modal into the OTP step (display only; code is sent to email). */
 export type PhoneVerifyPayload = {
   body: RegisterBody
-  displayPhone: string
+  displayEmail: string
 }
 
 export type AuthModalsContextValue = {

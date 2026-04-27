@@ -1,6 +1,11 @@
 import { type FormEvent, useEffect, useId, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { createPortal } from 'react-dom'
+import { buildAppMetaPayload, getOrCreateWebDeviceId, nicknameFromEmail } from '../../lib/appMeta'
+import { useAuth } from '../../auth/useAuth'
+import { ApiError, ClientVersionError } from '../../lib/api/client'
 import { useAuthModals } from './authModalsContext'
+import type { SignUpRequest } from '../../lib/api/types'
 import './AuthModals.css'
 
 type Props = {
@@ -27,24 +32,53 @@ function IconEyeClosed() {
   )
 }
 
-function maskPhoneForDisplay(raw: string): string {
-  const d = raw.replace(/\D/g, '')
-  if (d.length < 4) return raw.trim() || '—'
-  return `+1 (•••) ••• ${d.slice(-4)}`
+function maskEmailForDisplay(raw: string): string {
+  const em = raw.trim()
+  const at = em.indexOf('@')
+  if (at <= 0) return em || '—'
+  const local = em.slice(0, at)
+  const domain = em.slice(at + 1)
+  if (local.length <= 1) return `*@${domain}`
+  if (local.length === 2) return `${local[0]}*@${domain}`
+  return `${local[0]}${'*'.repeat(Math.min(4, local.length - 2))}${local[local.length - 1]}@${domain}`
+}
+
+function buildSignUpRequest(params: {
+  email: string
+  password: string
+  rePassword: string
+  referrer: string
+}): SignUpRequest {
+  const em = params.email.trim()
+  return {
+    nickname: nicknameFromEmail(em),
+    password: params.password,
+    rePassword: params.rePassword,
+    answer: '',
+    app_meta: buildAppMetaPayload(),
+    email: em,
+    deviceID: getOrCreateWebDeviceId(),
+    referrerCode: params.referrer.trim() || undefined,
+  }
 }
 
 export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
+  const { signUp, ingestAuthResponse } = useAuth()
+  const [searchParams] = useSearchParams()
+  const nav = useNavigate()
   const { openPhoneVerify } = useAuthModals()
   const formId = useId()
   const emailId = `${formId}-email`
   const phoneId = `${formId}-phone`
   const passwordId = `${formId}-password`
+  const password2Id = `${formId}-password2`
   const referralId = `${formId}-referral`
   const termsId = `${formId}-terms`
 
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
   const [_referral, setReferral] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -65,7 +99,7 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
     }
   }, [open])
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
     if (!termsAccepted) {
@@ -77,10 +111,47 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
       setError('Please enter a valid phone number (at least 10 digits)')
       return
     }
-    openPhoneVerify({
-      body: { account: email.trim(), password },
-      displayPhone: maskPhoneForDisplay(phone),
+    if (password !== passwordConfirm) {
+      setError('Passwords do not match')
+      return
+    }
+    const body = buildSignUpRequest({
+      email,
+      password,
+      rePassword: passwordConfirm,
+      referrer: _referral,
     })
+    try {
+      const result = await signUp(body)
+      if (result.auth) {
+        ingestAuthResponse(result.auth)
+        onClose()
+        const redir = searchParams.get('redirect')
+        if (redir && redir.startsWith('/') && !redir.startsWith('//')) {
+          nav(redir, { replace: true })
+        } else {
+          nav('/', { replace: true })
+        }
+        return
+      }
+      if (result.needSMSAnswer) {
+        openPhoneVerify({
+          body,
+          displayEmail: maskEmailForDisplay(email),
+        })
+        onClose()
+        return
+      }
+    } catch (err) {
+      if (err instanceof ClientVersionError) {
+        window.open(err.updateUrl, '_blank', 'noopener,noreferrer')
+        setError('A new version is required. A download page was opened in a new tab.')
+        return
+      }
+      const msg =
+        err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Registration failed'
+      setError(msg)
+    }
   }
 
   if (!open) return null
@@ -158,6 +229,23 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
               >
                 {showPassword ? <IconEyeClosed /> : <IconEyeOpen />}
               </button>
+            </div>
+
+            <label className="auth-modal__field-label auth-modal__field-label--register" htmlFor={password2Id}>
+              Confirm password:
+            </label>
+            <div className="auth-modal__password-wrap">
+              <input
+                id={password2Id}
+                className="auth-modal__input auth-modal__input--register auth-modal__input--password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                placeholder="Re-enter password"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                required
+                minLength={6}
+              />
             </div>
 
             <label className="auth-modal__field-label auth-modal__field-label--register" htmlFor={referralId}>

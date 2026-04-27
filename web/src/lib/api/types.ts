@@ -13,15 +13,37 @@ export type AuthResponse = {
   accessToken: string
   tokenType?: string
   user?: User
+  /** v1 登入／refresh 可回傳；存於 `localStorage` 供 POST `/api/v1/token` */
+  aRefreshToken?: string
+  /** 秒，可選，供日後續期計時 */
+  expiresIn?: number
+}
+
+/**
+ * 與 v1 註冊 `POST /api/v1/signup` 對齊。第一輪 `answer` 可空字串；需驗證時再送同結構並帶上驗證碼。
+ */
+export type SignUpRequest = {
+  nickname: string
+  password: string
+  rePassword: string
+  /** 郵件驗證碼等；首送可 `''` */
+  answer: string
+  app_meta: unknown
+  email: string
+  deviceID: string
+  referrerCode?: string
+}
+
+export type SignupResult = {
+  needSMSAnswer: boolean
+  /** 不需第二階或後端直接發 token 時帶入 */
+  auth?: AuthResponse
 }
 
 export type LoginBody = { account: string; password: string }
 
-export type RegisterBody = {
-  account: string
-  password: string
-  displayName?: string
-}
+/** 向後相容：註冊表單仍用 `account` 當主要識別時，在送出前可映射到 `email` / `nickname` */
+export type RegisterBody = SignUpRequest
 
 export type ForgotPasswordBody = { email: string }
 

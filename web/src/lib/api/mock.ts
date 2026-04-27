@@ -5,7 +5,7 @@ import type {
   DepositResponse,
   GamesResponse,
   LoginBody,
-  RegisterBody,
+  SignUpRequest,
   User,
 } from './types'
 
@@ -37,24 +37,34 @@ function delay<T>(v: T, ms = 200): Promise<T> {
   return new Promise((r) => setTimeout(() => r(v), ms))
 }
 
-function tokenFor(account: string): string {
-  return `mock.jwt.${btoa(encodeURIComponent(account))}`
+function tokenFor(id: string): string {
+  return `mock.jwt.${btoa(encodeURIComponent(id))}`
 }
 
-export async function mockRegister(body: RegisterBody): Promise<AuthResponse> {
-  return delay({
-    accessToken: tokenFor(body.account),
+function mockAuth(account: string): AuthResponse {
+  return {
+    accessToken: tokenFor(account),
     tokenType: 'Bearer',
-    user: { ...mockState, id: 'mock-user-1', displayName: body.displayName ?? body.account },
-  })
+    aRefreshToken: `mock.refresh.${btoa(encodeURIComponent(account))}`,
+    expiresIn: 3600,
+    user: { ...mockState, id: 'mock-user-1', displayName: account },
+  }
+}
+
+export async function mockRegisterFromSignUp(body: SignUpRequest): Promise<AuthResponse> {
+  return delay(mockAuth(body.email))
+}
+
+export async function mockRegister(body: SignUpRequest): Promise<AuthResponse> {
+  return delay(mockAuth(body.email))
+}
+
+export async function mockRefreshToken(_rt: string): Promise<AuthResponse> {
+  return delay(mockAuth('refreshed'))
 }
 
 export async function mockLogin(body: LoginBody): Promise<AuthResponse> {
-  return delay({
-    accessToken: tokenFor(body.account),
-    tokenType: 'Bearer',
-    user: { ...mockState },
-  })
+  return delay(mockAuth(body.account))
 }
 
 export async function mockGetMe(): Promise<User> {

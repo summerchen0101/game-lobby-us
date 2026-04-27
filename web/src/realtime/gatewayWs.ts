@@ -16,7 +16,7 @@ export type GatewayWsRequestPayload = {
   /** 併入該次 Request 的 RequestBasic（會蓋過同鍵的 getRequestBasicExtras） */
   basicExtras?: Record<string, unknown>
   /**
-   * 僅 `import.meta.env.DEV`：console 上辨識用途（如 `SERVER_LOGIN`、`LOBBY_GET`），不寫上線。
+   * 僅 `import.meta.env.DEV`：console 上辨識用途（如 `LOBBY_GET`），不寫上線。
    */
   debugLabel?: string
 }

@@ -7,26 +7,6 @@ export function isMockMode(): boolean {
   return import.meta.env.VITE_API_USE_MOCK === 'true'
 }
 
-/** 為 true 時 `login` 走 Gateway WebSocket `SERVER_LOGIN`（`ApiType` 4），回傳內需含可當 Bearer 的 token（JSON 或 `ServerLoginData`） */
-export function isAuthUseGatewayWs(): boolean {
-  return import.meta.env.VITE_AUTH_USE_GATEWAY_WS === 'true'
-}
-
-const DEFAULT_GATEWAY_LOGIN_REQUEST_TIMEOUT_MS = 25_000
-
-/** Gateway 登入臨時連線的 `request()` 逾時；不設則 25000，上限 10 分鐘。 */
-export function gatewayLoginRequestTimeoutMs(): number {
-  const raw = import.meta.env.VITE_GATEWAY_LOGIN_REQUEST_TIMEOUT_MS
-  if (raw == null || String(raw).trim() === '') {
-    return DEFAULT_GATEWAY_LOGIN_REQUEST_TIMEOUT_MS
-  }
-  const n = Number(String(raw).trim())
-  if (!Number.isFinite(n) || n <= 0) {
-    return DEFAULT_GATEWAY_LOGIN_REQUEST_TIMEOUT_MS
-  }
-  return Math.min(Math.floor(n), 600_000)
-}
-
 export function getApiBase(): string {
   const raw = (import.meta.env.VITE_API_BASE ?? '').trim()
   return raw.replace(/\/$/, '')

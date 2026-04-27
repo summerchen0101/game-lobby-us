@@ -127,6 +127,8 @@ flowchart LR
 
 數值與行尾注釋皆摘自 proto；**已註解掉的列**在 proto 中未生效，下表一併省略（若需追蹤歷史請直接看原檔）。
 
+> **本 Web 大廳（`web`）**：帳密登入僅走 **REST** `POST /api/v1/login`；**不** 經 WebSocket 送下表之 `SERVER_LOGIN`（4）。大廳 WS 僅用 `PING_PONG`、`LOBBY_GET` 等。下表仍列出後端 `ApiType` 列舉供全專案 proto 參考。
+
 ### 5.1 基礎 / 大廳 / 錢包 / 系統
 
 | 名稱                        | 值  | 註釋（proto）                |
