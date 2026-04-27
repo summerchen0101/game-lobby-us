@@ -30,10 +30,31 @@ type LobbyGameRow = NonNullable<
   NonNullable<LobbyGetDecoded['games']>['games']
 >[number]
 
+/** megaman.GameLabel 數值（若 toObject 未轉成字串則用此對應） */
+const GAME_LABEL_NUM_TO_NAME: Record<number, string> = {
+  0: 'UNKNOWN_LABEL',
+  1: 'HOT',
+  2: 'LATEST',
+  3: 'UNDER_MAINTENANCE',
+  4: 'COMING_SOON',
+  5: 'GENERAL',
+}
+
+function lobbyLabelFromRow(labelRaw: unknown): string | undefined {
+  if (typeof labelRaw === 'string' && labelRaw.trim()) {
+    return labelRaw.trim()
+  }
+  if (typeof labelRaw === 'number' && Number.isInteger(labelRaw)) {
+    return GAME_LABEL_NUM_TO_NAME[labelRaw] ?? String(labelRaw)
+  }
+  return undefined
+}
+
 function lobbyGameRowToApiGame(g: LobbyGameRow): Game {
   const id = String(g.ID ?? '')
   const path = typeof g.path === 'string' ? g.path.trim() : ''
   const icon = typeof g.iconURL === 'string' ? g.iconURL.trim() : ''
+  const lobbyLabel = lobbyLabelFromRow(g.label)
   let launchUrl = ''
   if (path.startsWith('http://') || path.startsWith('https://')) {
     launchUrl = path
@@ -51,6 +72,7 @@ function lobbyGameRowToApiGame(g: LobbyGameRow): Game {
     title: typeof g.displayName === 'string' ? g.displayName : id || 'Game',
     thumbnailUrl: icon || undefined,
     launchUrl,
+    lobbyLabel,
   }
 }
 

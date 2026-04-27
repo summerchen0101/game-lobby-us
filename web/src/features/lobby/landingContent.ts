@@ -21,6 +21,11 @@ export function unityDemoGameUrl(): string {
 /** 本地遊戲卡圖（放於 public/images/games/entry）；檔名：entry_slot{N}_L.png */
 export const GAME_ENTRY_BASE = "/images/games/entry";
 
+/** 未登入大廳第二列固定試玩（由 LOBBY_GET 同批清單依 id 對應，缺漏時以 placeholder 顯示卡圖） */
+export const GUEST_DEMO_SLOT_IDS: readonly [number, number, number] = [
+  144, 85, 52,
+];
+
 /** 與 public/images/games/entry 內檔案對齊，依 slot 編號數字排序（不含 entry_slotLoading_L 等）。 */
 const GAME_ENTRY_SLOT_IDS: number[] = [
   1, 2, 4, 8, 15, 16, 18, 20, 21, 35, 41, 42, 43, 45, 46, 47, 50, 51, 52, 55,
@@ -45,6 +50,23 @@ export function gameEntryThumbnail(
 ): string | undefined {
   if (GAME_ENTRY_CARD_IMAGES.length === 0) return fallback;
   return GAME_ENTRY_CARD_IMAGES[index % GAME_ENTRY_CARD_IMAGES.length];
+}
+
+const NUMERIC_GAME_ID = /^\d+$/;
+
+/**
+ * 大廳卡片背景：`public/images/games/entry/entry_slot{gameId}_L.png`（gameId 為純數字時）。
+ * 其餘沿用輪播本地圖或遠端縮圖。
+ */
+export function lobbyGameCardThumbnail(
+  gameId: string,
+  indexFallback: number,
+  remoteFallback?: string,
+): string | undefined {
+  if (NUMERIC_GAME_ID.test(gameId)) {
+    return `${GAME_ENTRY_BASE}/entry_slot${gameId}_L.png`;
+  }
+  return gameEntryThumbnail(indexFallback, remoteFallback);
 }
 
 /**

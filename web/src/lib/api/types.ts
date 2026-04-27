@@ -55,6 +55,8 @@ export type Game = {
   launchUrl: string
   /** 大廳卡片／橫列縮圖（可選） */
   thumbnailUrl?: string
+  /** LOBBY_GET `GameLabel` 字串（如 HOT），供訪客列分組等 */
+  lobbyLabel?: string
   embedWidthPercent?: number
   embedHeightPercent?: number
   openInNewWindow?: boolean

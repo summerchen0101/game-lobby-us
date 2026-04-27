@@ -39,9 +39,10 @@ import {
   FLOATING_CTA_IMAGE,
   GUEST_DEMO_GAMES,
   GUEST_DEMO_ROW_GAMES,
+  GUEST_DEMO_SLOT_IDS,
   GUEST_TOP_GAMES,
-  gameEntryThumbnail,
   getGuestHeroImage,
+  lobbyGameCardThumbnail,
   getSessionLobbyBannerImage,
   LOBBY_DEMO_JACKPOT_AMOUNTS,
   UNITY_DEMO_LOBBY_GAME,
@@ -71,6 +72,28 @@ function slotGameIdFromCard(g: Game, fallback: number): number {
   const n = Number.parseInt(g.id, 10);
   if (Number.isFinite(n) && n > 0) return n;
   return fallback;
+}
+
+function filterHotGames(games: Game[]): Game[] {
+  return games.filter(
+    (g) => (g.lobbyLabel ?? "").toUpperCase() === "HOT",
+  );
+}
+
+function pickGuestDemoRowGames(
+  games: Game[],
+  orderedIds: readonly [number, number, number],
+): Game[] {
+  return orderedIds.map((id) => {
+    const sid = String(id);
+    const found = games.find((g) => g.id === sid);
+    if (found) return found;
+    return {
+      id: sid,
+      title: `Game ${id}`,
+      launchUrl: "",
+    };
+  });
 }
 
 function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
@@ -184,10 +207,8 @@ export function LandingPage() {
                   items.slice(0, 3),
                 );
               }
-              if (wsLobbyEnabled) {
-                setWsLobbyGames(items);
-                setError(null);
-              }
+              setWsLobbyGames(items);
+              if (wsLobbyEnabled) setError(null);
             } catch (decodeErr) {
               console.warn(
                 "[gateway-ws] LOBBY_GET decode failed",
@@ -196,18 +217,24 @@ export function LandingPage() {
               if (wsLobbyEnabled) {
                 setWsLobbyGames([]);
                 setError("Could not decode lobby games");
+              } else {
+                setWsLobbyGames(null);
               }
             }
-          } else if (wsLobbyEnabled) {
+          } else {
             setWsLobbyGames([]);
-            setError(null);
+            if (wsLobbyEnabled) setError(null);
           }
-        } else if (wsLobbyEnabled) {
-          setWsLobbyGames([]);
-          setError(
-            r.errMessage?.trim() ||
-              `Lobby request failed (${String(r.code ?? "")})`,
-          );
+        } else {
+          if (wsLobbyEnabled) {
+            setWsLobbyGames([]);
+            setError(
+              r.errMessage?.trim() ||
+                `Lobby request failed (${String(r.code ?? "")})`,
+            );
+          } else {
+            setWsLobbyGames(null);
+          }
         }
       } catch (e) {
         console.warn("[gateway-ws] LOBBY_GET failed", e);
@@ -216,6 +243,8 @@ export function LandingPage() {
           setError(
             e instanceof Error ? e.message : "Lobby WebSocket request failed",
           );
+        } else {
+          setWsLobbyGames(null);
         }
       } finally {
         if (wsLobbyEnabled) setLoading(false);
@@ -223,9 +252,11 @@ export function LandingPage() {
     },
     onSocketError: (ev) => {
       console.warn("[gateway-ws] WebSocket error:", ev);
-      if (wsLobbyEnabled && token) {
+      if (wsLobbyEnabled) {
         setLoading(false);
         setError((prev) => prev ?? "WebSocket connection error");
+      } else {
+        setWsLobbyGames(null);
       }
     },
     onGatewayError: (msg) => {
@@ -257,10 +288,22 @@ export function LandingPage() {
   );
   const guestHeroSrc = getGuestHeroImage();
 
+  const guestLobbyRows = useMemo(() => {
+    if (wsLobbyGames !== null) {
+      return {
+        top: filterHotGames(wsLobbyGames),
+        demo: pickGuestDemoRowGames(wsLobbyGames, GUEST_DEMO_SLOT_IDS),
+      };
+    }
+    return { top: GUEST_TOP_GAMES, demo: GUEST_DEMO_ROW_GAMES };
+  }, [wsLobbyGames]);
+
   const displayGames = useMemo(() => {
-    if (!token) return GUEST_DEMO_GAMES;
     if (wsLobbyEnabled && wsLobbyGames !== null) {
       return [UNITY_DEMO_LOBBY_GAME, ...wsLobbyGames];
+    }
+    if (!token) {
+      return GUEST_DEMO_GAMES;
     }
     return [UNITY_DEMO_LOBBY_GAME, ...apiItems];
   }, [token, apiItems, wsLobbyEnabled, wsLobbyGames]);
@@ -302,7 +345,6 @@ export function LandingPage() {
   useEffect(() => {
     if (!token) {
       setApiItems([]);
-      setWsLobbyGames(null);
       setLoading(false);
       setError(null);
       return;
@@ -392,8 +434,13 @@ export function LandingPage() {
     index: number,
     thumbBase: number,
     showTextLabels = true,
+    onCardAction?: (g: Game) => void,
   ) {
-    const thumb = gameEntryThumbnail(thumbBase + index, g.thumbnailUrl);
+    const thumb = lobbyGameCardThumbnail(
+      g.id,
+      thumbBase + index,
+      g.thumbnailUrl,
+    );
     return (
       <button
         type="button"
@@ -401,7 +448,7 @@ export function LandingPage() {
           "lobby-game-card" +
           (showTextLabels ? "" : " lobby-game-card--thumb-only")
         }
-        onClick={() => onPlayGame(g)}
+        onClick={() => (onCardAction ? onCardAction(g) : onPlayGame(g))}
         aria-label={showTextLabels ? undefined : g.title}>
         <div
           className="lobby-game-card__thumb"
@@ -426,13 +473,20 @@ export function LandingPage() {
     games: Game[],
     thumbOffset = 0,
     showTextLabels = true,
+    onCardAction?: (g: Game) => void,
   ) {
     return (
       <div className="lobby-games-scroller">
         <ul className="lobby-games-track" role="list">
           {games.map((g, index) => (
             <li key={g.id}>
-              {gameCard(g, index, thumbOffset, showTextLabels)}
+              {gameCard(
+                g,
+                index,
+                thumbOffset,
+                showTextLabels,
+                onCardAction,
+              )}
             </li>
           ))}
         </ul>
@@ -485,10 +539,27 @@ export function LandingPage() {
           className="guest-landing__games-block page-container"
           aria-labelledby="guest-top-games-heading">
           <h2 id="guest-top-games-heading" className="guest-landing__row-title">
-            TOP <span className="guest-landing__accent">FREE-TO-PLAY</span>{" "}
-            CASINO STYLE GAMES
+            {wsLobbyGames !== null ? (
+              <>
+                <span className="guest-landing__accent">HOT</span> GAMES
+              </>
+            ) : (
+              <>
+                TOP <span className="guest-landing__accent">FREE-TO-PLAY</span>{" "}
+                CASINO STYLE GAMES
+              </>
+            )}
           </h2>
-          {renderGameTrack(GUEST_TOP_GAMES, 0, false)}
+          {renderGameTrack(
+            guestLobbyRows.top,
+            0,
+            false,
+            wsLobbyGames !== null
+              ? () => {
+                  openTermsThen("register");
+                }
+              : undefined,
+          )}
         </section>
 
         <section
@@ -499,7 +570,11 @@ export function LandingPage() {
             className="guest-landing__row-title guest-landing__row-title--demo">
             <span className="guest-landing__accent">DEMO</span> here
           </h2>
-          {renderGameTrack(GUEST_DEMO_ROW_GAMES, GUEST_TOP_GAMES.length, false)}
+          {renderGameTrack(
+            guestLobbyRows.demo,
+            guestLobbyRows.top.length,
+            false,
+          )}
         </section>
 
         <div className="guest-landing__signup-cta page-container">
