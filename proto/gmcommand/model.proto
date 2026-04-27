@@ -1,9 +1,0 @@
-syntax = "proto3";
-package gmcommand;
-option go_package = "gitlab.ffglobaltech.com/us888/pluto/protos/gmcommand";
-
-message RunGmCommandReq {
-    uint64 userID        = 1;
-    string commandName   = 2;
-    repeated string args = 3;
-}
