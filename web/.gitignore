@@ -1,3 +1,7 @@
+# Environment (do not commit secrets; keep example template tracked)
+.env*
+!.env.example
+
 # Logs
 logs
 *.log
