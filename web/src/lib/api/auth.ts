@@ -1,5 +1,5 @@
 import { isMockMode } from '../env'
-import { buildAppMetaPayload, LOGIN_V1_TYPE } from '../appMeta'
+import { buildAppMetaPayload, getOrCreateWebDeviceId, LOGIN_V1_TYPE } from '../appMeta'
 import { apiRequest, ApiError } from './client'
 
 export { ClientVersionError } from './client'
@@ -18,6 +18,7 @@ function buildV1LoginBody(body: LoginBody) {
     password: body.password,
     type: LOGIN_V1_TYPE,
     app_meta: buildAppMetaPayload(),
+    deviceID: getOrCreateWebDeviceId(),
   }
 }
 

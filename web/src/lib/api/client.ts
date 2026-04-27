@@ -1,3 +1,4 @@
+import { getOrCreateWebDeviceId } from '../appMeta'
 import { getApiBase } from '../env'
 import type { ApiErrorBody } from './types'
 
@@ -53,7 +54,7 @@ function joinUrl(path: string): string {
 }
 
 /**
- * 集中 JSON `fetch`：Bearer、JSON body、解錯、401 通知。
+ * 集中 JSON `fetch`：Bearer、`X-Device-ID`、JSON body、解錯、401 通知。
  *
  * 若 HTTP 2xx 且回應 body 為空字串，不會解析 JSON，回傳值為 `null`（泛型 `T` 實際可能為 `null`）。
  * 後端可以此表示成功但無 payload（例如 `201` 無內容）；呼叫端依端點語意處理，勿一律當格式錯誤。
@@ -69,6 +70,7 @@ export async function apiRequest<T>(
 
   const h = new Headers(headers)
   h.set('Accept', 'application/json')
+  h.set('X-Device-ID', getOrCreateWebDeviceId())
   if (body !== undefined) {
     h.set('Content-Type', 'application/json')
   }
