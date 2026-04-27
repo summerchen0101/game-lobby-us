@@ -1,5 +1,5 @@
 import * as protobuf from 'protobufjs/light.js'
-import type { Game } from '../lib/api/types'
+import type { Game, User } from '../lib/api/types'
 import { getUnityWebEntryBase } from '../lib/env'
 import schema from '../gen/lobby_wire.schema.js'
 
@@ -40,6 +40,14 @@ const GAME_LABEL_NUM_TO_NAME: Record<number, string> = {
   5: 'GENERAL',
 }
 
+const GAME_CATEGORY_NUM_TO_NAME: Record<number, string> = {
+  0: 'UNKNOWN_CATEGORY',
+  1: 'SLOT',
+  2: 'TABLE',
+  3: 'OTHER',
+  4: 'SCRATCHOFF',
+}
+
 function lobbyLabelFromRow(labelRaw: unknown): string | undefined {
   if (typeof labelRaw === 'string' && labelRaw.trim()) {
     return labelRaw.trim()
@@ -50,11 +58,27 @@ function lobbyLabelFromRow(labelRaw: unknown): string | undefined {
   return undefined
 }
 
+function lobbyCategoryFromRow(categoryRaw: unknown): string | undefined {
+  if (typeof categoryRaw === 'string' && categoryRaw.trim()) {
+    return categoryRaw.trim()
+  }
+  if (typeof categoryRaw === 'number' && Number.isInteger(categoryRaw)) {
+    return GAME_CATEGORY_NUM_TO_NAME[categoryRaw] ?? String(categoryRaw)
+  }
+  return undefined
+}
+
 function lobbyGameRowToApiGame(g: LobbyGameRow): Game {
   const id = String(g.ID ?? '')
   const path = typeof g.path === 'string' ? g.path.trim() : ''
   const icon = typeof g.iconURL === 'string' ? g.iconURL.trim() : ''
   const lobbyLabel = lobbyLabelFromRow(g.label)
+  const lobbyCategory = lobbyCategoryFromRow(g.category)
+  const providerRaw = g.providerName
+  const provider =
+    typeof providerRaw === 'string' && providerRaw.trim()
+      ? providerRaw.trim()
+      : undefined
   let launchUrl = ''
   if (path.startsWith('http://') || path.startsWith('https://')) {
     launchUrl = path
@@ -73,6 +97,8 @@ function lobbyGameRowToApiGame(g: LobbyGameRow): Game {
     thumbnailUrl: icon || undefined,
     launchUrl,
     lobbyLabel,
+    lobbyCategory,
+    provider,
   }
 }
 
@@ -80,4 +106,38 @@ function lobbyGameRowToApiGame(g: LobbyGameRow): Game {
 export function lobbyDecodedGamesToApiGames(decoded: LobbyGetDecoded): Game[] {
   const games: LobbyGameRow[] = decoded.games?.games ?? []
   return games.map((row) => lobbyGameRowToApiGame(row))
+}
+
+type LobbyPlayerRow = NonNullable<LobbyGetDecoded['playerInfo']>
+
+function numFromWire(v: unknown): number | undefined {
+  if (typeof v === 'number' && Number.isFinite(v)) return v
+  if (typeof v === 'string' && v !== '') {
+    const n = Number(v)
+    if (Number.isFinite(n)) return n
+  }
+  return undefined
+}
+
+/**
+ * LOBBY_GET 內 `playerInfo`（與 megaman.LobbyGetResponse 欄位 3 對齊）轉成可 merge 進 `User` 的欄位。
+ */
+export function lobbyDecodedPlayerToUserPatch(
+  decoded: LobbyGetDecoded,
+): Partial<User> | null {
+  const p = decoded.playerInfo as LobbyPlayerRow | null | undefined
+  if (!p || typeof p !== 'object') return null
+  const idRaw = p.userID
+  const id =
+    idRaw != null && String(idRaw) !== '' ? String(idRaw) : undefined
+  const nickRaw = p.nickname
+  const displayName =
+    typeof nickRaw === 'string' && nickRaw.trim() ? nickRaw.trim() : undefined
+  const vipLevel = numFromWire(p.vipLevel)
+  if (!id && !displayName && vipLevel === undefined) return null
+  const out: Partial<User> = {}
+  if (id) out.id = id
+  if (displayName) out.displayName = displayName
+  if (vipLevel !== undefined) out.vipLevel = Math.floor(vipLevel)
+  return out
 }

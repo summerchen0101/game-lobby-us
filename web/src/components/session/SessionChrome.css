@@ -142,6 +142,11 @@
   overflow: hidden;
 }
 
+a.session-header__avatar {
+  text-decoration: none;
+  color: inherit;
+}
+
 .session-header__avatar--has-image {
   color: transparent;
   background: #12181f;

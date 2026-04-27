@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { IoChevronBack } from "react-icons/io5";
 import { useAuth } from "../../auth/useAuth";
 import { ApiError, ClientVersionError } from "../../lib/api/client";
-import { requestPasswordReset } from "../../lib/api/passwordReset";
 import "./AuthModals.css";
 
 type Props = {
@@ -12,11 +11,6 @@ type Props = {
   onClose: () => void;
   onSwitchRegister: () => void;
 };
-
-type Screen = "signIn" | "forgot";
-
-const FORGOT_GENERIC_MSG =
-  "If that email is registered, you'll receive a password reset link shortly.";
 
 /** Icon when password is hidden — click to reveal. */
 function IconEyeOpen() {
@@ -53,18 +47,12 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
   const formId = useId();
   const emailId = `${formId}-email`;
   const passwordId = `${formId}-password`;
-  const forgotEmailId = `${formId}-forgot-email`;
 
-  const [screen, setScreen] = useState<Screen>("signIn");
   const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotSubmitting, setForgotSubmitting] = useState(false);
-  const [forgotMsg, setForgotMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -76,22 +64,9 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
   }, [open, onClose]);
 
   useEffect(() => {
-    if (!open) {
-      setScreen("signIn");
-      setForgotMsg(null);
-      return;
-    }
+    if (!open) return;
     setError(null);
-  }, [open, screen]);
-
-  function handleBack() {
-    if (screen === "forgot") {
-      setScreen("signIn");
-      setForgotMsg(null);
-    } else {
-      onClose();
-    }
-  }
+  }, [open]);
 
   async function onSignIn(e: FormEvent) {
     e.preventDefault();
@@ -126,28 +101,9 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
     }
   }
 
-  async function onForgotSubmit(e: FormEvent) {
-    e.preventDefault();
-    setForgotMsg(null);
-    setForgotSubmitting(true);
-    try {
-      await requestPasswordReset({ email: forgotEmail.trim() });
-      setForgotMsg(FORGOT_GENERIC_MSG);
-    } catch (err) {
-      // No backend or failure: do not block UX; use privacy-preserving copy (per plan)
-      if (import.meta.env.DEV && err instanceof ApiError) {
-        console.warn("[forgot-password]", err.message);
-      }
-      setForgotMsg(FORGOT_GENERIC_MSG);
-    } finally {
-      setForgotSubmitting(false);
-    }
-  }
-
   if (!open) return null;
 
   const titleId = "auth-login-dialog-title";
-  const title = screen === "signIn" ? "Login" : "Forgot Password";
 
   return createPortal(
     <div className="app-modal-overlay" role="presentation" onClick={onClose}>
@@ -161,12 +117,12 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
           <button
             type="button"
             className="app-modal__head-btn"
-            onClick={handleBack}
-            aria-label={screen === "forgot" ? "Back to sign in" : "Close"}>
+            onClick={onClose}
+            aria-label="Close">
             <IoChevronBack aria-hidden />
           </button>
           <h2 id={titleId} className="app-modal__title--abs-center">
-            {title}
+            Login
           </h2>
           <button
             type="button"
@@ -178,121 +134,66 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
         </header>
         <hr className="app-modal__rule" />
         <div className="app-modal__body">
-          {screen === "signIn" ? (
-            <>
-              <form onSubmit={onSignIn} noValidate>
-                <label
-                  className="auth-modal__field-label auth-modal__field-label--register"
-                  htmlFor={emailId}>
-                  Email:
-                </label>
-                <input
-                  id={emailId}
-                  className="auth-modal__input auth-modal__input--register"
-                  name="account"
-                  type="email"
-                  autoComplete="username"
-                  placeholder="Please enter email"
-                  value={account}
-                  onChange={(e) => setAccount(e.target.value)}
-                  required
-                />
-                <label
-                  className="auth-modal__field-label auth-modal__field-label--register"
-                  htmlFor={passwordId}>
-                  Password:
-                </label>
-                <div className="auth-modal__password-wrap">
-                  <input
-                    id={passwordId}
-                    className="auth-modal__input auth-modal__input--register auth-modal__input--password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    placeholder="Please enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="auth-modal__password-toggle"
-                    onClick={() => setShowPassword((v) => !v)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                    aria-pressed={showPassword}>
-                    {showPassword ? <IconEyeClosed /> : <IconEyeOpen />}
-                  </button>
-                </div>
-                {error ? <p className="auth-modal__error">{error}</p> : null}
-                <button
-                  type="submit"
-                  className="auth-modal__submit"
-                  disabled={submitting}>
-                  {submitting ? "…" : "SIGN IN"}
-                </button>
-              </form>
-              <p className="auth-modal__footer auth-modal__footer--center">
-                <button
-                  type="button"
-                  className="auth-modal__link--forgot"
-                  onClick={() => {
-                    setScreen("forgot");
-                    setForgotMsg(null);
-                    if (!forgotEmail.trim() && account.trim()) {
-                      setForgotEmail(account.trim());
-                    }
-                  }}>
-                  Forgot password
-                </button>
-              </p>
-              <p className="auth-modal__footer">
-                Need an account?{" "}
-                <button
-                  type="button"
-                  className="auth-modal__footer-link"
-                  onClick={onSwitchRegister}>
-                  CREATE ACCOUNT
-                </button>
-              </p>
-            </>
-          ) : (
-            <form onSubmit={onForgotSubmit} noValidate>
-              <p className="auth-modal__forgot-instruction">
-                Please enter your registered email address to receive a password
-                reset link.
-              </p>
-              <label
-                className="auth-modal__field-label auth-modal__field-label--register"
-                htmlFor={forgotEmailId}>
-                Email:
-              </label>
+          <form onSubmit={onSignIn} noValidate>
+            <label
+              className="auth-modal__field-label auth-modal__field-label--register"
+              htmlFor={emailId}>
+              Email:
+            </label>
+            <input
+              id={emailId}
+              className="auth-modal__input auth-modal__input--register"
+              name="account"
+              type="email"
+              autoComplete="username"
+              placeholder="Please enter email"
+              value={account}
+              onChange={(e) => setAccount(e.target.value)}
+              required
+            />
+            <label
+              className="auth-modal__field-label auth-modal__field-label--register"
+              htmlFor={passwordId}>
+              Password:
+            </label>
+            <div className="auth-modal__password-wrap">
               <input
-                id={forgotEmailId}
-                className="auth-modal__input auth-modal__input--register"
-                name="forgot-email"
-                type="email"
-                autoComplete="email"
-                placeholder="Please enter email"
-                value={forgotEmail}
-                onChange={(e) => {
-                  setForgotEmail(e.target.value);
-                  setForgotMsg(null);
-                }}
+                id={passwordId}
+                className="auth-modal__input auth-modal__input--register auth-modal__input--password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder="Please enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              {forgotMsg ? (
-                <p className="auth-modal__forgot-toast">{forgotMsg}</p>
-              ) : null}
               <button
-                type="submit"
-                className="auth-modal__submit"
-                disabled={forgotSubmitting}>
-                {forgotSubmitting ? "…" : "SEND LINK"}
+                type="button"
+                className="auth-modal__password-toggle"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}>
+                {showPassword ? <IconEyeClosed /> : <IconEyeOpen />}
               </button>
-            </form>
-          )}
+            </div>
+            {error ? <p className="auth-modal__error">{error}</p> : null}
+            <button
+              type="submit"
+              className="auth-modal__submit"
+              disabled={submitting}>
+              {submitting ? "…" : "SIGN IN"}
+            </button>
+          </form>
+          <p className="auth-modal__footer">
+            Need an account?{" "}
+            <button
+              type="button"
+              className="auth-modal__footer-link"
+              onClick={onSwitchRegister}>
+              CREATE ACCOUNT
+            </button>
+          </p>
         </div>
       </div>
     </div>,

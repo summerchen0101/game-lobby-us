@@ -3,14 +3,10 @@ import { buildAppMetaPayload, getOrCreateWebDeviceId, LOGIN_V1_TYPE } from '../a
 import { apiRequest, ApiError } from './client'
 
 export { ClientVersionError } from './client'
-import {
-  normalizeAuthResponse,
-  normalizeUserPayload,
-  parseSignupResponse,
-} from './authParse'
+import { normalizeAuthResponse, parseSignupResponse } from './authParse'
 import { getApiPaths } from './paths'
 import * as mock from './mock'
-import type { AuthResponse, LoginBody, SignupResult, SignUpRequest, User } from './types'
+import type { AuthResponse, LoginBody, SignupResult, SignUpRequest } from './types'
 
 function buildV1LoginBody(body: LoginBody) {
   return {
@@ -20,6 +16,15 @@ function buildV1LoginBody(body: LoginBody) {
     app_meta: buildAppMetaPayload(),
     deviceID: getOrCreateWebDeviceId(),
   }
+}
+
+/** 僅送 `refreshToken`（與 `docs/api-spec.md`／`docs/login_flow.md` 之 `POST /api/v1/token` 一致）。 */
+function buildV1RefreshBody(refreshToken: string) {
+  const rt = refreshToken.trim()
+  if (!rt) {
+    throw new ApiError('Missing refresh token', 400)
+  }
+  return { refreshToken: rt }
 }
 
 export async function signUp(body: SignUpRequest): Promise<SignupResult> {
@@ -52,7 +57,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthResp
   }
   const data = await apiRequest<unknown>(getApiPaths().token, {
     method: 'POST',
-    body: { refreshToken },
+    body: buildV1RefreshBody(refreshToken),
     skipUnauthorizedOn401: true,
   })
   return normalizeAuthResponse(data)
@@ -65,10 +70,4 @@ export async function login(body: LoginBody): Promise<AuthResponse> {
     body: buildV1LoginBody(body),
   })
   return normalizeAuthResponse(data)
-}
-
-export async function fetchCurrentUser(token: string | null): Promise<User> {
-  if (isMockMode()) return mock.mockGetMe()
-  const data = await apiRequest<unknown>(getApiPaths().me, { method: 'GET', token })
-  return normalizeUserPayload(data)
 }

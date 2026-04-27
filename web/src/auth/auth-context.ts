@@ -13,6 +13,8 @@ export type AuthContextValue = {
   ingestAuthResponse: (res: AuthResponse) => void
   logout: () => void
   refreshUser: () => Promise<void>
+  /** 與 LOBBY_GET 等來源合併玩家欄位並持久化 */
+  mergeUser: (patch: Partial<User>) => void
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

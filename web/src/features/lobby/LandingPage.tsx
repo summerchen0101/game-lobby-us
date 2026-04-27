@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { LandingHeader } from "../../components/LandingHeader";
@@ -14,25 +14,19 @@ import { PhoneVerificationModal } from "../auth/PhoneVerificationModal";
 import { RegisterModal } from "../auth/RegisterModal";
 import { TermsGateModal } from "../auth/TermsGateModal";
 import {
-  getGatewayWsUrl,
   trustpilotBusinessUnitId,
   unityWebEntryDefaultGameId,
   isSlotWebEntryEnabled,
+  isMockMode,
   isWsLobbyGamesEnabled,
 } from "../../lib/env";
-import { GATEWAY_API_LOBBY_GET } from "../../realtime/gatewayApi";
-import {
-  decodeLobbyGetResponseBytes,
-  lobbyDecodedGamesToApiGames,
-} from "../../realtime/lobbyDecode";
-import { useGatewayWs } from "../../realtime/useGatewayWs";
+import * as apiMock from "../../lib/api/mock";
+import { useGatewayLobby } from "../../realtime/useGatewayLobby";
 import {
   activeWalletToSlotMode,
   amountForActiveWallet,
   buildSlotLaunchUrl,
 } from "../../lib/slotLaunchUrl";
-import { ApiError } from "../../lib/api/client";
-import { fetchGames } from "../../lib/api/games";
 import type { Game } from "../../lib/api/types";
 import { useWallet } from "../../wallet/walletContext";
 import {
@@ -75,9 +69,7 @@ function slotGameIdFromCard(g: Game, fallback: number): number {
 }
 
 function filterHotGames(games: Game[]): Game[] {
-  return games.filter(
-    (g) => (g.lobbyLabel ?? "").toUpperCase() === "HOT",
-  );
+  return games.filter((g) => (g.lobbyLabel ?? "").toUpperCase() === "HOT");
 }
 
 function pickGuestDemoRowGames(
@@ -101,170 +93,48 @@ function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
     return displayGames;
   }
   if (f === "hot") {
+    const labelHot = displayGames.filter(
+      (g) => (g.lobbyLabel ?? "").toUpperCase() === "HOT",
+    );
+    if (labelHot.length > 0) return labelHot;
     const h = displayGames.filter((g) =>
       /hot|jackpot|fire/i.test(`${g.title} ${g.subtitle ?? ""} ${g.id}`),
     );
     return h.length > 0 ? h : displayGames;
   }
-  if (f === "providers" || f === "slots") {
-    return displayGames;
+  if (f === "slots") {
+    const slots = displayGames.filter(
+      (g) => (g.lobbyCategory ?? "").toUpperCase() === "SLOT",
+    );
+    return slots.length > 0 ? slots : displayGames;
+  }
+  if (f === "providers") {
+    const withProv = displayGames.filter((g) => g.provider?.trim());
+    return withProv.length > 0 ? withProv : displayGames;
   }
   return displayGames;
-}
-
-function devGatewayWsProbeEnabled(): boolean {
-  if (!import.meta.env.DEV) return false;
-  return import.meta.env.VITE_DEV_GATEWAY_WS !== "false";
-}
-
-function hexPreview(u8: Uint8Array, maxBytes: number): string {
-  const n = Math.min(maxBytes, u8.byteLength);
-  let s = "";
-  for (let i = 0; i < n; i++) {
-    s += u8[i]!.toString(16).padStart(2, "0");
-  }
-  return s;
 }
 
 export function LandingPage() {
   const { token, user, refreshUser } = useAuth();
   const { activeWallet } = useWallet();
   const { open: openShell } = useGameShell();
+  const { lobbyGames, lobbyLoading, lobbyError, liveJackpotAmounts } =
+    useGatewayLobby();
 
   const wsLobbyEnabled = isWsLobbyGamesEnabled();
-  /** 與 login_flow：無 token 亦可連線 PING / LOBBY_GET；啟用 WS 大廳時訪客也維持連線 */
-  const gatewayWsEnabled =
-    devGatewayWsProbeEnabled() || wsLobbyEnabled;
-  const shouldRunLobbyGetOnOpen =
-    (import.meta.env.DEV && import.meta.env.VITE_DEV_LOBBY_GET !== "false") ||
-    wsLobbyEnabled;
-
-  const [wsLobbyGames, setWsLobbyGames] = useState<Game[] | null>(null);
+  const mockLobby = isMockMode();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [apiItems, setApiItems] = useState<Game[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [mockGames, setMockGames] = useState<Game[]>([]);
+  const [mockLoading, setMockLoading] = useState(false);
+  const [mockError, setMockError] = useState<string | null>(null);
   const [lobbyFilter, setLobbyFilter] = useState<LobbyFilterTab>("all");
+  const [lobbySearch, setLobbySearch] = useState("");
 
-  const getRequestBasicExtras = useCallback((): Record<string, unknown> => {
-    const uid = user?.id;
-    if (!uid || !/^\d+$/.test(uid)) {
-      return { userID: 0 };
-    }
-    const n = Number.parseInt(uid, 10);
-    return { userID: Number.isFinite(n) ? n : 0 };
-  }, [user?.id]);
-
-  useGatewayWs({
-    enabled: gatewayWsEnabled,
-    wsToken: token ?? "",
-    clientVer: import.meta.env.VITE_CLIENT_VER?.trim() || undefined,
-    getRequestBasicExtras,
-    onState: (s) => {
-      if (import.meta.env.DEV) {
-        console.info(
-          "[gateway-ws][dev] state:",
-          s,
-          "url:",
-          getGatewayWsUrl({ token: token ?? "" }),
-        );
-      }
-    },
-    onResponse: (msg) => {
-      if (import.meta.env.DEV) {
-        console.info("[gateway-ws][dev] response:", msg);
-      }
-    },
-    onOpen: async ({ request }) => {
-      if (!shouldRunLobbyGetOnOpen) return;
-      try {
-        const r = await request({
-          type: GATEWAY_API_LOBBY_GET,
-          data: new Uint8Array(0),
-          debugLabel: "LOBBY_GET",
-        });
-        const raw = r.data;
-        const len = raw instanceof Uint8Array ? raw.byteLength : 0;
-        if (import.meta.env.DEV) {
-          console.info("[gateway-ws][dev] LOBBY_GET", {
-            code: r.code,
-            type: r.type,
-            errMessage: r.errMessage,
-            dataLength: len,
-            dataHexPreview24:
-              len > 0 && raw instanceof Uint8Array ? hexPreview(raw, 24) : "",
-          });
-        }
-        if (String(r.code) === "200") {
-          if (len > 0 && raw instanceof Uint8Array) {
-            try {
-              const decoded = decodeLobbyGetResponseBytes(raw);
-              const items = lobbyDecodedGamesToApiGames(decoded);
-              if (import.meta.env.DEV) {
-                console.info(
-                  "[gateway-ws][dev] LOBBY_GET decoded games:",
-                  items.length,
-                  items.slice(0, 3),
-                );
-              }
-              setWsLobbyGames(items);
-              if (wsLobbyEnabled) setError(null);
-            } catch (decodeErr) {
-              console.warn(
-                "[gateway-ws] LOBBY_GET decode failed",
-                decodeErr,
-              );
-              if (wsLobbyEnabled) {
-                setWsLobbyGames([]);
-                setError("Could not decode lobby games");
-              } else {
-                setWsLobbyGames(null);
-              }
-            }
-          } else {
-            setWsLobbyGames([]);
-            if (wsLobbyEnabled) setError(null);
-          }
-        } else {
-          if (wsLobbyEnabled) {
-            setWsLobbyGames([]);
-            setError(
-              r.errMessage?.trim() ||
-                `Lobby request failed (${String(r.code ?? "")})`,
-            );
-          } else {
-            setWsLobbyGames(null);
-          }
-        }
-      } catch (e) {
-        console.warn("[gateway-ws] LOBBY_GET failed", e);
-        if (wsLobbyEnabled) {
-          setWsLobbyGames([]);
-          setError(
-            e instanceof Error ? e.message : "Lobby WebSocket request failed",
-          );
-        } else {
-          setWsLobbyGames(null);
-        }
-      } finally {
-        if (wsLobbyEnabled) setLoading(false);
-      }
-    },
-    onSocketError: (ev) => {
-      console.warn("[gateway-ws] WebSocket error:", ev);
-      if (wsLobbyEnabled) {
-        setLoading(false);
-        setError((prev) => prev ?? "WebSocket connection error");
-      } else {
-        setWsLobbyGames(null);
-      }
-    },
-    onGatewayError: (msg) => {
-      if (import.meta.env.DEV) {
-        console.warn("[gateway-ws][dev] non-success code:", msg);
-      }
-    },
-  });
+  const loading =
+    user && mockLobby ? mockLoading : user && wsLobbyEnabled ? lobbyLoading : false;
+  const error =
+    user && mockLobby ? mockError : user && wsLobbyEnabled ? lobbyError : null;
   const {
     termsOpen,
     loginOpen,
@@ -289,43 +159,56 @@ export function LandingPage() {
   const guestHeroSrc = getGuestHeroImage();
 
   const guestLobbyRows = useMemo(() => {
-    if (wsLobbyGames !== null) {
+    if (lobbyGames !== null) {
       return {
-        top: filterHotGames(wsLobbyGames),
-        demo: pickGuestDemoRowGames(wsLobbyGames, GUEST_DEMO_SLOT_IDS),
+        top: filterHotGames(lobbyGames),
+        demo: pickGuestDemoRowGames(lobbyGames, GUEST_DEMO_SLOT_IDS),
       };
     }
     return { top: GUEST_TOP_GAMES, demo: GUEST_DEMO_ROW_GAMES };
-  }, [wsLobbyGames]);
+  }, [lobbyGames]);
 
   const displayGames = useMemo(() => {
-    if (wsLobbyEnabled && wsLobbyGames !== null) {
-      return [UNITY_DEMO_LOBBY_GAME, ...wsLobbyGames];
+    if (user && mockLobby) {
+      return [UNITY_DEMO_LOBBY_GAME, ...mockGames];
     }
-    if (!token) {
+    if (user && wsLobbyEnabled && lobbyGames !== null) {
+      return [UNITY_DEMO_LOBBY_GAME, ...lobbyGames];
+    }
+    if (!user) {
       return GUEST_DEMO_GAMES;
     }
-    return [UNITY_DEMO_LOBBY_GAME, ...apiItems];
-  }, [token, apiItems, wsLobbyEnabled, wsLobbyGames]);
+    return [UNITY_DEMO_LOBBY_GAME];
+  }, [user, mockLobby, mockGames, wsLobbyEnabled, lobbyGames]);
+
+  const searchFilteredGames = useMemo(() => {
+    const q = lobbySearch.trim().toLowerCase();
+    if (!q) return displayGames;
+    return displayGames.filter((g) => {
+      const hay =
+        `${g.title} ${g.subtitle ?? ""} ${g.id} ${g.provider ?? ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [displayGames, lobbySearch]);
 
   /** 各分類一份列表（已登入分頁用） */
   const gamesByFilter = useMemo(() => {
     const out = {} as Record<LobbyFilterTab, Game[]>;
     for (const f of LOBBY_FILTER_ORDER) {
-      out[f] = gamesForFilter(displayGames, f);
+      out[f] = gamesForFilter(searchFilteredGames, f);
     }
     return out;
-  }, [displayGames]);
+  }, [searchFilteredGames]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!user) return;
     const el = document.getElementById(`lobby-tab-${lobbyFilter}`);
     el?.scrollIntoView({
       behavior: "smooth",
       inline: "center",
       block: "nearest",
     });
-  }, [token, lobbyFilter]);
+  }, [user, lobbyFilter]);
 
   useEffect(() => {
     const auth = searchParams.get("auth");
@@ -344,45 +227,41 @@ export function LandingPage() {
 
   useEffect(() => {
     if (!token) {
-      setApiItems([]);
-      setLoading(false);
-      setError(null);
+      setMockGames([]);
+      setMockLoading(false);
+      setMockError(null);
       return;
     }
-    if (wsLobbyEnabled) {
-      setError(null);
-      setLoading(true);
-      setApiItems([]);
+    if (!mockLobby) {
+      setMockGames([]);
+      setMockLoading(false);
+      setMockError(null);
       void refreshUser();
       return;
     }
     let cancelled = false;
-    setError(null);
-    setLoading(true);
+    setMockError(null);
+    setMockLoading(true);
     void (async () => {
       try {
-        const res = await fetchGames(token);
+        const res = await apiMock.mockGetGames();
         if (cancelled) return;
-        setApiItems(res.items ?? []);
+        setMockGames(res.items ?? []);
         await refreshUser();
       } catch (e) {
         if (cancelled) return;
         const msg =
-          e instanceof ApiError
-            ? e.message
-            : e instanceof Error
-              ? e.message
-              : "Could not load games";
-        setError(msg);
-        setApiItems([]);
+          e instanceof Error ? e.message : "Could not load games";
+        setMockError(msg);
+        setMockGames([]);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setMockLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [token, refreshUser, wsLobbyEnabled]);
+  }, [token, refreshUser, mockLobby]);
 
   useEffect(() => {
     const { documentElement, body } = document;
@@ -480,13 +359,7 @@ export function LandingPage() {
         <ul className="lobby-games-track" role="list">
           {games.map((g, index) => (
             <li key={g.id}>
-              {gameCard(
-                g,
-                index,
-                thumbOffset,
-                showTextLabels,
-                onCardAction,
-              )}
+              {gameCard(g, index, thumbOffset, showTextLabels, onCardAction)}
             </li>
           ))}
         </ul>
@@ -539,7 +412,7 @@ export function LandingPage() {
           className="guest-landing__games-block page-container"
           aria-labelledby="guest-top-games-heading">
           <h2 id="guest-top-games-heading" className="guest-landing__row-title">
-            {wsLobbyGames !== null ? (
+            {lobbyGames !== null ? (
               <>
                 <span className="guest-landing__accent">HOT</span> GAMES
               </>
@@ -554,7 +427,7 @@ export function LandingPage() {
             guestLobbyRows.top,
             0,
             false,
-            wsLobbyGames !== null
+            lobbyGames !== null
               ? () => {
                   openTermsThen("register");
                 }
@@ -628,7 +501,8 @@ export function LandingPage() {
             />
             <LobbyJackpotStrip
               wallet={activeWallet}
-              amounts={LOBBY_DEMO_JACKPOT_AMOUNTS}
+              amounts={liveJackpotAmounts ?? LOBBY_DEMO_JACKPOT_AMOUNTS}
+              variant={liveJackpotAmounts ? "live" : "demo"}
             />
           </div>
         </section>
@@ -636,38 +510,61 @@ export function LandingPage() {
         <section
           className="lobby-games-section page-container"
           aria-label="Games">
-          {token ? (
-            <div
-              className="lobby-game-filter"
-              role="tablist"
-              aria-label="Game categories (demo)">
-              {LOBBY_FILTER_TABS.map(({ id, label }) => (
-                <button
-                  key={id}
-                  id={`lobby-tab-${id}`}
-                  type="button"
-                  className={
-                    "lobby-game-filter__tab" +
-                    (lobbyFilter === id ? " is-active" : "")
-                  }
-                  role="tab"
-                  aria-selected={lobbyFilter === id}
-                  aria-controls="lobby-games-panel"
-                  tabIndex={lobbyFilter === id ? 0 : -1}
-                  onClick={() => setLobbyFilter(id)}>
-                  {label}
-                </button>
-              ))}
+          {user ? (
+            <div className="lobby-games-toolbar">
+              <label className="lobby-games-search-wrap">
+                <span className="lobby-games-search-sr">Search games</span>
+                <input
+                  type="search"
+                  className="lobby-games-search-input"
+                  value={lobbySearch}
+                  onChange={(e) => setLobbySearch(e.target.value)}
+                  placeholder="Search games"
+                  autoComplete="off"
+                  enterKeyHint="search"
+                />
+              </label>
+              <div
+                className="lobby-game-filter"
+                role="tablist"
+                aria-label="Game categories">
+                {LOBBY_FILTER_TABS.map(({ id, label }) => (
+                  <button
+                    key={id}
+                    id={`lobby-tab-${id}`}
+                    type="button"
+                    className={
+                      "lobby-game-filter__tab" +
+                      (lobbyFilter === id ? " is-active" : "")
+                    }
+                    role="tab"
+                    aria-selected={lobbyFilter === id}
+                    aria-controls="lobby-games-panel"
+                    tabIndex={lobbyFilter === id ? 0 : -1}
+                    onClick={() => setLobbyFilter(id)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : null}
           {error ? <p className="lobby-games-error">{error}</p> : null}
-          {token && loading && displayGames.length === 0 && !error ? (
+          {user && loading && displayGames.length === 0 && !error ? (
             <p className="lobby-games-hint">Loading…</p>
           ) : null}
-          {token && !loading && !error && displayGames.length === 0 ? (
+          {user && !loading && !error && displayGames.length === 0 ? (
             <p className="lobby-games-hint">No games available yet.</p>
           ) : null}
-          {token ? (
+          {user &&
+          !loading &&
+          !error &&
+          displayGames.length > 0 &&
+          gamesByFilter[lobbyFilter].length === 0 ? (
+            <p className="lobby-games-hint">
+              No games match your search or filter.
+            </p>
+          ) : null}
+          {user ? (
             <div
               id="lobby-games-panel"
               className="lobby-games-panel-host"

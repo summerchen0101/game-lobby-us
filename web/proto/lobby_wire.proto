@@ -48,6 +48,22 @@ enum GameJoinRoomPolicy {
   GAME_JOIN_RESERVE = 2;
 }
 
+// Gateway ApiType 112：切換使用中錢包（GC/SC）；與後端約定一致時送此 body。
+enum ActiveWalletMode {
+  ACTIVE_WALLET_UNKNOWN = 0;
+  ACTIVE_WALLET_GC = 1;
+  ACTIVE_WALLET_SC = 2;
+}
+
+message WalletUseRequest {
+  ActiveWalletMode mode = 1;
+}
+
+// Gateway 推播 type 14：Slot 累積獎池（伺服器主動下發）；jackpot_amounts 至少 1 筆，前端取前三格顯示。
+message SlotJackPotInfo {
+  repeated int64 jackpot_amounts = 1;
+}
+
 message Game {
   uint64 ID = 1;
   string displayName = 2;
@@ -82,12 +98,27 @@ message Game {
   int64 unlockVipLevel = 36;
   int64 rtpMinGC = 37;
   int64 rtpMaxGC = 38;
+  string providerName = 39;
 }
 
 message ListGameResponse {
   repeated Game games = 1;
 }
 
+// 與 proto/playerinfo/model.proto PlayerInfo 前段欄位編號對齊，供 LOBBY_GET 解出玩家基本資訊。
+message PlayerInfo {
+  uint64 userID = 1;
+  string nickname = 2;
+  uint32 gender = 3;
+  uint32 playerKind = 4;
+  uint64 vipLevel = 5;
+  uint64 vipExp = 6;
+  uint64 level = 7;
+  uint64 exp = 8;
+}
+
+// 與 proto/megaman/lobby.proto LobbyGetResponse 欄位 2、3 對齊（欄位 1 bag 等由解碼器略過）。
 message LobbyGetResponse {
   ListGameResponse games = 2;
+  PlayerInfo playerInfo = 3;
 }

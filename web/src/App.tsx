@@ -16,6 +16,7 @@ import { RedeemPage } from './features/lobby/RedeemPage'
 import { ShopPage } from './features/shop/ShopPage'
 import { WalletProvider } from './wallet/WalletProvider'
 import { AlertProvider } from './components/alert/AlertProvider'
+import { GatewayLobbyProvider } from './realtime/GatewayLobbyProvider'
 
 export default function App() {
   return (
@@ -23,28 +24,30 @@ export default function App() {
       <AuthProvider>
         <WalletProvider>
           <AlertProvider>
-            <AuthModalsProvider>
-              <GameShellProvider>
-                <ZendeskLoader />
-                <PwaInstallBanner />
-                <IosInstallGuide />
-                <Routes>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/login" element={<LoginRedirect />} />
-                  <Route path="/register" element={<RegisterRedirect />} />
-                  <Route element={<RequireAuth />}>
-                    <Route path="/events" element={<EventsRedirect />} />
-                    <Route element={<SessionLayout />}>
-                      <Route path="/shop" element={<ShopPage />} />
-                      <Route path="/redeem" element={<RedeemPage />} />
-                      <Route path="/promo" element={<PromoPage />} />
-                      <Route path="/profile" element={<ProfilePage />} />
+            <GatewayLobbyProvider>
+              <AuthModalsProvider>
+                <GameShellProvider>
+                  <ZendeskLoader />
+                  <PwaInstallBanner />
+                  <IosInstallGuide />
+                  <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/login" element={<LoginRedirect />} />
+                    <Route path="/register" element={<RegisterRedirect />} />
+                    <Route element={<RequireAuth />}>
+                      <Route path="/events" element={<EventsRedirect />} />
+                      <Route element={<SessionLayout />}>
+                        <Route path="/shop" element={<ShopPage />} />
+                        <Route path="/redeem" element={<RedeemPage />} />
+                        <Route path="/promo" element={<PromoPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                      </Route>
                     </Route>
-                  </Route>
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </GameShellProvider>
-            </AuthModalsProvider>
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </GameShellProvider>
+              </AuthModalsProvider>
+            </GatewayLobbyProvider>
           </AlertProvider>
         </WalletProvider>
       </AuthProvider>

@@ -2,10 +2,16 @@ import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
+import { useAlert } from '../alert/alertContext'
 import { getProfileAvatarById } from '../../features/lobby/profileAvatars'
 import { useProfileAvatarId } from '../../features/lobby/profileAvatarStorage'
 import { getCurrencyIconUrl } from '../../lib/currencyIcons'
+import { GATEWAY_API_WALLET_USE } from '../../realtime/gatewayApi'
+import { isGatewaySuccessCode } from '../../realtime/gatewayWire'
+import { useGatewayLobby } from '../../realtime/useGatewayLobby'
+import { encodeWalletUseRequestBytes } from '../../realtime/walletLobbyWire'
 import { getWalletDisplay } from '../../wallet/formatWalletAmount'
+import type { ActiveWallet } from '../../wallet/walletContext'
 import { useWallet } from '../../wallet/walletContext'
 import './SessionChrome.css'
 
@@ -13,8 +19,11 @@ const BRAND_LOGO = '/images/brand/brand-logo.webp'
 
 export function SessionHeader() {
   const { user } = useAuth()
+  const { show } = useAlert()
+  const { requestRef } = useGatewayLobby()
   const { avatarId } = useProfileAvatarId()
   const [avatarImgFailed, setAvatarImgFailed] = useState(false)
+  const [walletSwitchBusy, setWalletSwitchBusy] = useState(false)
   const { activeWallet, setActiveWallet } = useWallet()
   const { label, amount } = getWalletDisplay(user ?? undefined, activeWallet)
 
@@ -28,8 +37,34 @@ export function SessionHeader() {
     setAvatarImgFailed(false)
   }, [avatarId])
 
-  function toggleWallet() {
-    setActiveWallet(activeWallet === 'GC' ? 'SC' : 'GC')
+  async function toggleWallet() {
+    const next: ActiveWallet = activeWallet === 'GC' ? 'SC' : 'GC'
+    const req = requestRef.current
+    if (!req) {
+      setActiveWallet(next)
+      return
+    }
+    setWalletSwitchBusy(true)
+    try {
+      const data = encodeWalletUseRequestBytes(next)
+      const r = await req({
+        type: GATEWAY_API_WALLET_USE,
+        data,
+        debugLabel: 'WALLET_USE',
+      })
+      if (!isGatewaySuccessCode(String(r.code ?? ''))) {
+        throw new Error(
+          r.errMessage?.trim() || `Wallet switch failed (${String(r.code ?? '')})`,
+        )
+      }
+      setActiveWallet(next)
+    } catch (e) {
+      show(e instanceof Error ? e.message : 'Could not switch wallet', {
+        variant: 'error',
+      })
+    } finally {
+      setWalletSwitchBusy(false)
+    }
   }
 
   return (
@@ -47,12 +82,13 @@ export function SessionHeader() {
             height={44}
             decoding="async"
           />
-          <div
+          <Link
+            to="/profile"
             className={
               'session-header__avatar' +
               (showAvatarImage ? ' session-header__avatar--has-image' : '')
             }
-            aria-hidden
+            aria-label="Open profile"
           >
             {showAvatarImage && picked ? (
               <img
@@ -65,7 +101,7 @@ export function SessionHeader() {
             ) : (
               initial
             )}
-          </div>
+          </Link>
         </div>
         <div className="session-header__center">
           <div className="session-header__pill" title="Wallet balance">
@@ -96,7 +132,8 @@ export function SessionHeader() {
             role="switch"
             aria-checked={activeWallet === 'SC'}
             aria-label="Switch between gold coins and sweepstakes coins"
-            onClick={toggleWallet}
+            disabled={walletSwitchBusy}
+            onClick={() => void toggleWallet()}
           >
             <span
               className={

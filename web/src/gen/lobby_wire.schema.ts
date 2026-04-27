@@ -52,6 +52,30 @@ export default {
             "GAME_JOIN_RESERVE": 2
           }
         },
+        "ActiveWalletMode": {
+          "values": {
+            "ACTIVE_WALLET_UNKNOWN": 0,
+            "ACTIVE_WALLET_GC": 1,
+            "ACTIVE_WALLET_SC": 2
+          }
+        },
+        "WalletUseRequest": {
+          "fields": {
+            "mode": {
+              "type": "ActiveWalletMode",
+              "id": 1
+            }
+          }
+        },
+        "SlotJackPotInfo": {
+          "fields": {
+            "jackpotAmounts": {
+              "rule": "repeated",
+              "type": "int64",
+              "id": 1
+            }
+          }
+        },
         "Game": {
           "fields": {
             "ID": {
@@ -185,6 +209,10 @@ export default {
             "rtpMaxGC": {
               "type": "int64",
               "id": 38
+            },
+            "providerName": {
+              "type": "string",
+              "id": 39
             }
           }
         },
@@ -197,11 +225,51 @@ export default {
             }
           }
         },
+        "PlayerInfo": {
+          "fields": {
+            "userID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "nickname": {
+              "type": "string",
+              "id": 2
+            },
+            "gender": {
+              "type": "uint32",
+              "id": 3
+            },
+            "playerKind": {
+              "type": "uint32",
+              "id": 4
+            },
+            "vipLevel": {
+              "type": "uint64",
+              "id": 5
+            },
+            "vipExp": {
+              "type": "uint64",
+              "id": 6
+            },
+            "level": {
+              "type": "uint64",
+              "id": 7
+            },
+            "exp": {
+              "type": "uint64",
+              "id": 8
+            }
+          }
+        },
         "LobbyGetResponse": {
           "fields": {
             "games": {
               "type": "ListGameResponse",
               "id": 2
+            },
+            "playerInfo": {
+              "type": "PlayerInfo",
+              "id": 3
             }
           }
         }

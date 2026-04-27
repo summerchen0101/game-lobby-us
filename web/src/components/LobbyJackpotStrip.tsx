@@ -48,15 +48,18 @@ type Props = {
   wallet: ActiveWallet
   /** 三格金額，順序 JACKPOT 1~3 */
   amounts: readonly [number, number, number]
+  /** demo：本地假遞增；live：僅依伺服器推播更新（變更時 scramble） */
+  variant?: 'demo' | 'live'
 }
 
-export function LobbyJackpotStrip({ wallet, amounts }: Props) {
+export function LobbyJackpotStrip({ wallet, amounts, variant = 'demo' }: Props) {
   const coinSrc = getCurrencyIconUrl(wallet)
   const [values, setValues] = useState<Triple>(() => [amounts[0], amounts[1], amounts[2]])
   const [scrambling, setScrambling] = useState(false)
   const valuesRef = useRef<Triple>(values)
   const abortedRef = useRef(false)
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  const liveInitRef = useRef(false)
 
   useEffect(() => {
     setValues([amounts[0], amounts[1], amounts[2]])
@@ -66,40 +69,41 @@ export function LobbyJackpotStrip({ wallet, amounts }: Props) {
     valuesRef.current = values
   }, [values])
 
-  useEffect(() => {
-    abortedRef.current = false
-
-    const clearScrambleTimeouts = () => {
-      for (const id of timeoutsRef.current) {
-        clearTimeout(id)
-      }
-      timeoutsRef.current = []
+  const clearScrambleTimeouts = () => {
+    for (const id of timeoutsRef.current) {
+      clearTimeout(id)
     }
+    timeoutsRef.current = []
+  }
 
-    const schedule = (fn: () => void, delay: number) => {
-      const id = setTimeout(() => {
-        timeoutsRef.current = timeoutsRef.current.filter((t) => t !== id)
-        fn()
-      }, delay)
-      timeoutsRef.current.push(id)
-    }
+  const schedule = (fn: () => void, delay: number) => {
+    const id = setTimeout(() => {
+      timeoutsRef.current = timeoutsRef.current.filter((t) => t !== id)
+      fn()
+    }, delay)
+    timeoutsRef.current.push(id)
+  }
 
-    const runScramble = (from: Triple, to: Triple) => {
-      if (abortedRef.current) return
-      setScrambling(true)
-      for (let step = 0; step < SCRAMBLE_STEPS - 1; step++) {
-        const atStep = step
-        schedule(() => {
-          if (abortedRef.current) return
-          setValues(scrambleFrame(from, to, atStep))
-        }, step * SCRAMBLE_STEP_MS)
-      }
+  const runScramble = (from: Triple, to: Triple) => {
+    if (abortedRef.current) return
+    setScrambling(true)
+    for (let step = 0; step < SCRAMBLE_STEPS - 1; step++) {
+      const atStep = step
       schedule(() => {
         if (abortedRef.current) return
-        setValues([to[0], to[1], to[2]])
-        setScrambling(false)
-      }, (SCRAMBLE_STEPS - 1) * SCRAMBLE_STEP_MS)
+        setValues(scrambleFrame(from, to, atStep))
+      }, step * SCRAMBLE_STEP_MS)
     }
+    schedule(() => {
+      if (abortedRef.current) return
+      setValues([to[0], to[1], to[2]])
+      setScrambling(false)
+    }, (SCRAMBLE_STEPS - 1) * SCRAMBLE_STEP_MS)
+  }
+
+  useEffect(() => {
+    if (variant !== 'demo') return
+    abortedRef.current = false
 
     const onTick = () => {
       if (abortedRef.current) return
@@ -120,13 +124,44 @@ export function LobbyJackpotStrip({ wallet, amounts }: Props) {
       clearInterval(intervalId)
       clearScrambleTimeouts()
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- demo ticker; runScramble closure is intentional
+  }, [variant])
+
+  const amountsTriple = `${amounts[0]},${amounts[1]},${amounts[2]}`
+  useEffect(() => {
+    if (variant !== 'live') {
+      liveInitRef.current = false
+      return
+    }
+    const next: Triple = [amounts[0], amounts[1], amounts[2]]
+    if (!liveInitRef.current) {
+      liveInitRef.current = true
+      abortedRef.current = false
+      setValues(next)
+      valuesRef.current = next
+      return
+    }
+    const prev = valuesRef.current
+    if (prev[0] === next[0] && prev[1] === next[1] && prev[2] === next[2]) {
+      return
+    }
+    abortedRef.current = false
+    clearScrambleTimeouts()
+    runScramble(prev, next)
+    return () => {
+      abortedRef.current = true
+      clearScrambleTimeouts()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- amountsTriple encodes amounts; runScramble is stable
+  }, [variant, amountsTriple])
+
+  const aria =
+    variant === 'live'
+      ? 'Progressive jackpots (server updates)'
+      : 'Progressive jackpots (live figures refresh periodically)'
 
   return (
-    <div
-      className="lobby-jackpot-strip"
-      aria-label="Progressive jackpots (live figures refresh periodically)"
-    >
+    <div className="lobby-jackpot-strip" aria-label={aria}>
       <div className="lobby-jackpot-strip__cluster" role="list" aria-hidden>
         {values.map((amount, i) => {
           return (
