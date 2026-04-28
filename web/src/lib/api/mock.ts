@@ -29,6 +29,8 @@ const mockUser: User = {
   currency: "GC",
   /** 低於 Redeem 門檻，Redeem 頁可顯示 insufficient 卡片（對齊 UI 稿） */
   sweepstakesBalance: 2,
+  /** 對應 `public/images/head/head3.png`（mock 大廳頭像） */
+  avatarId: 3,
 };
 
 let mockState = { ...mockUser };

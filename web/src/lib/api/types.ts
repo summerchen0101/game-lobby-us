@@ -7,6 +7,8 @@ export type User = {
   sweepstakesBalance?: number;
   /** VIP 等級（WebEntry `vip_lv`；API 未回傳時前端可視為 0） */
   vipLevel?: number;
+  /** 頭像 id 1–10，對應 `/images/head/head{id}.png`（API 鍵例：`avatarID`） */
+  avatarId?: number;
 };
 
 export type AuthResponse = {

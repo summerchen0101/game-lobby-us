@@ -3,7 +3,10 @@ import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { useAlert } from "../alert/alertContext";
-import { getProfileAvatarById } from "../../features/lobby/profileAvatars";
+import {
+  effectiveAvatarId,
+  getProfileAvatarById,
+} from "../../features/lobby/profileAvatars";
 import { useProfileAvatarId } from "../../features/lobby/profileAvatarStorage";
 import {
   getCurrencyIconUrl,
@@ -24,7 +27,7 @@ export function SessionHeader() {
   const { user } = useAuth();
   const { show } = useAlert();
   const { requestRef } = useGatewayLobby();
-  const { avatarId } = useProfileAvatarId();
+  const { avatarId: storedAvatarId } = useProfileAvatarId();
   const [avatarImgFailed, setAvatarImgFailed] = useState(false);
   const [walletSwitchBusy, setWalletSwitchBusy] = useState(false);
   const { activeWallet, setActiveWallet } = useWallet();
@@ -36,12 +39,13 @@ export function SessionHeader() {
     "?"
   ).toUpperCase();
 
-  const picked = getProfileAvatarById(avatarId);
+  const displayAvatarId = effectiveAvatarId(user?.avatarId, storedAvatarId);
+  const picked = getProfileAvatarById(displayAvatarId);
   const showAvatarImage = Boolean(picked && !avatarImgFailed);
 
   useEffect(() => {
     setAvatarImgFailed(false);
-  }, [avatarId]);
+  }, [displayAvatarId]);
 
   async function toggleWallet() {
     const next: ActiveWallet = activeWallet === "GC" ? "SC" : "GC";

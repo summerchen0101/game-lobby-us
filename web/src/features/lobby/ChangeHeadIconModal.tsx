@@ -24,7 +24,7 @@ export function ChangeHeadIconModal({
       setDraftId(
         currentAvatarId ||
           PROFILE_AVATARS[0]?.id ||
-          "preset-1",
+          "1",
       )
     }
   }, [open, currentAvatarId])

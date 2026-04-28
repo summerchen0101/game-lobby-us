@@ -29,6 +29,27 @@ function numField(
   return undefined;
 }
 
+/** 後端會用 avatarID／avatarId／avatar_id／avatar；僅接受 1–10，無效則略過 */
+function avatarIdFromUserPayload(o: Record<string, unknown>): number | undefined {
+  const keys = ["avatarID", "avatarId", "avatar_id", "avatar"] as const;
+  for (const k of keys) {
+    const v = o[k];
+    if (typeof v === "number" && !Number.isNaN(v)) {
+      const n = Math.floor(v);
+      if (n >= 1 && n <= 10) return n;
+      return undefined;
+    }
+    if (typeof v === "string" && v !== "") {
+      const n = Number(v);
+      if (Number.isNaN(n)) continue;
+      const f = Math.floor(n);
+      if (f >= 1 && f <= 10) return f;
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
 export function normalizeUserPayload(raw: unknown): User {
   if (!raw || typeof raw !== "object") {
     throw new ApiError("Invalid user payload", 500);
@@ -50,6 +71,8 @@ export function normalizeUserPayload(raw: unknown): User {
   if (sc !== undefined) u.sweepstakesBalance = sc;
   const vl = numField(o, "vipLevel", "vip_level");
   if (vl !== undefined) u.vipLevel = Math.floor(vl);
+  const av = avatarIdFromUserPayload(o);
+  if (av !== undefined) u.avatarId = av;
   return u;
 }
 

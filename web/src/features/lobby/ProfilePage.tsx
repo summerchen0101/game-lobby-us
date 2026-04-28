@@ -6,7 +6,11 @@ import { InfoPopover } from "../../components/InfoPopover";
 import { useAuth } from "../../auth/useAuth";
 import { ChangeHeadIconModal } from "./ChangeHeadIconModal";
 import { MyProfileModal } from "./MyProfileModal";
-import { getProfileAvatarById } from "./profileAvatars";
+import {
+  PROFILE_AVATAR_COUNT,
+  effectiveAvatarId,
+  getProfileAvatarById,
+} from "./profileAvatars";
 import { useProfileAvatarId } from "./profileAvatarStorage";
 import "./ProfilePage.css";
 import "./SessionPageDecor.css";
@@ -18,7 +22,7 @@ const RANK_PCT = 0;
 
 export function ProfilePage() {
   const { show } = useAlert();
-  const { user, refreshUser, logout } = useAuth();
+  const { user, mergeUser, refreshUser, logout } = useAuth();
   const { avatarId, setAvatarId } = useProfileAvatarId();
   const [headIconOpen, setHeadIconOpen] = useState(false);
   const [myProfileOpen, setMyProfileOpen] = useState(false);
@@ -76,14 +80,31 @@ export function ProfilePage() {
     "?"
   ).toUpperCase();
 
-  const pickedAvatar = getProfileAvatarById(avatarId);
+  const displayAvatarId = effectiveAvatarId(user?.avatarId, avatarId);
+  const pickedAvatar = getProfileAvatarById(displayAvatarId);
   const showAvatarImage = Boolean(
     pickedAvatar && !avatarImgFailed,
   );
 
   useEffect(() => {
     setAvatarImgFailed(false);
-  }, [avatarId]);
+  }, [displayAvatarId]);
+
+  const confirmHeadIcon = useCallback(
+    (selectedId: string) => {
+      setAvatarId(selectedId);
+      const n = Number.parseInt(selectedId, 10);
+      if (
+        user &&
+        Number.isFinite(n) &&
+        n >= 1 &&
+        n <= PROFILE_AVATAR_COUNT
+      ) {
+        mergeUser({ avatarId: n });
+      }
+    },
+    [mergeUser, setAvatarId, user],
+  );
 
   const displayHandle = user?.displayName?.trim() || user?.id?.trim() || "—";
 
@@ -283,14 +304,14 @@ export function ProfilePage() {
         onClose={() => setMyProfileOpen(false)}
         userId={user?.id}
         displayName={user?.displayName}
-        avatarId={avatarId}
+        avatarId={displayAvatarId ?? ""}
       />
 
       <ChangeHeadIconModal
         open={headIconOpen}
         onClose={() => setHeadIconOpen(false)}
-        currentAvatarId={avatarId}
-        onConfirm={setAvatarId}
+        currentAvatarId={displayAvatarId ?? "1"}
+        onConfirm={confirmHeadIcon}
       />
 
       <dialog

@@ -8,8 +8,6 @@ import "./ShopCheckout.css";
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import type { ShopPack, ShopPaymentMethodId } from "./types";
 
-const PANEL = "/images/shop";
-
 export type CheckoutStep = "summary" | "payment" | "success";
 
 type Props = {
