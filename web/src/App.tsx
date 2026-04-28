@@ -7,7 +7,11 @@ import { PwaInstallBanner } from './components/PwaInstallBanner'
 import { SessionLayout } from './components/session/SessionLayout'
 import { ZendeskLoader } from './components/ZendeskLoader'
 import { AuthModalsProvider } from './features/auth/AuthModalsProvider'
-import { LoginRedirect, RegisterRedirect } from './features/auth/AuthRedirects'
+import {
+  ForgotPasswordRedirect,
+  LoginRedirect,
+  RegisterRedirect,
+} from './features/auth/AuthRedirects'
 import { EventsRedirect } from './features/lobby/EventsRedirect'
 import { LandingPage } from './features/lobby/LandingPage'
 import { ProfilePage } from './features/lobby/ProfilePage'
@@ -34,6 +38,10 @@ export default function App() {
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/login" element={<LoginRedirect />} />
                     <Route path="/register" element={<RegisterRedirect />} />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPasswordRedirect />}
+                    />
                     <Route element={<RequireAuth />}>
                       <Route path="/events" element={<EventsRedirect />} />
                       <Route element={<SessionLayout />}>

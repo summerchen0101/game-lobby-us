@@ -42,6 +42,15 @@ export type SignupResult = {
 
 export type LoginBody = { account: string; password: string };
 
+export type PasswordResetRequest = { email: string };
+
+/** `POST /api/v1/password/resetInfo` — 信箱驗證碼 + 新密碼 */
+export type PasswordResetInfoRequest = {
+  email: string;
+  password: string;
+  code: string;
+};
+
 /** 向後相容：註冊表單仍用 `account` 當主要識別時，在送出前可映射到 `email` / `nickname` */
 export type RegisterBody = SignUpRequest;
 

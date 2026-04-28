@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from 'react'
+import { type FormEvent, useMemo, useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { MarketingTopBar } from '../../components/MarketingTopBar'
@@ -10,6 +10,13 @@ export function LoginPage() {
   const [search] = useSearchParams()
   const navigate = useNavigate()
   const redirectTo = search.get('redirect') || '/'
+  const forgotPasswordHref = useMemo(() => {
+    const rd = search.get('redirect')
+    if (!rd) return '/forgot-password'
+    const q = new URLSearchParams()
+    q.set('redirect', rd)
+    return `/forgot-password?${q.toString()}`
+  }, [search])
   const [account, setAccount] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -84,6 +91,8 @@ export function LoginPage() {
           </div>
         </form>
         <p className="auth-page__link">
+          <Link to={forgotPasswordHref}>Forgot password?</Link>
+          {' · '}
           No account yet? <Link to="/register">Register</Link>
         </p>
       </div>

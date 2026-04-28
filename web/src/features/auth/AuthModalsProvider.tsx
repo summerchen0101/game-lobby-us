@@ -7,6 +7,7 @@ export function AuthModalsProvider({ children }: { children: ReactNode }) {
   const [termsOpen, setTermsOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
   const [registerOpen, setRegisterOpen] = useState(false)
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
   const [phoneVerifyOpen, setPhoneVerifyOpen] = useState(false)
   const [phoneVerifyPayload, setPhoneVerifyPayload] = useState<PhoneVerifyPayload | null>(null)
   const [pendingAfterTerms, setPendingAfterTerms] = useState<PostTermsAction | null>(null)
@@ -16,6 +17,7 @@ export function AuthModalsProvider({ children }: { children: ReactNode }) {
   const openLoginDirect = useCallback(() => {
     setLoginOpen(true)
     setRegisterOpen(false)
+    setForgotPasswordOpen(false)
     setPhoneVerifyOpen(false)
     setPhoneVerifyPayload(null)
   }, [])
@@ -23,9 +25,20 @@ export function AuthModalsProvider({ children }: { children: ReactNode }) {
   const openRegisterDirect = useCallback(() => {
     setRegisterOpen(true)
     setLoginOpen(false)
+    setForgotPasswordOpen(false)
     setPhoneVerifyOpen(false)
     setPhoneVerifyPayload(null)
   }, [])
+
+  const openForgotPasswordDirect = useCallback(() => {
+    setForgotPasswordOpen(true)
+    setLoginOpen(false)
+    setRegisterOpen(false)
+    setPhoneVerifyOpen(false)
+    setPhoneVerifyPayload(null)
+  }, [])
+
+  const closeForgotPassword = useCallback(() => setForgotPasswordOpen(false), [])
 
   const openTermsThen = useCallback(
     (next: PostTermsAction) => {
@@ -51,6 +64,7 @@ export function AuthModalsProvider({ children }: { children: ReactNode }) {
   const openPhoneVerify = useCallback((payload: PhoneVerifyPayload) => {
     setRegisterOpen(false)
     setLoginOpen(false)
+    setForgotPasswordOpen(false)
     setPhoneVerifyPayload(payload)
     setPhoneVerifyOpen(true)
   }, [])
@@ -64,6 +78,7 @@ export function AuthModalsProvider({ children }: { children: ReactNode }) {
     setTermsOpen(false)
     setLoginOpen(false)
     setRegisterOpen(false)
+    setForgotPasswordOpen(false)
     setPhoneVerifyOpen(false)
     setPhoneVerifyPayload(null)
     setPendingAfterTerms(null)
@@ -83,16 +98,19 @@ export function AuthModalsProvider({ children }: { children: ReactNode }) {
       termsOpen,
       loginOpen,
       registerOpen,
+      forgotPasswordOpen,
       phoneVerifyOpen,
       phoneVerifyPayload,
       openTermsThen,
       openLoginDirect,
       openRegisterDirect,
+      openForgotPasswordDirect,
       openPhoneVerify,
       closePhoneVerify,
       closeTerms,
       closeLogin,
       closeRegister,
+      closeForgotPassword,
       closeAllModals,
       onTermsAccepted,
       hasAcceptedTerms,
@@ -101,16 +119,19 @@ export function AuthModalsProvider({ children }: { children: ReactNode }) {
       termsOpen,
       loginOpen,
       registerOpen,
+      forgotPasswordOpen,
       phoneVerifyOpen,
       phoneVerifyPayload,
       openTermsThen,
       openLoginDirect,
       openRegisterDirect,
+      openForgotPasswordDirect,
       openPhoneVerify,
       closePhoneVerify,
       closeTerms,
       closeLogin,
       closeRegister,
+      closeForgotPassword,
       closeAllModals,
       onTermsAccepted,
       hasAcceptedTerms,

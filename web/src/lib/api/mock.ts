@@ -72,6 +72,14 @@ export async function mockLogin(body: LoginBody): Promise<AuthResponse> {
   return delay(mockAuth(body.account));
 }
 
+export async function mockRequestPasswordReset(): Promise<void> {
+  return delay(undefined);
+}
+
+export async function mockCompletePasswordReset(): Promise<void> {
+  return delay(undefined);
+}
+
 export async function mockGetMe(): Promise<User> {
   return delay({ ...mockState });
 }

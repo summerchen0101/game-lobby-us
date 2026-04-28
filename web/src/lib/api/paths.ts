@@ -6,5 +6,10 @@ export function getApiPaths() {
     login: import.meta.env.VITE_API_PATH_AUTH_LOGIN ?? '/api/v1/login',
     /** v1 以 refresh 換新 access */
     token: import.meta.env.VITE_API_PATH_AUTH_TOKEN ?? '/api/v1/token',
+    passwordReset:
+      import.meta.env.VITE_API_PATH_PASSWORD_RESET ?? '/api/v1/password/reset',
+    passwordResetInfo:
+      import.meta.env.VITE_API_PATH_PASSWORD_RESET_INFO ??
+      '/api/v1/password/resetInfo',
   } as const
 }

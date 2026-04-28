@@ -6,7 +6,14 @@ export { ClientVersionError } from './client'
 import { normalizeAuthResponse, parseSignupResponse } from './authParse'
 import { getApiPaths } from './paths'
 import * as mock from './mock'
-import type { AuthResponse, LoginBody, SignupResult, SignUpRequest } from './types'
+import type {
+  AuthResponse,
+  LoginBody,
+  PasswordResetInfoRequest,
+  PasswordResetRequest,
+  SignupResult,
+  SignUpRequest,
+} from './types'
 
 function buildV1LoginBody(body: LoginBody) {
   return {
@@ -70,4 +77,30 @@ export async function login(body: LoginBody): Promise<AuthResponse> {
     body: buildV1LoginBody(body),
   })
   return normalizeAuthResponse(data)
+}
+
+export async function requestPasswordReset(body: PasswordResetRequest): Promise<void> {
+  if (isMockMode()) {
+    await mock.mockRequestPasswordReset()
+    return
+  }
+  await apiRequest<unknown>(getApiPaths().passwordReset, {
+    method: 'POST',
+    body: { email: body.email.trim() },
+  })
+}
+
+export async function completePasswordReset(body: PasswordResetInfoRequest): Promise<void> {
+  if (isMockMode()) {
+    await mock.mockCompletePasswordReset()
+    return
+  }
+  await apiRequest<unknown>(getApiPaths().passwordResetInfo, {
+    method: 'POST',
+    body: {
+      email: body.email.trim(),
+      password: body.password,
+      code: body.code.trim(),
+    },
+  })
 }

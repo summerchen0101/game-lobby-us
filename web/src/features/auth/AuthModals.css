@@ -181,6 +181,12 @@
   cursor: not-allowed;
 }
 
+.auth-modal__forgot-password {
+  margin: calc(var(--space-2) * -1) 0 var(--space-2);
+  text-align: right;
+  font-size: 0.8rem;
+}
+
 .auth-modal__footer {
   margin-top: var(--space-4);
   text-align: center;

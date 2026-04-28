@@ -13,16 +13,19 @@ export type AuthModalsContextValue = {
   termsOpen: boolean
   loginOpen: boolean
   registerOpen: boolean
+  forgotPasswordOpen: boolean
   phoneVerifyOpen: boolean
   phoneVerifyPayload: PhoneVerifyPayload | null
   openTermsThen: (next: PostTermsAction) => void
   openLoginDirect: () => void
   openRegisterDirect: () => void
+  openForgotPasswordDirect: () => void
   openPhoneVerify: (payload: PhoneVerifyPayload) => void
   closePhoneVerify: () => void
   closeTerms: () => void
   closeLogin: () => void
   closeRegister: () => void
+  closeForgotPassword: () => void
   closeAllModals: () => void
   onTermsAccepted: () => void
   hasAcceptedTerms: () => boolean

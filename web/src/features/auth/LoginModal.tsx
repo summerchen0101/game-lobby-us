@@ -10,6 +10,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onSwitchRegister: () => void;
+  onForgotPassword: () => void;
 };
 
 /** Icon when password is hidden — click to reveal. */
@@ -40,7 +41,12 @@ function IconEyeClosed() {
   );
 }
 
-export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
+export function LoginModal({
+  open,
+  onClose,
+  onSwitchRegister,
+  onForgotPassword,
+}: Props) {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -177,6 +183,14 @@ export function LoginModal({ open, onClose, onSwitchRegister }: Props) {
                 {showPassword ? <IconEyeClosed /> : <IconEyeOpen />}
               </button>
             </div>
+            <p className="auth-modal__forgot-password">
+              <button
+                type="button"
+                className="auth-modal__footer-link"
+                onClick={onForgotPassword}>
+                Forgot password?
+              </button>
+            </p>
             {error ? <p className="auth-modal__error">{error}</p> : null}
             <button
               type="submit"

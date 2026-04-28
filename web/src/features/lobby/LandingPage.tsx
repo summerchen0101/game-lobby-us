@@ -9,6 +9,7 @@ import { LobbyComplianceFooter } from "../../components/LobbyComplianceFooter";
 import { TrustpilotSection } from "../../components/TrustpilotSection";
 import { useGameShell } from "../../components/useGameShell";
 import { useAuthModals } from "../auth/authModalsContext";
+import { ForgotPasswordModal } from "../auth/ForgotPasswordModal";
 import { LoginModal } from "../auth/LoginModal";
 import { PhoneVerificationModal } from "../auth/PhoneVerificationModal";
 import { RegisterModal } from "../auth/RegisterModal";
@@ -139,14 +140,17 @@ export function LandingPage() {
     termsOpen,
     loginOpen,
     registerOpen,
+    forgotPasswordOpen,
     phoneVerifyOpen,
     phoneVerifyPayload,
     openTermsThen,
     openLoginDirect,
     openRegisterDirect,
+    openForgotPasswordDirect,
     closeTerms,
     closeLogin,
     closeRegister,
+    closeForgotPassword,
     closePhoneVerify,
     onTermsAccepted,
   } = useAuthModals();
@@ -222,8 +226,13 @@ export function LandingPage() {
       const next = new URLSearchParams(searchParams);
       next.delete("auth");
       setSearchParams(next, { replace: true });
+    } else if (auth === "forgot") {
+      openForgotPasswordDirect();
+      const next = new URLSearchParams(searchParams);
+      next.delete("auth");
+      setSearchParams(next, { replace: true });
     }
-  }, [searchParams, setSearchParams, openTermsThen]);
+  }, [searchParams, setSearchParams, openForgotPasswordDirect, openTermsThen]);
 
   useEffect(() => {
     if (!token) {
@@ -629,9 +638,18 @@ export function LandingPage() {
       <LoginModal
         open={loginOpen}
         onClose={closeLogin}
+        onForgotPassword={openForgotPasswordDirect}
         onSwitchRegister={() => {
           closeLogin();
           openRegisterDirect();
+        }}
+      />
+      <ForgotPasswordModal
+        open={forgotPasswordOpen}
+        onClose={closeForgotPassword}
+        onSwitchToLogin={() => {
+          closeForgotPassword();
+          openLoginDirect();
         }}
       />
       <RegisterModal
