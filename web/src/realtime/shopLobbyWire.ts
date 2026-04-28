@@ -73,9 +73,10 @@ export function encodeMegaAccountBindingRequestBytes(
   const uid = wireUInt64Field(fields.userID);
   const msg = {
     userID: uid,
-    countryCode: fields.countryCode,
     phone: fields.phone,
+    countryCode: fields.countryCode,
     email: fields.email,
+    password: "",
     answer: fields.answer,
     firstName: fields.firstName,
     lastName: fields.lastName,
@@ -109,6 +110,83 @@ export function encodeBuyProductRequestBytes(
     paymentType: pt,
   });
   return Uint8Array.from(BuyProductRequestType.encode(msg).finish());
+}
+
+const wireToObjectOpts = {
+  longs: String,
+  defaults: true,
+  enums: String,
+} as const;
+
+/**
+ * 僅供 dev 日誌：解 `MegaAccountBindingRequest`（失敗時由呼叫端 try/catch）。
+ */
+export function decodeMegaAccountBindingRequestForDevLog(
+  raw: Uint8Array,
+): Record<string, unknown> {
+  const msg = MegaAccountBindingRequestType.decode(raw);
+  const o = MegaAccountBindingRequestType.toObject(msg, wireToObjectOpts) as {
+    userID?: string | number;
+    countryCode?: string;
+    phone?: string;
+    email?: string;
+    answer?: string;
+    firstName?: string;
+    lastName?: string;
+    birthday?: string;
+    address?: string;
+    country?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    language?: string;
+  };
+  return {
+    userID: String(o.userID ?? ""),
+    countryCode: String(o.countryCode ?? ""),
+    phone: String(o.phone ?? ""),
+    email: String(o.email ?? ""),
+    answer: String(o.answer ?? ""),
+    firstName: String(o.firstName ?? ""),
+    lastName: String(o.lastName ?? ""),
+    birthday: String(o.birthday ?? ""),
+    address: String(o.address ?? ""),
+    country: String(o.country ?? ""),
+    city: String(o.city ?? ""),
+    state: String(o.state ?? ""),
+    zip: String(o.zip ?? ""),
+    language: String(o.language ?? ""),
+  };
+}
+
+/**
+ * 僅供 dev 日誌：解 `BuyProductRequest`（失敗時由呼叫端 try/catch）。
+ */
+export function decodeBuyProductRequestForDevLog(
+  raw: Uint8Array,
+): Record<string, unknown> {
+  const msg = BuyProductRequestType.decode(raw);
+  const o = BuyProductRequestType.toObject(msg, wireToObjectOpts) as {
+    productID?: string | number;
+    paymentType?: string | number;
+  };
+  return {
+    productID: String(o.productID ?? ""),
+    paymentType: String(o.paymentType ?? ""),
+  };
+}
+
+/**
+ * 僅供 dev 日誌：解 `ListProductsRequest`（失敗時由呼叫端 try/catch）。
+ */
+export function decodeListProductsRequestForDevLog(
+  raw: Uint8Array,
+): Record<string, unknown> {
+  const msg = ListProductsRequestType.decode(raw);
+  return ListProductsRequestType.toObject(msg, wireToObjectOpts) as Record<
+    string,
+    unknown
+  >;
 }
 
 export type ListProductsWireProduct = {

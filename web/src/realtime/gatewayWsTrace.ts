@@ -1,4 +1,5 @@
 import { hexPreview } from './bytesHexPreview'
+import { decodeGatewayRequestDataForDevLog } from './gatewayRequestDevPayload'
 
 const DATA_HEX_PREVIEW_MAX_BYTES = 256
 const HEX_PREVIEW_LEN = 48
@@ -40,6 +41,10 @@ export function logGatewayRequestOut(params: {
     dataByteLength > 0 && dataByteLength <= DATA_HEX_PREVIEW_MAX_BYTES
       ? hexPreview(params.data, HEX_PREVIEW_LEN)
       : undefined
+  const dataDecoded = decodeGatewayRequestDataForDevLog(
+    params.apiType,
+    params.data,
+  )
   console.info('[gateway-ws] → request', {
     kind: params.kind ?? 'API',
     apiType: params.apiType,
@@ -47,6 +52,7 @@ export function logGatewayRequestOut(params: {
     debugLabel: params.debugLabel,
     basic: sanitizeBasicForLog(params.basic),
     dataByteLength,
+    dataDecoded,
     ...(dataHexPreview ? { dataHexPreview } : {}),
   })
 }

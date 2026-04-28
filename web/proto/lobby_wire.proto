@@ -2,8 +2,17 @@ syntax = "proto3";
 
 package megaman;
 
-// 與 proto/megaman/lobby.proto 之 LobbyGetResponse 欄位 2、proto/gamemanager/gamemanager.proto
-// 之 ListGameResponse / Game 編號對齊，供前端解碼；若主 repo 變更請同步。
+// Web wire：無 import，供 protobufjs 單檔解析。欄位編號須與下列主 repo 訊息一致：
+// - LobbyGetResponse 樹：proto/megaman/lobby.proto、proto/wallet/wallet.proto（Bag/Coin/Token）、
+//   proto/gamemanager/gamemanager.proto（Game/ListGameResponse）、proto/playerinfo/model.proto（PlayerInfo 前段）、
+//   proto/kaixilo/kaixilo.proto（ListParasitesResp）、proto/megaman/campaign.proto（Campaign/ListHomePageCampaignResponse）、
+//   ciri/commonpb pagination（Pagination）
+// - 商城：proto/megaman/product.proto、proto/virtualgood/virtualgood.proto（ProductContent、enum）
+// - 付款推播：proto/megaman/payment.proto（PaymentPush、Item）、proto/megaman/message.proto（MsgResp）、
+//   proto/msg/msg.proto Message（apiType=14、data=10）→ WirePushMessage
+// - 帳號綁定：proto/megaman/playerinfo.proto MegaAccountBindingRequest/Response
+// - WalletUseRequest：與 megaman lobby WalletUseRequest 欄位 1 二進位相容（WalletType 與 ActiveWalletMode 均 1=GC、2=SC）
+// - SlotJackPotInfo：Gateway ApiType 14 body（主 repo 僅註解約定，見 proto/gateway/gateway.proto）
 
 enum YesNo {
   NO = 0;
@@ -55,11 +64,12 @@ enum ActiveWalletMode {
   ACTIVE_WALLET_SC = 2;
 }
 
+// 欄位 1 與 proto/megaman/lobby.proto WalletUseRequest.walletType 同號同線型；枚舉數值對齊 WalletType。
 message WalletUseRequest {
   ActiveWalletMode mode = 1;
 }
 
-// Gateway 推播 type 14：Slot 累積獎池（伺服器主動下發）；jackpot_amounts 至少 1 筆，前端取前三格顯示。
+// Gateway ApiType SLOT_JACKPOT_INFO_PUSH(14)：Slot 累積獎池（伺服器主動下發）；jackpot_amounts 至少 1 筆，前端取前三格顯示。
 message SlotJackPotInfo {
   repeated int64 jackpot_amounts = 1;
 }
@@ -103,6 +113,7 @@ message Game {
 
 message ListGameResponse {
   repeated Game games = 1;
+  Pagination pagination = 2;
 }
 
 // 與 proto/playerinfo/model.proto PlayerInfo 前段欄位編號對齊，供 LOBBY_GET 解出玩家基本資訊。
@@ -117,13 +128,7 @@ message PlayerInfo {
   uint64 exp = 8;
 }
 
-// 與 proto/megaman/lobby.proto LobbyGetResponse 欄位 2、3 對齊（欄位 1 bag 等由解碼器略過）。
-message LobbyGetResponse {
-  ListGameResponse games = 2;
-  PlayerInfo playerInfo = 3;
-}
-
-// --- Shop / payment wire（對齊 proto/megaman/product.proto、payment.proto、wallet.Coin、virtualgood.ProductContent、msg.Message）---
+// --- wallet.Bag（對齊 proto/wallet/wallet.proto）與 LOBBY_GET 衛星型別 ---
 
 enum CoinType {
   UNKNOWN_COIN_TYPE = 0;
@@ -142,6 +147,111 @@ message Coin {
   int64 redeemableAmount = 8;
 }
 
+message WalletToken {
+  uint64 userID = 1;
+  uint64 gameID = 2;
+  uint64 createdAtMs = 3;
+  uint64 expireAtMs = 4;
+  int64 amount = 5;
+  string roomID = 6;
+}
+
+message Bag {
+  uint64 userID = 1;
+  repeated Coin coins = 2;
+  uint64 updatedAtMs = 3;
+  YesNo isFakePlayer = 4;
+  int64 level = 5;
+  repeated WalletToken tokens = 6;
+}
+
+// 對齊 proto/kaixilo/kaixilo.proto ListParasitesResp
+message ListParasitesResp {
+  repeated uint64 parasiteIDs = 2;
+  uint64 userID = 3;
+}
+
+// 對齊 proto/megaman/lobby.proto ThirdPartyGameInfo
+message ThirdPartyGameInfo {
+  string platform = 1;
+  string gameType = 2;
+  string gameName = 3;
+  string gameUID = 4;
+  string status = 5;
+  string gameLaunchURL = 6;
+}
+
+// 對齊 proto/megaman/campaign.proto 所依賴之 campaign 子集 + megaman.Campaign
+enum CampaignType {
+  CampaignTypeALL = 0;
+  ADVERTISE = 1;
+  COMMODITY = 2;
+}
+
+enum CampaignImageType {
+  ImageTypeALL = 0;
+  ImgURL = 1;
+  ICON_ID = 2;
+  ImgSource = 3;
+}
+
+message CampaignImage {
+  CampaignImageType type = 1;
+  string value = 2;
+}
+
+message HomePageCampaign {
+  string id = 1;
+  CampaignType type = 2;
+  CampaignImage image = 3;
+  int64 startedAtMs = 4;
+  int64 endedAtMs = 5;
+  YesNo hasAction = 6;
+  int64 sort = 7;
+  string name = 8;
+}
+
+// 對齊 ciri pagination.Pagination（常見欄位編號；若後端升級請比對 commonpb）
+message Pagination {
+  uint32 page = 1;
+  uint32 perPage = 2;
+  uint64 total = 3;
+}
+
+message ListHomePageCampaignResponse {
+  repeated HomePageCampaign campaign = 1;
+  Pagination page = 2;
+  int64 dailyRewardRecivedAtMs = 3;
+}
+
+// 與 proto/megaman/lobby.proto LobbyGetResponse 欄位 1–22 對齊
+message LobbyGetResponse {
+  Bag bag = 1;
+  ListGameResponse games = 2;
+  PlayerInfo playerInfo = 3;
+  ListParasitesResp parasite = 4;
+  PlayerInfo kaixiloOwner = 5;
+  bool isEnterSecondPasswordSetting = 6;
+  ListHomePageCampaignResponse campaign = 7;
+  bool isEnterLoginAwardSetting = 8;
+  bool canSendStrangerMsg = 9;
+  bool isNew = 10;
+  bool isDiamond = 11;
+  bool canSendCondition = 12;
+  int64 currency = 13;
+  repeated uint64 jackPotGameList = 14;
+  bool isSummonedPlayer = 15;
+  string version = 16;
+  string versionDetail = 17;
+  bool canShowRichDaddies = 18;
+  Bag bagGC = 19;
+  string email = 20;
+  string phone = 21;
+  repeated ThirdPartyGameInfo thirdPartyGameInfoList = 22;
+}
+
+// --- Shop / payment wire（對齊 proto/megaman/product.proto、payment.proto、wallet.Coin、virtualgood.ProductContent、msg.Message）---
+
 message Item {
   uint64 itemID = 1;
   uint64 amount = 2;
@@ -157,7 +267,7 @@ message PaymentPush {
   string reason = 6;
 }
 
-// SEND_MESSAGE_PUSH payload：對齊 proto/megaman/message.proto MsgResp、msg.Message（僅解 apiType、data）。
+// SEND_MESSAGE_PUSH 內層：對齊 proto/megaman/message.proto MsgResp 與 proto/msg/msg.proto Message 之欄位 10、14。
 message WirePushMessage {
   bytes data = 10;
   int64 apiType = 14;
@@ -210,6 +320,7 @@ enum VirtualGoodType {
   SC_GOLD = 15002;
 }
 
+// 欄位編號對齊 proto/virtualgood/virtualgood.proto ProductContent（goodType=8、amount=6、percent=7、sort=9）。
 message ProductContent {
   uint64 productID = 1;
   uint64 itemID = 2;
@@ -244,4 +355,28 @@ message BuyProductRequest {
 message BuyProductResponse {
   string orderID = 1;
   string paymentURL = 2;
+}
+
+// 對齊 proto/megaman/playerinfo.proto（Gateway MegaAccountBinding）
+message MegaAccountBindingRequest {
+  uint64 userID = 1;
+  string phone = 2;
+  string countryCode = 3;
+  string email = 4;
+  string password = 5;
+  string answer = 6;
+  string firstName = 7;
+  string lastName = 8;
+  string birthday = 9;
+  string country = 10;
+  string city = 11;
+  string state = 12;
+  string zip = 13;
+  string address = 14;
+  string language = 15;
+}
+
+message MegaAccountBindingResponse {
+  YesNo needSMSAnswer = 1;
+  string phoneNum = 2;
 }

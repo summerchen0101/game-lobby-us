@@ -2,8 +2,10 @@ import {
   GATEWAY_API_BUY_PRODUCT,
   GATEWAY_API_LIST_PRODUCTS,
   GATEWAY_API_LOBBY_GET,
+  GATEWAY_API_MEGA_ACCOUNT_BINDING,
   GATEWAY_API_PING_PONG,
   GATEWAY_API_SEND_MESSAGE_PUSH,
+  GATEWAY_API_SERVER_LOGIN,
   GATEWAY_API_SLOT_JACKPOT_PUSH,
   GATEWAY_API_WALLET_USE,
 } from './gatewayApi'
@@ -13,11 +15,12 @@ import { decodeSlotJackPotInfoToObjectForDev } from './jackpotLobbyWire'
 import {
   decodeLobbyGetResponseBytes,
   lobbyDecodedGamesToApiGames,
-  lobbyDecodedPlayerToUserPatch,
+  lobbyDecodedToUserPatch,
 } from './lobbyDecode'
 import {
   decodeBuyProductResponseBytes,
   decodeListProductsResponseBytes,
+  decodeMegaAccountBindingResponseBytes,
   tryDecodeSendMessagePushToPaymentPush,
 } from './shopLobbyWire'
 import { tryDecodeWalletUseRequestForDev } from './walletLobbyWire'
@@ -53,6 +56,16 @@ export function decodeGatewayResponseDataForDevLog(
     }
     return { kind: 'PING_PONG', unexpectedBytes: raw.byteLength }
   }
+  if (type === GATEWAY_API_SERVER_LOGIN) {
+    if (empty) {
+      return { kind: 'SERVER_LOGIN', note: 'empty' }
+    }
+    return {
+      kind: 'SERVER_LOGIN',
+      unexpectedBytes: raw.byteLength,
+      hexPreview: hexPreview(raw, HEX_MAX),
+    }
+  }
   if (code === '204' && empty) {
     return { kind: 'noBody', code: '204' }
   }
@@ -64,7 +77,7 @@ export function decodeGatewayResponseDataForDevLog(
     if (type === GATEWAY_API_LOBBY_GET) {
       const decoded = decodeLobbyGetResponseBytes(raw)
       const items = lobbyDecodedGamesToApiGames(decoded)
-      const userPatch = lobbyDecodedPlayerToUserPatch(decoded)
+      const userPatch = lobbyDecodedToUserPatch(decoded)
       return {
         kind: 'LOBBY_GET',
         gameCount: items.length,
@@ -72,7 +85,12 @@ export function decodeGatewayResponseDataForDevLog(
           id: g.id,
           title: g.title,
         })),
-        playerInfo: userPatch,
+        userPatch,
+        currency: decoded.currency,
+        jackPotGameCount: decoded.jackPotGameList?.length ?? 0,
+        thirdPartyGameCount: decoded.thirdPartyGameInfoList?.length ?? 0,
+        campaignCount: decoded.campaign?.campaign?.length ?? 0,
+        canShowRichDaddies: decoded.canShowRichDaddies,
       }
     }
     if (type === GATEWAY_API_SLOT_JACKPOT_PUSH) {
@@ -119,6 +137,19 @@ export function decodeGatewayResponseDataForDevLog(
             paymentURL.length > 80
               ? `${paymentURL.slice(0, 80)}…`
               : paymentURL,
+        }
+      } catch (e) {
+        return fallbackHex(raw, e)
+      }
+    }
+    if (type === GATEWAY_API_MEGA_ACCOUNT_BINDING) {
+      try {
+        const { phoneNum, needSMSAnswer } =
+          decodeMegaAccountBindingResponseBytes(raw)
+        return {
+          kind: 'MEGA_ACCOUNT_BINDING',
+          phoneNum,
+          needSMSAnswer,
         }
       } catch (e) {
         return fallbackHex(raw, e)

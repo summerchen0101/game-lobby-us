@@ -122,28 +122,96 @@ function numFromWire(v: unknown): number | undefined {
 /**
  * LOBBY_GET 內 `playerInfo`（與 megaman.LobbyGetResponse 欄位 3 對齊）轉成可 merge 進 `User` 的欄位。
  */
+function isGoldenCoinType(raw: unknown): boolean {
+  return raw === 'GOLDEN' || raw === 1 || raw === '1'
+}
+
+type BagRow = NonNullable<LobbyGetDecoded['bag']>
+
+function sumGoldenAmountFromBag(bag: BagRow | null | undefined): number | undefined {
+  if (!bag?.coins?.length) return undefined
+  let sum = 0
+  for (const c of bag.coins) {
+    if (!c || typeof c !== 'object') continue
+    if (!isGoldenCoinType((c as { type?: unknown }).type)) continue
+    const n = numFromWire((c as { amount?: unknown }).amount)
+    if (n !== undefined) sum += n
+  }
+  return sum
+}
+
+/**
+ * LOBBY_GET `bag` / `bagGC`（欄位 1、19）→ `User.balance`（GC）與 `sweepstakesBalance`（SC）。
+ * 命名依 proto：`bagGC` 對應 GC 顯示餘額，`bag` 對應 SC。
+ */
+export function lobbyDecodedBagsToUserBalancePatch(
+  decoded: LobbyGetDecoded,
+): Partial<User> | null {
+  const gc = sumGoldenAmountFromBag(decoded.bagGC ?? undefined)
+  const sc = sumGoldenAmountFromBag(decoded.bag ?? undefined)
+  if (gc === undefined && sc === undefined) return null
+  const out: Partial<User> = {}
+  if (gc !== undefined) out.balance = gc
+  if (sc !== undefined) out.sweepstakesBalance = sc
+  return out
+}
+
 export function lobbyDecodedPlayerToUserPatch(
   decoded: LobbyGetDecoded,
 ): Partial<User> | null {
   const p = decoded.playerInfo as LobbyPlayerRow | null | undefined
-  if (!p || typeof p !== 'object') return null
-  const idRaw = p.userID
+  const idRaw = p && typeof p === 'object' ? p.userID : undefined
   const id =
     idRaw != null && String(idRaw) !== '' ? String(idRaw) : undefined
-  const nickRaw = p.nickname
+  const nickRaw = p && typeof p === 'object' ? p.nickname : undefined
   const displayName =
     typeof nickRaw === 'string' && nickRaw.trim() ? nickRaw.trim() : undefined
-  const vipLevel = numFromWire(p.vipLevel)
-  const phoneRaw = (p as { phone?: unknown }).phone
-  const phone =
-    typeof phoneRaw === 'string' && phoneRaw.trim()
-      ? phoneRaw.trim()
+  const vipLevel =
+    p && typeof p === 'object' ? numFromWire(p.vipLevel) : undefined
+  const phoneFromPlayer = (p as { phone?: unknown } | null)?.phone
+  const phonePlayer =
+    typeof phoneFromPlayer === 'string' && phoneFromPlayer.trim()
+      ? phoneFromPlayer.trim()
       : undefined
-  if (!id && !displayName && vipLevel === undefined && !phone) return null
+  const phoneRoot =
+    typeof decoded.phone === 'string' && decoded.phone.trim()
+      ? decoded.phone.trim()
+      : undefined
+  const phone = phoneRoot ?? phonePlayer
+  const email =
+    typeof decoded.email === 'string' && decoded.email.trim()
+      ? decoded.email.trim()
+      : undefined
+  if (
+    !id &&
+    !displayName &&
+    vipLevel === undefined &&
+    !phone &&
+    !email
+  )
+    return null
   const out: Partial<User> = {}
   if (id) out.id = id
   if (displayName) out.displayName = displayName
   if (vipLevel !== undefined) out.vipLevel = Math.floor(vipLevel)
   if (phone) out.phone = phone
+  if (email) out.email = email
   return out
+}
+
+function lobbyDecodedCurrencyToUserPatch(
+  decoded: LobbyGetDecoded,
+): Partial<User> | null {
+  const raw = decoded.currency
+  if (raw === undefined || raw === null || String(raw) === '') return null
+  return { currency: String(raw) }
+}
+
+/** 合併 playerInfo、email/phone、幣值與雙錢包餘額，供 LOBBY_GET 成功後一次 mergeUser。 */
+export function lobbyDecodedToUserPatch(decoded: LobbyGetDecoded): Partial<User> {
+  return {
+    ...(lobbyDecodedPlayerToUserPatch(decoded) ?? {}),
+    ...(lobbyDecodedBagsToUserBalancePatch(decoded) ?? {}),
+    ...(lobbyDecodedCurrencyToUserPatch(decoded) ?? {}),
+  }
 }

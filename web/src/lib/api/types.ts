@@ -11,6 +11,8 @@ export type User = {
   avatarId?: number;
   /** LOBBY_GET `playerInfo.phone`：有值通常表示已綁定手機（商城購買前檢查） */
   phone?: string;
+  /** LOBBY_GET 頂層 `email`（與後端欄位 20 對齊） */
+  email?: string;
 };
 
 export type AuthResponse = {

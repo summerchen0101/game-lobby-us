@@ -222,6 +222,10 @@ export default {
               "rule": "repeated",
               "type": "Game",
               "id": 1
+            },
+            "pagination": {
+              "type": "Pagination",
+              "id": 2
             }
           }
         },
@@ -258,22 +262,6 @@ export default {
             "exp": {
               "type": "uint64",
               "id": 8
-            },
-            "phone": {
-              "type": "string",
-              "id": 9
-            }
-          }
-        },
-        "LobbyGetResponse": {
-          "fields": {
-            "games": {
-              "type": "ListGameResponse",
-              "id": 2
-            },
-            "playerInfo": {
-              "type": "PlayerInfo",
-              "id": 3
             }
           }
         },
@@ -317,6 +305,295 @@ export default {
             "redeemableAmount": {
               "type": "int64",
               "id": 8
+            }
+          }
+        },
+        "WalletToken": {
+          "fields": {
+            "userID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "gameID": {
+              "type": "uint64",
+              "id": 2
+            },
+            "createdAtMs": {
+              "type": "uint64",
+              "id": 3
+            },
+            "expireAtMs": {
+              "type": "uint64",
+              "id": 4
+            },
+            "amount": {
+              "type": "int64",
+              "id": 5
+            },
+            "roomID": {
+              "type": "string",
+              "id": 6
+            }
+          }
+        },
+        "Bag": {
+          "fields": {
+            "userID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "coins": {
+              "rule": "repeated",
+              "type": "Coin",
+              "id": 2
+            },
+            "updatedAtMs": {
+              "type": "uint64",
+              "id": 3
+            },
+            "isFakePlayer": {
+              "type": "YesNo",
+              "id": 4
+            },
+            "level": {
+              "type": "int64",
+              "id": 5
+            },
+            "tokens": {
+              "rule": "repeated",
+              "type": "WalletToken",
+              "id": 6
+            }
+          }
+        },
+        "ListParasitesResp": {
+          "fields": {
+            "parasiteIDs": {
+              "rule": "repeated",
+              "type": "uint64",
+              "id": 2
+            },
+            "userID": {
+              "type": "uint64",
+              "id": 3
+            }
+          }
+        },
+        "ThirdPartyGameInfo": {
+          "fields": {
+            "platform": {
+              "type": "string",
+              "id": 1
+            },
+            "gameType": {
+              "type": "string",
+              "id": 2
+            },
+            "gameName": {
+              "type": "string",
+              "id": 3
+            },
+            "gameUID": {
+              "type": "string",
+              "id": 4
+            },
+            "status": {
+              "type": "string",
+              "id": 5
+            },
+            "gameLaunchURL": {
+              "type": "string",
+              "id": 6
+            }
+          }
+        },
+        "CampaignType": {
+          "values": {
+            "CampaignTypeALL": 0,
+            "ADVERTISE": 1,
+            "COMMODITY": 2
+          }
+        },
+        "CampaignImageType": {
+          "values": {
+            "ImageTypeALL": 0,
+            "ImgURL": 1,
+            "ICON_ID": 2,
+            "ImgSource": 3
+          }
+        },
+        "CampaignImage": {
+          "fields": {
+            "type": {
+              "type": "CampaignImageType",
+              "id": 1
+            },
+            "value": {
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "HomePageCampaign": {
+          "fields": {
+            "id": {
+              "type": "string",
+              "id": 1
+            },
+            "type": {
+              "type": "CampaignType",
+              "id": 2
+            },
+            "image": {
+              "type": "CampaignImage",
+              "id": 3
+            },
+            "startedAtMs": {
+              "type": "int64",
+              "id": 4
+            },
+            "endedAtMs": {
+              "type": "int64",
+              "id": 5
+            },
+            "hasAction": {
+              "type": "YesNo",
+              "id": 6
+            },
+            "sort": {
+              "type": "int64",
+              "id": 7
+            },
+            "name": {
+              "type": "string",
+              "id": 8
+            }
+          }
+        },
+        "Pagination": {
+          "fields": {
+            "page": {
+              "type": "uint32",
+              "id": 1
+            },
+            "perPage": {
+              "type": "uint32",
+              "id": 2
+            },
+            "total": {
+              "type": "uint64",
+              "id": 3
+            }
+          }
+        },
+        "ListHomePageCampaignResponse": {
+          "fields": {
+            "campaign": {
+              "rule": "repeated",
+              "type": "HomePageCampaign",
+              "id": 1
+            },
+            "page": {
+              "type": "Pagination",
+              "id": 2
+            },
+            "dailyRewardRecivedAtMs": {
+              "type": "int64",
+              "id": 3
+            }
+          }
+        },
+        "LobbyGetResponse": {
+          "fields": {
+            "bag": {
+              "type": "Bag",
+              "id": 1
+            },
+            "games": {
+              "type": "ListGameResponse",
+              "id": 2
+            },
+            "playerInfo": {
+              "type": "PlayerInfo",
+              "id": 3
+            },
+            "parasite": {
+              "type": "ListParasitesResp",
+              "id": 4
+            },
+            "kaixiloOwner": {
+              "type": "PlayerInfo",
+              "id": 5
+            },
+            "isEnterSecondPasswordSetting": {
+              "type": "bool",
+              "id": 6
+            },
+            "campaign": {
+              "type": "ListHomePageCampaignResponse",
+              "id": 7
+            },
+            "isEnterLoginAwardSetting": {
+              "type": "bool",
+              "id": 8
+            },
+            "canSendStrangerMsg": {
+              "type": "bool",
+              "id": 9
+            },
+            "isNew": {
+              "type": "bool",
+              "id": 10
+            },
+            "isDiamond": {
+              "type": "bool",
+              "id": 11
+            },
+            "canSendCondition": {
+              "type": "bool",
+              "id": 12
+            },
+            "currency": {
+              "type": "int64",
+              "id": 13
+            },
+            "jackPotGameList": {
+              "rule": "repeated",
+              "type": "uint64",
+              "id": 14
+            },
+            "isSummonedPlayer": {
+              "type": "bool",
+              "id": 15
+            },
+            "version": {
+              "type": "string",
+              "id": 16
+            },
+            "versionDetail": {
+              "type": "string",
+              "id": 17
+            },
+            "canShowRichDaddies": {
+              "type": "bool",
+              "id": 18
+            },
+            "bagGC": {
+              "type": "Bag",
+              "id": 19
+            },
+            "email": {
+              "type": "string",
+              "id": 20
+            },
+            "phone": {
+              "type": "string",
+              "id": 21
+            },
+            "thirdPartyGameInfoList": {
+              "rule": "repeated",
+              "type": "ThirdPartyGameInfo",
+              "id": 22
             }
           }
         },
@@ -541,11 +818,11 @@ export default {
               "type": "uint64",
               "id": 1
             },
-            "countryCode": {
+            "phone": {
               "type": "string",
               "id": 2
             },
-            "phone": {
+            "countryCode": {
               "type": "string",
               "id": 3
             },
@@ -553,23 +830,23 @@ export default {
               "type": "string",
               "id": 4
             },
-            "answer": {
+            "password": {
               "type": "string",
               "id": 5
             },
-            "firstName": {
+            "answer": {
               "type": "string",
               "id": 6
             },
-            "lastName": {
+            "firstName": {
               "type": "string",
               "id": 7
             },
-            "birthday": {
+            "lastName": {
               "type": "string",
               "id": 8
             },
-            "address": {
+            "birthday": {
               "type": "string",
               "id": 9
             },
@@ -589,20 +866,24 @@ export default {
               "type": "string",
               "id": 13
             },
-            "language": {
+            "address": {
               "type": "string",
               "id": 14
+            },
+            "language": {
+              "type": "string",
+              "id": 15
             }
           }
         },
         "MegaAccountBindingResponse": {
           "fields": {
-            "phoneNum": {
-              "type": "string",
-              "id": 1
-            },
             "needSMSAnswer": {
               "type": "YesNo",
+              "id": 1
+            },
+            "phoneNum": {
+              "type": "string",
               "id": 2
             }
           }

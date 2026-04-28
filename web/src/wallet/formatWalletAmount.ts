@@ -11,7 +11,6 @@ export function getWalletDisplay(
   user: User | null | undefined,
   active: ActiveWallet,
 ) {
-  console.log("getWalletDisplay", user, active);
   if (!user) return { label: active, amount: "—" as string };
   if (active === "GC") {
     return {

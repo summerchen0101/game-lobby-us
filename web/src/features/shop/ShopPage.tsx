@@ -346,6 +346,25 @@ export function ShopPage() {
       setBindingBusy(true);
       setBindingError(null);
       try {
+        if (import.meta.env.DEV) {
+          console.log("[MEGA_ACCOUNT_BINDING]", {
+            apiType: GATEWAY_API_MEGA_ACCOUNT_BINDING,
+            userID: uid,
+            countryCode: payload.countryCode,
+            phoneNum: payload.phone,
+            answer: payload.answer,
+            email: payload.email,
+            firstName: payload.firstName,
+            lastName: payload.lastName,
+            birthday: payload.birthday,
+            address: payload.address,
+            country: payload.country,
+            city: payload.city,
+            state: payload.state,
+            zip: payload.zip,
+            language: "en",
+          });
+        }
         const data = encodeMegaAccountBindingRequestBytes({
           userID: uid,
           countryCode: payload.countryCode,

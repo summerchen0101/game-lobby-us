@@ -1,8 +1,13 @@
-/** 對應 proto/gateway/gateway.proto ApiType（登入僅走 REST，不在此送 ApiType 4） */
+/**
+ * 對應 proto/gateway/gateway.proto ApiType。
+ * HTTP `/api/v1/login` 為身分驗證；WebSocket 連線後另送 `ServerLogin`(4) 完成 Gateway 會話。
+ */
 
 export const GATEWAY_API_PING_PONG = 0
+/** 連線後伺服器登入；對應 ApiType ServerLogin / SERVER_LOGIN；`data` 為空 */
+export const GATEWAY_API_SERVER_LOGIN = 4
 export const GATEWAY_API_LOBBY_GET = 11
-/** 伺服器主動推播：SlotJackPotInfo（見 web/proto/lobby_wire.proto） */
+/** 伺服器主動推播：與 proto/gateway/gateway.proto ApiType SLOT_JACKPOT_INFO_PUSH(14) 一致；body 為 megaman.SlotJackPotInfo（見 web/proto/lobby_wire.proto） */
 export const GATEWAY_API_SLOT_JACKPOT_PUSH = 14
 /** 切換使用中錢包 GC/SC；body 為 megaman.WalletUseRequest */
 export const GATEWAY_API_WALLET_USE = 112
