@@ -6,6 +6,7 @@ import { useAuth } from '../../auth/useAuth'
 import { ApiError, ClientVersionError } from '../../lib/api/client'
 import { useAuthModals } from './authModalsContext'
 import type { SignUpRequest } from '../../lib/api/types'
+import { AuthClearableInputWrap } from './AuthClearableInputWrap'
 import './AuthModals.css'
 
 type Props = {
@@ -172,21 +173,45 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
             <label className="auth-modal__field-label auth-modal__field-label--register" htmlFor={emailId}>
               Email:
             </label>
-            <input
-              id={emailId}
-              className="auth-modal__input auth-modal__input--register"
-              type="email"
-              autoComplete="email"
-              placeholder="Enter email"
+            <AuthClearableInputWrap
+              variant="modal"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+              onClear={() => setEmail('')}
+              clearAriaLabel="Clear email"
+            >
+              <input
+                id={emailId}
+                className="auth-modal__input auth-modal__input--register"
+                type="email"
+                autoComplete="email"
+                placeholder="Enter email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </AuthClearableInputWrap>
 
             <label className="auth-modal__field-label auth-modal__field-label--register" htmlFor={passwordId}>
               Password:
             </label>
-            <div className="auth-modal__password-wrap">
+            <AuthClearableInputWrap
+              variant="modal"
+              modalWrap="password"
+              value={password}
+              onClear={() => setPassword('')}
+              clearAriaLabel="Clear password"
+              suffix={
+                <button
+                  type="button"
+                  className="auth-modal__password-toggle"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <IconEyeClosed /> : <IconEyeOpen />}
+                </button>
+              }
+            >
               <input
                 id={passwordId}
                 className="auth-modal__input auth-modal__input--register auth-modal__input--password"
@@ -198,21 +223,18 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
                 required
                 minLength={6}
               />
-              <button
-                type="button"
-                className="auth-modal__password-toggle"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                aria-pressed={showPassword}
-              >
-                {showPassword ? <IconEyeClosed /> : <IconEyeOpen />}
-              </button>
-            </div>
+            </AuthClearableInputWrap>
 
             <label className="auth-modal__field-label auth-modal__field-label--register" htmlFor={password2Id}>
               Confirm password:
             </label>
-            <div className="auth-modal__password-wrap">
+            <AuthClearableInputWrap
+              variant="modal"
+              modalWrap="password"
+              value={passwordConfirm}
+              onClear={() => setPasswordConfirm('')}
+              clearAriaLabel="Clear confirm password"
+            >
               <input
                 id={password2Id}
                 className="auth-modal__input auth-modal__input--register auth-modal__input--password"
@@ -224,19 +246,26 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
                 required
                 minLength={6}
               />
-            </div>
+            </AuthClearableInputWrap>
 
             <label className="auth-modal__field-label auth-modal__field-label--register" htmlFor={referralId}>
               Referral Code (optional):
             </label>
-            <input
-              id={referralId}
-              className="auth-modal__input auth-modal__input--register"
-              autoComplete="off"
-              placeholder="Referral Code"
+            <AuthClearableInputWrap
+              variant="modal"
               value={_referral}
-              onChange={(e) => setReferral(e.target.value)}
-            />
+              onClear={() => setReferral('')}
+              clearAriaLabel="Clear referral code"
+            >
+              <input
+                id={referralId}
+                className="auth-modal__input auth-modal__input--register"
+                autoComplete="off"
+                placeholder="Referral Code"
+                value={_referral}
+                onChange={(e) => setReferral(e.target.value)}
+              />
+            </AuthClearableInputWrap>
 
             <div className="auth-modal__legal">
               <input

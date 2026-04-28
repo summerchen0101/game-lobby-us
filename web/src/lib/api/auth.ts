@@ -41,7 +41,11 @@ export async function signUp(body: SignUpRequest): Promise<SignupResult> {
     }
     return { needSMSAnswer: true }
   }
-  const data = await apiRequest<unknown>(getApiPaths().register, { method: 'POST', body })
+  const data = await apiRequest<unknown>(getApiPaths().register, {
+    method: 'POST',
+    body,
+    largeSafeUserIdsInJson: true,
+  })
   return parseSignupResponse(data, body)
 }
 
@@ -66,6 +70,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthResp
     method: 'POST',
     body: buildV1RefreshBody(refreshToken),
     skipUnauthorizedOn401: true,
+    largeSafeUserIdsInJson: true,
   })
   return normalizeAuthResponse(data)
 }
@@ -75,6 +80,7 @@ export async function login(body: LoginBody): Promise<AuthResponse> {
   const data = await apiRequest<unknown>(getApiPaths().login, {
     method: 'POST',
     body: buildV1LoginBody(body),
+    largeSafeUserIdsInJson: true,
   })
   return normalizeAuthResponse(data)
 }

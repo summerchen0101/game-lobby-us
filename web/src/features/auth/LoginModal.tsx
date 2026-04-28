@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { IoChevronBack } from "react-icons/io5";
 import { useAuth } from "../../auth/useAuth";
 import { ApiError, ClientVersionError } from "../../lib/api/client";
+import { AuthClearableInputWrap } from "./AuthClearableInputWrap";
 import "./AuthModals.css";
 
 type Props = {
@@ -146,23 +147,44 @@ export function LoginModal({
               htmlFor={emailId}>
               Email:
             </label>
-            <input
-              id={emailId}
-              className="auth-modal__input auth-modal__input--register"
-              name="account"
-              type="email"
-              autoComplete="username"
-              placeholder="Please enter email"
+            <AuthClearableInputWrap
+              variant="modal"
               value={account}
-              onChange={(e) => setAccount(e.target.value)}
-              required
-            />
+              onClear={() => setAccount("")}
+              clearAriaLabel="Clear email">
+              <input
+                id={emailId}
+                className="auth-modal__input auth-modal__input--register"
+                name="account"
+                type="email"
+                autoComplete="username"
+                placeholder="Please enter email"
+                value={account}
+                onChange={(e) => setAccount(e.target.value)}
+                required
+              />
+            </AuthClearableInputWrap>
             <label
               className="auth-modal__field-label auth-modal__field-label--register"
               htmlFor={passwordId}>
               Password:
             </label>
-            <div className="auth-modal__password-wrap">
+            <AuthClearableInputWrap
+              variant="modal"
+              modalWrap="password"
+              value={password}
+              onClear={() => setPassword("")}
+              clearAriaLabel="Clear password"
+              suffix={
+                <button
+                  type="button"
+                  className="auth-modal__password-toggle"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}>
+                  {showPassword ? <IconEyeClosed /> : <IconEyeOpen />}
+                </button>
+              }>
               <input
                 id={passwordId}
                 className="auth-modal__input auth-modal__input--register auth-modal__input--password"
@@ -174,15 +196,7 @@ export function LoginModal({
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <button
-                type="button"
-                className="auth-modal__password-toggle"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                aria-pressed={showPassword}>
-                {showPassword ? <IconEyeClosed /> : <IconEyeOpen />}
-              </button>
-            </div>
+            </AuthClearableInputWrap>
             <p className="auth-modal__forgot-password">
               <button
                 type="button"

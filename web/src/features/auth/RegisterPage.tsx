@@ -5,6 +5,7 @@ import { MarketingTopBar } from '../../components/MarketingTopBar'
 import { ApiError, ClientVersionError } from '../../lib/api/client'
 import { buildAppMetaPayload, getOrCreateWebDeviceId, nicknameFromEmail } from '../../lib/appMeta'
 import type { SignUpRequest } from '../../lib/api/types'
+import { AuthClearableInputWrap } from './AuthClearableInputWrap'
 import './AuthPages.css'
 
 function buildRequest(params: { email: string; password: string; rePassword: string }): SignUpRequest {
@@ -105,16 +106,23 @@ export function RegisterPage() {
               <label className="auth-form__label" htmlFor="reg-code">
                 Verification code
               </label>
-              <input
-                id="reg-code"
-                className="auth-form__input"
-                name="code"
-                autoComplete="one-time-code"
-                inputMode="numeric"
+              <AuthClearableInputWrap
+                variant="page"
                 value={answer}
-                onChange={(e) => setAnswer(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                required
-              />
+                onClear={() => setAnswer('')}
+                clearAriaLabel="Clear verification code"
+              >
+                <input
+                  id="reg-code"
+                  className="auth-form__input"
+                  name="code"
+                  autoComplete="one-time-code"
+                  inputMode="numeric"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                  required
+                />
+              </AuthClearableInputWrap>
             </div>
             {error ? <p className="auth-form__error">{error}</p> : null}
             <div className="auth-form__actions">
@@ -139,48 +147,69 @@ export function RegisterPage() {
             <label className="auth-form__label" htmlFor="reg-email">
               Email
             </label>
-            <input
-              id="reg-email"
-              className="auth-form__input"
-              name="email"
-              type="email"
-              autoComplete="email"
+            <AuthClearableInputWrap
+              variant="page"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+              onClear={() => setEmail('')}
+              clearAriaLabel="Clear email"
+            >
+              <input
+                id="reg-email"
+                className="auth-form__input"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </AuthClearableInputWrap>
           </div>
           <div className="auth-form__field">
             <label className="auth-form__label" htmlFor="reg-password">
               Password
             </label>
-            <input
-              id="reg-password"
-              className="auth-form__input"
-              name="password"
-              type="password"
-              autoComplete="new-password"
+            <AuthClearableInputWrap
+              variant="page"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
+              onClear={() => setPassword('')}
+              clearAriaLabel="Clear password"
+            >
+              <input
+                id="reg-password"
+                className="auth-form__input"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+            </AuthClearableInputWrap>
           </div>
           <div className="auth-form__field">
             <label className="auth-form__label" htmlFor="reg-password2">
               Confirm password
             </label>
-            <input
-              id="reg-password2"
-              className="auth-form__input"
-              name="password2"
-              type="password"
-              autoComplete="new-password"
+            <AuthClearableInputWrap
+              variant="page"
               value={password2}
-              onChange={(e) => setPassword2(e.target.value)}
-              required
-              minLength={6}
-            />
+              onClear={() => setPassword2('')}
+              clearAriaLabel="Clear confirm password"
+            >
+              <input
+                id="reg-password2"
+                className="auth-form__input"
+                name="password2"
+                type="password"
+                autoComplete="new-password"
+                value={password2}
+                onChange={(e) => setPassword2(e.target.value)}
+                required
+                minLength={6}
+              />
+            </AuthClearableInputWrap>
           </div>
           {error ? <p className="auth-form__error">{error}</p> : null}
           <div className="auth-form__actions">

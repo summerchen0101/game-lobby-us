@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { MarketingTopBar } from '../../components/MarketingTopBar'
 import { ApiError } from '../../lib/api/client'
+import { AuthClearableInputWrap } from './AuthClearableInputWrap'
 import './AuthPages.css'
 
 export function LoginPage() {
@@ -58,30 +59,44 @@ export function LoginPage() {
             <label className="auth-form__label" htmlFor="login-account">
               Account
             </label>
-            <input
-              id="login-account"
-              className="auth-form__input"
-              name="account"
-              autoComplete="username"
+            <AuthClearableInputWrap
+              variant="page"
               value={account}
-              onChange={(e) => setAccount(e.target.value)}
-              required
-            />
+              onClear={() => setAccount('')}
+              clearAriaLabel="Clear account"
+            >
+              <input
+                id="login-account"
+                className="auth-form__input"
+                name="account"
+                autoComplete="username"
+                value={account}
+                onChange={(e) => setAccount(e.target.value)}
+                required
+              />
+            </AuthClearableInputWrap>
           </div>
           <div className="auth-form__field">
             <label className="auth-form__label" htmlFor="login-password">
               Password
             </label>
-            <input
-              id="login-password"
-              className="auth-form__input"
-              name="password"
-              type="password"
-              autoComplete="current-password"
+            <AuthClearableInputWrap
+              variant="page"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+              onClear={() => setPassword('')}
+              clearAriaLabel="Clear password"
+            >
+              <input
+                id="login-password"
+                className="auth-form__input"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </AuthClearableInputWrap>
           </div>
           {error ? <p className="auth-form__error">{error}</p> : null}
           <div className="auth-form__actions">

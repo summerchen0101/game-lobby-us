@@ -77,6 +77,27 @@ type Props = {
   onSubmit: (payload: ShopBindingFormPayload) => Promise<void>;
 };
 
+const PROTECT_ACCOUNT_DEV_DEFAULTS = import.meta.env.DEV
+  ? {
+      firstName: "Summer",
+      lastName: "Chen",
+      email: "summer@ffglobaltech.com",
+      phoneCountry: "1",
+      phoneNumber: "3105550192",
+      dobMonth: "03",
+      dobDay: "15",
+      dobYear: "1990",
+      address1: "742 Evergreen Terrace",
+      address2: "Apt 2B",
+      country: "US",
+      city: "Los Angeles",
+      state: "CA",
+      zip: "90001",
+    }
+  : null;
+
+const dev = PROTECT_ACCOUNT_DEV_DEFAULTS;
+
 export function ProtectAccountView({
   bindingBusy,
   bindingError,
@@ -86,20 +107,20 @@ export function ProtectAccountView({
   onSubmit,
 }: Props) {
   const idPrefix = useId();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneCountry, setPhoneCountry] = useState("1");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [dobMonth, setDobMonth] = useState("");
-  const [dobDay, setDobDay] = useState("");
-  const [dobYear, setDobYear] = useState("");
-  const [address1, setAddress1] = useState("");
-  const [address2, setAddress2] = useState("");
-  const [country, setCountry] = useState("US");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [zip, setZip] = useState("");
+  const [firstName, setFirstName] = useState(dev?.firstName ?? "");
+  const [lastName, setLastName] = useState(dev?.lastName ?? "");
+  const [email, setEmail] = useState(dev?.email ?? "");
+  const [phoneCountry, setPhoneCountry] = useState(dev?.phoneCountry ?? "1");
+  const [phoneNumber, setPhoneNumber] = useState(dev?.phoneNumber ?? "");
+  const [dobMonth, setDobMonth] = useState(dev?.dobMonth ?? "");
+  const [dobDay, setDobDay] = useState(dev?.dobDay ?? "");
+  const [dobYear, setDobYear] = useState(dev?.dobYear ?? "");
+  const [address1, setAddress1] = useState(dev?.address1 ?? "");
+  const [address2, setAddress2] = useState(dev?.address2 ?? "");
+  const [country, setCountry] = useState(dev?.country ?? "US");
+  const [city, setCity] = useState(dev?.city ?? "");
+  const [state, setState] = useState(dev?.state ?? "");
+  const [zip, setZip] = useState(dev?.zip ?? "");
   const [smsAnswer, setSmsAnswer] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
   const [invalidFields, setInvalidFields] = useState<Set<FieldKey>>(

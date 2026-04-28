@@ -35,7 +35,7 @@ export function headIconChoicesFromServerRows(
     }
     const st = row.goodState
     const disabled =
-      st === 'UNUSABLE' || st === 3 || st === '3'
+      st === 'UNUSABLE' || st === '3'
     return { id: id || '0', imageSrc, disabled }
   })
   const out = mapped.filter((c) => c.id && c.id !== '0')

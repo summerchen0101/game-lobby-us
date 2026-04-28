@@ -55,11 +55,15 @@ export function normalizeUserPayload(raw: unknown): User {
     throw new ApiError("Invalid user payload", 500);
   }
   const o = raw as Record<string, unknown>;
-  const idRaw = o.id ?? o.user_id;
+  const idRaw =
+    o.id ??
+    o.user_id ??
+    o.userId ??
+    (o as { userID?: unknown }).userID;
   if (idRaw == null || idRaw === "") {
     throw new ApiError("Invalid user payload", 500);
   }
-  const id = String(idRaw);
+  const id = typeof idRaw === "bigint" ? idRaw.toString() : String(idRaw);
   const u: User = { id };
   const dn = strField(o, "displayName", "display_name");
   if (dn !== undefined) u.displayName = dn;

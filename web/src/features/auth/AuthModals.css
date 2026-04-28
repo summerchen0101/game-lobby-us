@@ -256,15 +256,98 @@
   margin-bottom: var(--space-3);
 }
 
-.auth-modal--register .auth-modal__input--password,
-.auth-modal--login .auth-modal__input--password {
-  padding-right: 3rem;
-  margin-bottom: 0;
-}
-
 .auth-modal--register .auth-modal__password-wrap .auth-modal__input--register,
 .auth-modal--login .auth-modal__password-wrap .auth-modal__input--register {
   margin-bottom: 0;
+}
+
+.auth-modal__input-wrap {
+  position: relative;
+  width: 100%;
+  margin-bottom: var(--space-3);
+}
+
+.auth-modal__input-wrap .auth-modal__input {
+  margin-bottom: 0;
+}
+
+.auth-modal__input-wrap--has-clear .auth-modal__input--register:not(.auth-modal__input--password) {
+  padding-right: 2.65rem;
+}
+
+.auth-modal__clear-btn {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.35rem;
+  background: none;
+  color: rgb(255 255 255 / 55%);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.auth-modal__clear-btn:hover {
+  color: rgb(255 255 255 / 85%);
+}
+
+.auth-modal__clear-btn:focus-visible {
+  outline: 2px solid var(--crown-locale-green);
+  outline-offset: 2px;
+}
+
+.auth-modal__password-wrap--has-suffix .auth-modal__clear-btn {
+  right: 2.65rem;
+}
+
+.auth-modal--register .auth-modal__password-wrap .auth-modal__input--password,
+.auth-modal--login .auth-modal__password-wrap .auth-modal__input--password {
+  margin-bottom: 0;
+}
+
+.auth-modal--register
+  .auth-modal__password-wrap--has-suffix:not(.auth-modal__password-wrap--has-clear)
+  .auth-modal__input--password,
+.auth-modal--login
+  .auth-modal__password-wrap--has-suffix:not(.auth-modal__password-wrap--has-clear)
+  .auth-modal__input--password {
+  padding-right: 3rem;
+}
+
+.auth-modal--register
+  .auth-modal__password-wrap--has-suffix.auth-modal__password-wrap--has-clear
+  .auth-modal__input--password,
+.auth-modal--login
+  .auth-modal__password-wrap--has-suffix.auth-modal__password-wrap--has-clear
+  .auth-modal__input--password {
+  padding-right: 5.35rem;
+}
+
+.auth-modal--register
+  .auth-modal__password-wrap:not(.auth-modal__password-wrap--has-suffix)
+  .auth-modal__input--password,
+.auth-modal--login
+  .auth-modal__password-wrap:not(.auth-modal__password-wrap--has-suffix)
+  .auth-modal__input--password {
+  padding-right: var(--space-4);
+}
+
+.auth-modal--register
+  .auth-modal__password-wrap:not(.auth-modal__password-wrap--has-suffix).auth-modal__password-wrap--has-clear
+  .auth-modal__input--password,
+.auth-modal--login
+  .auth-modal__password-wrap:not(.auth-modal__password-wrap--has-suffix).auth-modal__password-wrap--has-clear
+  .auth-modal__input--password {
+  padding-right: 2.65rem;
 }
 
 .auth-modal__password-toggle {

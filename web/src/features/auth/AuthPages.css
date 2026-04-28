@@ -89,6 +89,53 @@
   opacity: 0.7;
 }
 
+.auth-form__input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.auth-form__input-wrap .auth-form__input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-form__input--has-clear:not(.auth-form__input--has-suffix) {
+  padding-right: 2.5rem;
+}
+
+.auth-form__input--has-clear.auth-form__input--has-suffix {
+  padding-right: 5rem;
+}
+
+.auth-form__clear-btn {
+  position: absolute;
+  top: 50%;
+  right: 0.45rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.35rem;
+  background: none;
+  color: rgb(255 255 255 / 55%);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.auth-form__clear-btn:hover {
+  color: rgb(255 255 255 / 85%);
+}
+
+.auth-form__clear-btn:focus-visible {
+  outline: 2px solid rgb(255 198 0 / 55%);
+  outline-offset: 2px;
+}
+
 .auth-form__error {
   margin: 0;
   color: #f87171;

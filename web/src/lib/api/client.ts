@@ -1,6 +1,7 @@
 import { getOrCreateWebDeviceId } from '../appMeta'
 import { getApiBase } from '../env'
 import type { ApiErrorBody } from './types'
+import { parseAuthJson } from './authJsonParse'
 
 export class ApiError extends Error {
   status: number
@@ -28,6 +29,10 @@ type JsonRequestInit = Omit<RequestInit, 'body'> & {
   body?: unknown
   /** 為 true 時 401 不觸發全域 `unauthorizedHandler`（例如 refresh token 失敗需自行處理） */
   skipUnauthorizedOn401?: boolean
+  /**
+   * 為 true 時以 `json-bigint` 解析回應，避免大整數經 `JSON.parse` 捲成 IEEE double（登入／refresh 用）。
+   */
+  largeSafeUserIdsInJson?: boolean
 }
 
 let unauthorizedHandler: (() => void) | null = null
@@ -65,7 +70,14 @@ export async function apiRequest<T>(
   /** 內部用：已嘗試過 refresh 時勿再遞迴 */
   _didRefresh?: boolean,
 ): Promise<T> {
-  const { token, body, headers, skipUnauthorizedOn401, ...rest } = init
+  const {
+    token,
+    body,
+    headers,
+    skipUnauthorizedOn401,
+    largeSafeUserIdsInJson,
+    ...rest
+  } = init
   const url = joinUrl(path)
 
   const h = new Headers(headers)
@@ -104,7 +116,9 @@ export async function apiRequest<T>(
   let data: unknown = null
   if (text) {
     try {
-      data = JSON.parse(text) as unknown
+      data = (
+        largeSafeUserIdsInJson ? parseAuthJson.parse(text) : JSON.parse(text)
+      ) as unknown
     } catch {
       if (!res.ok) {
         throw new ApiError(text.slice(0, 200), res.status)

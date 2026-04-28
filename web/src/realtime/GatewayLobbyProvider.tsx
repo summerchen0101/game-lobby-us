@@ -40,6 +40,7 @@ import {
   tryDecodeSendMessagePushToPaymentPush,
   userPatchFromPaymentPush,
 } from "./shopLobbyWire";
+import { wireUInt64Field } from "./wireUint64";
 
 function devGatewayWsProbeEnabled(): boolean {
   if (!import.meta.env.DEV) return false;
@@ -82,8 +83,11 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
     if (!uid || !/^\d+$/.test(uid)) {
       return { userID: 0 };
     }
-    const n = Number.parseInt(uid, 10);
-    return { userID: Number.isFinite(n) ? n : 0 };
+    try {
+      return { userID: wireUInt64Field(uid) };
+    } catch {
+      return { userID: 0 };
+    }
   }, [user?.id]);
 
   useEffect(() => {
@@ -195,6 +199,8 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
           if (len > 0 && raw instanceof Uint8Array) {
             try {
               const decoded = decodeLobbyGetResponseBytes(raw);
+              console.log("raw", raw);
+              console.log("decoded", decoded);
               const items = lobbyDecodedGamesToApiGames(decoded);
               const userPatch = lobbyDecodedToUserPatch(decoded);
               if (Object.keys(userPatch).length > 0) {

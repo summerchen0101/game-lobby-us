@@ -1,4 +1,3 @@
-import Long from "long";
 import * as protobuf from "protobufjs/light.js";
 import type { User } from "../lib/api/types";
 import schema from "../gen/lobby_wire.schema.js";
@@ -6,6 +5,9 @@ import {
   GATEWAY_API_PAYMENT_FINISH_PUSH,
   GATEWAY_API_SEND_MESSAGE_PUSH,
 } from "./gatewayApi";
+import { wireUInt64Field } from "./wireUint64";
+
+export { wireUInt64Field };
 
 const root = protobuf.Root.fromJSON(schema as protobuf.INamespace);
 
@@ -33,21 +35,6 @@ const PaymentPushType = mustLookup("megaman.PaymentPush");
 export function encodeListProductsRequestBytes(): Uint8Array {
   const msg = ListProductsRequestType.create({});
   return Uint8Array.from(ListProductsRequestType.encode(msg).finish());
-}
-
-/**
- * megaman uint64：超過 Number.MAX_SAFE_INTEGER 時使用 long.js，protobufjs 可正確編碼。
- */
-function wireUInt64Field(value: bigint | number | string): number | Long {
-  const bi =
-    typeof value === "bigint"
-      ? value
-      : typeof value === "number"
-        ? BigInt(Math.trunc(value))
-        : BigInt(String(value).trim() || "0");
-  if (bi < 0n) throw new Error("uint64 must be non-negative");
-  if (bi <= BigInt(Number.MAX_SAFE_INTEGER)) return Number(bi);
-  return Long.fromString(bi.toString(), true);
 }
 
 export type MegaAccountBindingRequestFields = {

@@ -1,4 +1,5 @@
 import { normalizeUserPayload } from '../lib/api/authParse'
+import { parseAuthJson } from '../lib/api/authJsonParse'
 import type { User } from '../lib/api/types'
 import { USER_STORAGE_KEY } from './storage'
 
@@ -7,7 +8,7 @@ export function readPersistedUser(): User | null {
   const raw = localStorage.getItem(USER_STORAGE_KEY)
   if (!raw) return null
   try {
-    return normalizeUserPayload(JSON.parse(raw) as unknown)
+    return normalizeUserPayload(parseAuthJson.parse(raw) as unknown)
   } catch {
     return null
   }
