@@ -1,6 +1,9 @@
 import {
+  GATEWAY_API_BUY_PRODUCT,
+  GATEWAY_API_LIST_PRODUCTS,
   GATEWAY_API_LOBBY_GET,
   GATEWAY_API_PING_PONG,
+  GATEWAY_API_SEND_MESSAGE_PUSH,
   GATEWAY_API_SLOT_JACKPOT_PUSH,
   GATEWAY_API_WALLET_USE,
 } from './gatewayApi'
@@ -12,6 +15,11 @@ import {
   lobbyDecodedGamesToApiGames,
   lobbyDecodedPlayerToUserPatch,
 } from './lobbyDecode'
+import {
+  decodeBuyProductResponseBytes,
+  decodeListProductsResponseBytes,
+  tryDecodeSendMessagePushToPaymentPush,
+} from './shopLobbyWire'
 import { tryDecodeWalletUseRequestForDev } from './walletLobbyWire'
 
 const HEX_MAX = 48
@@ -82,6 +90,48 @@ export function decodeGatewayResponseDataForDevLog(
       return {
         kind: 'WALLET_USE',
         note: 'body not decodable as WalletUseRequest; hex only',
+        hexPreview: hexPreview(raw, HEX_MAX),
+      }
+    }
+    if (type === GATEWAY_API_LIST_PRODUCTS) {
+      try {
+        const { products } = decodeListProductsResponseBytes(raw)
+        return {
+          kind: 'LIST_PRODUCTS',
+          productCount: products.length,
+          productIdsPreview: products.slice(0, 8).map((p) => p.productID),
+          productsPaymentTypesPreview: products.slice(0, 6).map((p) => ({
+            productID: p.productID,
+            paymentTypes: p.paymentTypes,
+          })),
+        }
+      } catch (e) {
+        return fallbackHex(raw, e)
+      }
+    }
+    if (type === GATEWAY_API_BUY_PRODUCT) {
+      try {
+        const { orderID, paymentURL } = decodeBuyProductResponseBytes(raw)
+        return {
+          kind: 'BUY_PRODUCT',
+          orderID,
+          paymentURLPreview:
+            paymentURL.length > 80
+              ? `${paymentURL.slice(0, 80)}…`
+              : paymentURL,
+        }
+      } catch (e) {
+        return fallbackHex(raw, e)
+      }
+    }
+    if (type === GATEWAY_API_SEND_MESSAGE_PUSH) {
+      const pay = tryDecodeSendMessagePushToPaymentPush(type, raw)
+      if (pay) {
+        return { kind: 'SEND_MESSAGE_PUSH', paymentFinishPush: pay }
+      }
+      return {
+        kind: 'SEND_MESSAGE_PUSH',
+        note: 'not PaymentFinishPush(1013) or inner decode failed',
         hexPreview: hexPreview(raw, HEX_MAX),
       }
     }

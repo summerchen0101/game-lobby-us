@@ -458,9 +458,61 @@
     color-mix(in srgb, #000000 40%, var(--crown-button-primary-bg));
 }
 
+.shop-checkout__pay-error {
+  color: #ffb4b4;
+  font-size: 0.85rem;
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.app-modal.shop-checkout.shop-checkout--payment {
+  max-width: min(36rem, 100%);
+  max-height: min(92dvh, 800px);
+}
+
+.shop-checkout__payment-frame-wrap {
+  flex: 1;
+  min-height: 320px;
+  padding: 0 0.75rem 0.75rem;
+}
+
+.shop-checkout__payment-frame {
+  width: 100%;
+  height: min(70dvh, 560px);
+  border: none;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.shop-checkout__strike {
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.shop-checkout__line--muted-small {
+  margin: -0.5rem 0 0.5rem;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.shop-checkout__success-body {
+  padding-bottom: 1.5rem;
+}
+
+.shop-checkout__success-text {
+  margin: 0 0 1.25rem;
+  line-height: 1.45;
+  color: #fff;
+}
+
 @media (min-width: 48rem) {
   .app-modal.shop-checkout {
     max-width: min(25rem, 100%);
     max-height: min(92dvh, 40rem);
+  }
+
+  .app-modal.shop-checkout.shop-checkout--payment {
+    max-width: min(36rem, 100%);
+    max-height: min(92dvh, 800px);
   }
 }

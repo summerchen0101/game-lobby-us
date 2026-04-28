@@ -8,6 +8,7 @@ import {
 } from '../lib/env'
 import {
   GATEWAY_API_LOBBY_GET,
+  GATEWAY_API_SEND_MESSAGE_PUSH,
   GATEWAY_API_SLOT_JACKPOT_PUSH,
 } from './gatewayApi'
 import { decodeSlotJackPotInfoBytes } from './jackpotLobbyWire'
@@ -19,9 +20,16 @@ import {
   lobbyDecodedGamesToApiGames,
   lobbyDecodedPlayerToUserPatch,
 } from './lobbyDecode'
-import { formatGatewayResponseForDevLog } from './gatewayResponseDevPayload'
 import { useGatewayWs } from './useGatewayWs'
-import { GatewayLobbyContext, type GatewayLobbyContextValue } from './gatewayLobbyContext'
+import {
+  GatewayLobbyContext,
+  type GatewayLobbyContextValue,
+  type PaymentFinishListener,
+} from './gatewayLobbyContext'
+import {
+  tryDecodeSendMessagePushToPaymentPush,
+  userPatchFromPaymentPush,
+} from './shopLobbyWire'
 
 function devGatewayWsProbeEnabled(): boolean {
   if (!import.meta.env.DEV) return false
@@ -45,6 +53,17 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
   >(null)
 
   const requestRef = useRef<GatewayWsRequestFn | null>(null)
+  const paymentFinishListenersRef = useRef(new Set<PaymentFinishListener>())
+
+  const subscribePaymentFinish = useCallback(
+    (listener: PaymentFinishListener) => {
+      paymentFinishListenersRef.current.add(listener)
+      return () => {
+        paymentFinishListenersRef.current.delete(listener)
+      }
+    },
+    [],
+  )
 
   const getRequestBasicExtras = useCallback((): Record<string, unknown> => {
     const uid = user?.id
@@ -77,19 +96,32 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
       }
     },
     onResponse: (msg) => {
-      if (import.meta.env.DEV) {
-        console.info(
-          '[gateway-ws][dev] response:',
-          formatGatewayResponseForDevLog(msg),
-        )
-      }
       const codeStr = String(msg.code ?? '')
       if (!isGatewaySuccessCode(codeStr)) return
-      if (Number(msg.type) !== GATEWAY_API_SLOT_JACKPOT_PUSH) return
+      const t = Number(msg.type)
       const raw = msg.data
-      if (!(raw instanceof Uint8Array) || raw.byteLength === 0) return
-      const triple = decodeSlotJackPotInfoBytes(raw)
-      if (triple) setLiveJackpotAmounts(triple)
+      if (t === GATEWAY_API_SLOT_JACKPOT_PUSH) {
+        if (!(raw instanceof Uint8Array) || raw.byteLength === 0) return
+        const triple = decodeSlotJackPotInfoBytes(raw)
+        if (triple) setLiveJackpotAmounts(triple)
+        return
+      }
+      if (t === GATEWAY_API_SEND_MESSAGE_PUSH) {
+        const push = tryDecodeSendMessagePushToPaymentPush(
+          t,
+          raw instanceof Uint8Array ? raw : undefined,
+        )
+        if (!push) return
+        const patch = userPatchFromPaymentPush(push)
+        if (patch) mergeUser(patch)
+        for (const fn of paymentFinishListenersRef.current) {
+          try {
+            fn(push)
+          } catch (e) {
+            console.warn('[gateway-ws] payment finish listener', e)
+          }
+        }
+      }
     },
     onOpen: async ({ request }) => {
       requestRef.current = request
@@ -194,8 +226,15 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
       lobbyLoading,
       lobbyError,
       liveJackpotAmounts,
+      subscribePaymentFinish,
     }),
-    [lobbyGames, lobbyLoading, lobbyError, liveJackpotAmounts],
+    [
+      lobbyGames,
+      lobbyLoading,
+      lobbyError,
+      liveJackpotAmounts,
+      subscribePaymentFinish,
+    ],
   )
 
   return (

@@ -122,3 +122,126 @@ message LobbyGetResponse {
   ListGameResponse games = 2;
   PlayerInfo playerInfo = 3;
 }
+
+// --- Shop / payment wire（對齊 proto/megaman/product.proto、payment.proto、wallet.Coin、virtualgood.ProductContent、msg.Message）---
+
+enum CoinType {
+  UNKNOWN_COIN_TYPE = 0;
+  GOLDEN = 1;
+  TOKEN = 2;
+}
+
+message Coin {
+  int64 amount = 1;
+  CoinType type = 2;
+  int64 saveAmount = 3;
+  int64 frozenAmount = 4;
+  int64 payable = 5;
+  int64 gameToken = 6;
+  int64 paymentPointAmount = 7;
+  int64 redeemableAmount = 8;
+}
+
+message Item {
+  uint64 itemID = 1;
+  uint64 amount = 2;
+  string name = 3;
+}
+
+message PaymentPush {
+  Coin coin = 1;
+  uint64 status = 2;
+  string amount = 3;
+  repeated Item item = 4;
+  string errorMsg = 5;
+  string reason = 6;
+}
+
+// SEND_MESSAGE_PUSH payload：對齊 proto/megaman/message.proto MsgResp、msg.Message（僅解 apiType、data）。
+message WirePushMessage {
+  bytes data = 10;
+  int64 apiType = 14;
+}
+
+message MsgResp {
+  WirePushMessage msg = 1;
+  string roomID = 2;
+}
+
+enum PaymentGateway {
+  UNKNOWN_PAYMENT_GATEWAY = 0;
+  IDRRealPay = 1;
+  IDRNicePay = 2;
+  IDRTopPay = 3;
+  IDRWowPay = 4;
+  IDRDeePay = 6;
+  IDRHaloPay = 7;
+  PHPLetsPayGCash = 11;
+  PHPLetsPayGCashII = 12;
+  PHPLetsPayMaya = 13;
+  PHPHaloPay = 14;
+  PHPFastPay = 15;
+  USDPayPlus = 21;
+}
+
+enum VirtualGoodType {
+  UNKNOWN_VIRTUAL_GOOD_TYPE = 0;
+  GC_FREE_GAME_VOUCHER_100 = 3;
+  GC_FREE_GAME_VOUCHER_1000 = 4;
+  GC_FREE_GAME_VOUCHER_10000 = 5;
+  GC_FREE_GAME_VOUCHER_100000 = 31;
+  GC_FREE_GAME_VOUCHER_FRAGMENTS_100 = 6;
+  GC_FREE_GAME_VOUCHER_FRAGMENTS_1000 = 7;
+  GC_FREE_GAME_VOUCHER_FRAGMENTS_10000 = 8;
+  GC_FREE_GAME_VOUCHER_FRAGMENTS_100000 = 30;
+  SC_FREE_GAME_VOUCHER_100 = 9;
+  SC_FREE_GAME_VOUCHER_1000 = 10;
+  SC_FREE_GAME_VOUCHER_10000 = 11;
+  SC_FREE_GAME_VOUCHER_100000 = 33;
+  SC_FREE_GAME_VOUCHER_FRAGMENTS_100 = 12;
+  SC_FREE_GAME_VOUCHER_FRAGMENTS_1000 = 13;
+  SC_FREE_GAME_VOUCHER_FRAGMENTS_10000 = 14;
+  SC_FREE_GAME_VOUCHER_FRAGMENTS_100000 = 32;
+  GC_GOLD_TICKET = 26;
+  SC_GOLD_TICKET = 27;
+  PLAYER_INFO_AVATAR = 10001;
+  PLAYER_INFO_ROLE = 10002;
+  GC_GOLD = 15001;
+  SC_GOLD = 15002;
+}
+
+message ProductContent {
+  uint64 productID = 1;
+  uint64 itemID = 2;
+  string itemName = 3;
+  PaymentGateway paymentGateway = 4;
+  uint64 paymentType = 5;
+  int64 amount = 6;
+  int64 percent = 7;
+  VirtualGoodType goodType = 8;
+  int64 sort = 9;
+}
+
+message ListProductsRequest {}
+
+message ListProductsResponseProduct {
+  uint64 productID = 1;
+  repeated uint64 paymentTypes = 2;
+  repeated ProductContent productContents = 3;
+  string originalPrice = 4;
+  string price = 5;
+}
+
+message ListProductsResponse {
+  repeated ListProductsResponseProduct products = 1;
+}
+
+message BuyProductRequest {
+  uint64 productID = 1;
+  uint64 paymentType = 2;
+}
+
+message BuyProductResponse {
+  string orderID = 1;
+  string paymentURL = 2;
+}

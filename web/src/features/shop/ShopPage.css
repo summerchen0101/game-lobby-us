@@ -43,6 +43,17 @@
   text-align: center;
 }
 
+.shop-page__status {
+  margin: var(--space-4) 0;
+  text-align: center;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.shop-page__status--error {
+  color: #ffb4b4;
+}
+
 .shop-page__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

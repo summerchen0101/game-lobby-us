@@ -272,6 +272,264 @@ export default {
               "id": 3
             }
           }
+        },
+        "CoinType": {
+          "values": {
+            "UNKNOWN_COIN_TYPE": 0,
+            "GOLDEN": 1,
+            "TOKEN": 2
+          }
+        },
+        "Coin": {
+          "fields": {
+            "amount": {
+              "type": "int64",
+              "id": 1
+            },
+            "type": {
+              "type": "CoinType",
+              "id": 2
+            },
+            "saveAmount": {
+              "type": "int64",
+              "id": 3
+            },
+            "frozenAmount": {
+              "type": "int64",
+              "id": 4
+            },
+            "payable": {
+              "type": "int64",
+              "id": 5
+            },
+            "gameToken": {
+              "type": "int64",
+              "id": 6
+            },
+            "paymentPointAmount": {
+              "type": "int64",
+              "id": 7
+            },
+            "redeemableAmount": {
+              "type": "int64",
+              "id": 8
+            }
+          }
+        },
+        "Item": {
+          "fields": {
+            "itemID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "amount": {
+              "type": "uint64",
+              "id": 2
+            },
+            "name": {
+              "type": "string",
+              "id": 3
+            }
+          }
+        },
+        "PaymentPush": {
+          "fields": {
+            "coin": {
+              "type": "Coin",
+              "id": 1
+            },
+            "status": {
+              "type": "uint64",
+              "id": 2
+            },
+            "amount": {
+              "type": "string",
+              "id": 3
+            },
+            "item": {
+              "rule": "repeated",
+              "type": "Item",
+              "id": 4
+            },
+            "errorMsg": {
+              "type": "string",
+              "id": 5
+            },
+            "reason": {
+              "type": "string",
+              "id": 6
+            }
+          }
+        },
+        "WirePushMessage": {
+          "fields": {
+            "data": {
+              "type": "bytes",
+              "id": 10
+            },
+            "apiType": {
+              "type": "int64",
+              "id": 14
+            }
+          }
+        },
+        "MsgResp": {
+          "fields": {
+            "msg": {
+              "type": "WirePushMessage",
+              "id": 1
+            },
+            "roomID": {
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "PaymentGateway": {
+          "values": {
+            "UNKNOWN_PAYMENT_GATEWAY": 0,
+            "IDRRealPay": 1,
+            "IDRNicePay": 2,
+            "IDRTopPay": 3,
+            "IDRWowPay": 4,
+            "IDRDeePay": 6,
+            "IDRHaloPay": 7,
+            "PHPLetsPayGCash": 11,
+            "PHPLetsPayGCashII": 12,
+            "PHPLetsPayMaya": 13,
+            "PHPHaloPay": 14,
+            "PHPFastPay": 15,
+            "USDPayPlus": 21
+          }
+        },
+        "VirtualGoodType": {
+          "values": {
+            "UNKNOWN_VIRTUAL_GOOD_TYPE": 0,
+            "GC_FREE_GAME_VOUCHER_100": 3,
+            "GC_FREE_GAME_VOUCHER_1000": 4,
+            "GC_FREE_GAME_VOUCHER_10000": 5,
+            "GC_FREE_GAME_VOUCHER_100000": 31,
+            "GC_FREE_GAME_VOUCHER_FRAGMENTS_100": 6,
+            "GC_FREE_GAME_VOUCHER_FRAGMENTS_1000": 7,
+            "GC_FREE_GAME_VOUCHER_FRAGMENTS_10000": 8,
+            "GC_FREE_GAME_VOUCHER_FRAGMENTS_100000": 30,
+            "SC_FREE_GAME_VOUCHER_100": 9,
+            "SC_FREE_GAME_VOUCHER_1000": 10,
+            "SC_FREE_GAME_VOUCHER_10000": 11,
+            "SC_FREE_GAME_VOUCHER_100000": 33,
+            "SC_FREE_GAME_VOUCHER_FRAGMENTS_100": 12,
+            "SC_FREE_GAME_VOUCHER_FRAGMENTS_1000": 13,
+            "SC_FREE_GAME_VOUCHER_FRAGMENTS_10000": 14,
+            "SC_FREE_GAME_VOUCHER_FRAGMENTS_100000": 32,
+            "GC_GOLD_TICKET": 26,
+            "SC_GOLD_TICKET": 27,
+            "PLAYER_INFO_AVATAR": 10001,
+            "PLAYER_INFO_ROLE": 10002,
+            "GC_GOLD": 15001,
+            "SC_GOLD": 15002
+          }
+        },
+        "ProductContent": {
+          "fields": {
+            "productID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "itemID": {
+              "type": "uint64",
+              "id": 2
+            },
+            "itemName": {
+              "type": "string",
+              "id": 3
+            },
+            "paymentGateway": {
+              "type": "PaymentGateway",
+              "id": 4
+            },
+            "paymentType": {
+              "type": "uint64",
+              "id": 5
+            },
+            "amount": {
+              "type": "int64",
+              "id": 6
+            },
+            "percent": {
+              "type": "int64",
+              "id": 7
+            },
+            "goodType": {
+              "type": "VirtualGoodType",
+              "id": 8
+            },
+            "sort": {
+              "type": "int64",
+              "id": 9
+            }
+          }
+        },
+        "ListProductsRequest": {
+          "fields": {}
+        },
+        "ListProductsResponseProduct": {
+          "fields": {
+            "productID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "paymentTypes": {
+              "rule": "repeated",
+              "type": "uint64",
+              "id": 2
+            },
+            "productContents": {
+              "rule": "repeated",
+              "type": "ProductContent",
+              "id": 3
+            },
+            "originalPrice": {
+              "type": "string",
+              "id": 4
+            },
+            "price": {
+              "type": "string",
+              "id": 5
+            }
+          }
+        },
+        "ListProductsResponse": {
+          "fields": {
+            "products": {
+              "rule": "repeated",
+              "type": "ListProductsResponseProduct",
+              "id": 1
+            }
+          }
+        },
+        "BuyProductRequest": {
+          "fields": {
+            "productID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "paymentType": {
+              "type": "uint64",
+              "id": 2
+            }
+          }
+        },
+        "BuyProductResponse": {
+          "fields": {
+            "orderID": {
+              "type": "string",
+              "id": 1
+            },
+            "paymentURL": {
+              "type": "string",
+              "id": 2
+            }
+          }
         }
       }
     }
