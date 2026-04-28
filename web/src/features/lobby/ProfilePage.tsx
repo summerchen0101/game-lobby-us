@@ -4,13 +4,26 @@ import { HiPencil } from "react-icons/hi2";
 import { useAlert } from "../../components/alert/alertContext";
 import { InfoPopover } from "../../components/InfoPopover";
 import { useAuth } from "../../auth/useAuth";
+import { isMockMode, isWsLobbyGamesEnabled } from "../../lib/env";
+import {
+  GATEWAY_API_LIST_PLAYER_AVATARS,
+  GATEWAY_API_UPDATE_PLAYER_AVATAR,
+} from "../../realtime/gatewayApi";
+import {
+  decodeListPlayerAvatarsResponseBytes,
+  encodeUpdatePlayerCurrentAvatarRequest,
+} from "../../realtime/playerAvatarWire";
+import { useGatewayLobby } from "../../realtime/useGatewayLobby";
 import { ChangeHeadIconModal } from "./ChangeHeadIconModal";
 import { MyProfileModal } from "./MyProfileModal";
 import {
-  PROFILE_AVATAR_COUNT,
   effectiveAvatarId,
   getProfileAvatarById,
 } from "./profileAvatars";
+import {
+  headIconChoicesFromServerRows,
+  type HeadIconChoice,
+} from "./profileAvatarChoices";
 import { useProfileAvatarId } from "./profileAvatarStorage";
 import "./ProfilePage.css";
 import "./SessionPageDecor.css";
@@ -20,18 +33,33 @@ const RANK_MAX = 500;
 /** Placeholder until rank API exists */
 const RANK_PCT = 0;
 
+type ZendeskWindow = Window & { zE?: (a: string, b: string) => void };
+
 export function ProfilePage() {
   const { show } = useAlert();
   const { user, mergeUser, refreshUser, logout } = useAuth();
+  const { requestRef } = useGatewayLobby();
   const { avatarId, setAvatarId } = useProfileAvatarId();
   const [headIconOpen, setHeadIconOpen] = useState(false);
+  const [headIconChoices, setHeadIconChoices] = useState<
+    HeadIconChoice[] | null
+  >(null);
   const [myProfileOpen, setMyProfileOpen] = useState(false);
   const [avatarImgFailed, setAvatarImgFailed] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const fundsRef = useRef<HTMLDialogElement>(null);
   const soundLabelId = useId();
 
-  const rankCurrent = Math.round((RANK_PCT / 100) * RANK_MAX);
+  const betReq = user?.vipCurrentLevelBetExpRequired;
+  const betExp = user?.vipCurrentLevelBetExp;
+  const useServerVipBar = betReq !== undefined && betReq > 0;
+  const rankMax = useServerVipBar ? betReq! : RANK_MAX;
+  const rankCurrent = useServerVipBar
+    ? Math.min(betReq!, Math.max(0, betExp ?? 0))
+    : Math.round((RANK_PCT / 100) * RANK_MAX);
+  const rankPct = useServerVipBar
+    ? Math.min(100, Math.round(((betExp ?? 0) / betReq!) * 100))
+    : RANK_PCT;
 
   const onRefresh = useCallback(async () => {
     try {
@@ -90,20 +118,69 @@ export function ProfilePage() {
     setAvatarImgFailed(false);
   }, [displayAvatarId]);
 
+  useEffect(() => {
+    if (!headIconOpen) return;
+    setHeadIconChoices(null);
+    if (isMockMode() || !isWsLobbyGamesEnabled()) return;
+    const req = requestRef.current;
+    if (!req) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const r = await req({
+          type: GATEWAY_API_LIST_PLAYER_AVATARS,
+          data: new Uint8Array(0),
+          debugLabel: "LIST_PLAYER_AVATARS",
+        });
+        if (cancelled) return;
+        if (String(r.code) === "200" && r.data instanceof Uint8Array) {
+          if (r.data.byteLength === 0) {
+            setHeadIconChoices(null);
+            return;
+          }
+          const { avatarsInfo } = decodeListPlayerAvatarsResponseBytes(r.data);
+          const next = headIconChoicesFromServerRows(avatarsInfo);
+          setHeadIconChoices(next.length > 0 ? next : null);
+        }
+      } catch {
+        if (!cancelled) setHeadIconChoices(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [headIconOpen, requestRef]);
+
   const confirmHeadIcon = useCallback(
-    (selectedId: string) => {
+    async (selectedId: string) => {
       setAvatarId(selectedId);
       const n = Number.parseInt(selectedId, 10);
-      if (
-        user &&
-        Number.isFinite(n) &&
-        n >= 1 &&
-        n <= PROFILE_AVATAR_COUNT
-      ) {
-        mergeUser({ avatarId: n });
+      if (!user || !Number.isFinite(n) || n < 1) return;
+      const wsOk = !isMockMode() && isWsLobbyGamesEnabled();
+      if (wsOk && requestRef.current) {
+        try {
+          const body = encodeUpdatePlayerCurrentAvatarRequest({
+            avatarID: selectedId,
+            avatarURL: "",
+            isFBAvatar: false,
+          });
+          const r = await requestRef.current({
+            type: GATEWAY_API_UPDATE_PLAYER_AVATAR,
+            data: body,
+            debugLabel: "UPDATE_PLAYER_AVATAR",
+          });
+          if (String(r.code) !== "200") {
+            show("Could not update avatar", { variant: "error" });
+            return;
+          }
+        } catch {
+          show("Could not update avatar", { variant: "error" });
+          return;
+        }
       }
+      mergeUser({ avatarId: n });
     },
-    [mergeUser, setAvatarId, user],
+    [mergeUser, requestRef, setAvatarId, show, user],
   );
 
   const displayHandle = user?.displayName?.trim() || user?.id?.trim() || "—";
@@ -125,6 +202,15 @@ export function ProfilePage() {
   }
 
   function onSupport() {
+    const zE = (window as ZendeskWindow).zE;
+    if (typeof zE === "function") {
+      try {
+        zE("messenger", "open");
+        return;
+      } catch {
+        /* fall through */
+      }
+    }
     window.location.href =
       "mailto:support@example.com?subject=Support%20request";
   }
@@ -199,8 +285,9 @@ export function ProfilePage() {
               align="end"
               content={
                 <p className="profile-page__info-popover-text">
-                  Level details will be available when your account is connected
-                  to the loyalty system.
+                  {useServerVipBar
+                    ? "VIP bet progress toward the next loyalty tier."
+                    : "Level details will be available when your account is connected to the loyalty system."}
                 </p>
               }>
               {(p, triggerRef) => (
@@ -230,10 +317,10 @@ export function ProfilePage() {
               aria-label="Level progress">
               <div
                 className="profile-page__bar-fill"
-                style={{ width: `${RANK_PCT}%` }}
+                style={{ width: `${rankPct}%` }}
               />
               <span className="profile-page__bar-label">
-                {rankCurrent}/{RANK_MAX}
+                {rankCurrent}/{rankMax}
               </span>
               <div className="profile-page__bar-cap" aria-hidden>
                 <Crown
@@ -305,6 +392,8 @@ export function ProfilePage() {
         userId={user?.id}
         displayName={user?.displayName}
         avatarId={displayAvatarId ?? ""}
+        email={user?.email}
+        phone={user?.phone}
       />
 
       <ChangeHeadIconModal
@@ -312,6 +401,7 @@ export function ProfilePage() {
         onClose={() => setHeadIconOpen(false)}
         currentAvatarId={displayAvatarId ?? "1"}
         onConfirm={confirmHeadIcon}
+        choices={headIconChoices}
       />
 
       <dialog

@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useAuth } from "../auth/useAuth";
 import type { Game } from "../lib/api/types";
+import { useWallet } from "../wallet/walletContext";
 import {
   getGatewayWsUrlForDevLog,
   isMockMode,
@@ -47,6 +48,7 @@ function devGatewayWsProbeEnabled(): boolean {
 
 export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
   const { token, user, mergeUser } = useAuth();
+  const { setActiveWallet } = useWallet();
   const wsLobbyEnabled = isWsLobbyGamesEnabled();
   const gatewayWsEnabled =
     !isMockMode() && (devGatewayWsProbeEnabled() || wsLobbyEnabled);
@@ -95,7 +97,7 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   useGatewayWs({
-    enabled: gatewayWsEnabled,
+    enabled: gatewayWsEnabled && Boolean(token?.trim()),
     wsToken: token ?? "",
     clientVer: import.meta.env.VITE_CLIENT_VER?.trim() || undefined,
     getRequestBasicExtras,
@@ -197,6 +199,12 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
               const userPatch = lobbyDecodedToUserPatch(decoded);
               if (Object.keys(userPatch).length > 0) {
                 mergeUser(userPatch);
+                if (
+                  userPatch.lobbyWalletType === "GC" ||
+                  userPatch.lobbyWalletType === "SC"
+                ) {
+                  setActiveWallet(userPatch.lobbyWalletType);
+                }
               }
               setLobbyGames(items);
               setLobbyGet(decoded);

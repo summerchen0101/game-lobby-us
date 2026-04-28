@@ -37,6 +37,11 @@
     0 0 0.5rem rgb(34 211 238 / 35%);
 }
 
+.change-head-icon-modal__tile--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .change-head-icon-modal__img {
   display: block;
   width: 100%;

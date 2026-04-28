@@ -12,6 +12,13 @@ export const GATEWAY_API_SLOT_JACKPOT_PUSH = 14
 /** 切換使用中錢包 GC/SC；body 為 megaman.WalletUseRequest */
 export const GATEWAY_API_WALLET_USE = 112
 
+/** 玩家頭像列表；body 空；回應 megaman.ListPlayerAvatarsResponse */
+export const GATEWAY_API_LIST_PLAYER_AVATARS = 22
+/** 更新玩家頭像；body 為 megaman.UpdatePlayerCurrentAvatarRequest */
+export const GATEWAY_API_UPDATE_PLAYER_AVATAR = 23
+/** 取得第三方遊戲連結；body 為 megaman.GetThirdPartyGameInfoRequest */
+export const GATEWAY_API_GET_THIRD_PARTY_GAME_INFO = 701
+
 /** 商城商品列表；body 為 megaman.ListProductsRequest */
 export const GATEWAY_API_LIST_PRODUCTS = 316
 /** 建立購買訂單；body 為 megaman.BuyProductRequest */

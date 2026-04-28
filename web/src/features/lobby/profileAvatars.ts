@@ -3,7 +3,7 @@ export type ProfileAvatar = {
   imageSrc: string
 }
 
-/** 對應 `public/images/head/head{N}.png`（N = 1…10）；後端數字 avatar id 同此區間 */
+/** 對應 `public/images/head/head{N}.png`（N = 1…10）；後端舊 id 同此區間 */
 export const PROFILE_AVATAR_COUNT = 10
 
 export const PROFILE_AVATARS: readonly ProfileAvatar[] = Array.from(
@@ -17,12 +17,29 @@ export const PROFILE_AVATARS: readonly ProfileAvatar[] = Array.from(
   },
 )
 
-function isKnownAvatarId(id: string): boolean {
+/** docs/profile.md 靜態表 ItemID 顯示順序（供頭像選擇排序） */
+export const PROFILE_AVATAR_ITEM_ORDER: readonly number[] = [
+  401, 406, 490, 491, 414, 494, 496, 495, 492, 438, 448, 487, 441, 485, 486,
+  488, 489, 446, 419, 455, 497, 499,
+]
+
+const ITEM_ID_TO_HEAD_INDEX = new Map<number, number>(
+  PROFILE_AVATAR_ITEM_ORDER.map((itemId, i) => [
+    itemId,
+    (i % PROFILE_AVATAR_COUNT) + 1,
+  ]),
+)
+
+function isLegacyOneToTenId(id: string): boolean {
   return /^[1-9]$|^10$/.test(id)
 }
 
+function headSrcForIndex(n: number): string {
+  return `/images/head/head${n}.png`
+}
+
 /**
- * `backendAvatarId` 為登入／refresh 之 User.avatarId；
+ * `backendAvatarId` 為登入／refresh 之 User.avatarId（可為 Item ID 如 401）；
  * `storedId` 為 localStorage，僅在後端未給有效 id 時使用。
  */
 export function effectiveAvatarId(
@@ -32,13 +49,12 @@ export function effectiveAvatarId(
   if (
     backendAvatarId !== undefined &&
     Number.isFinite(backendAvatarId) &&
-    backendAvatarId >= 1 &&
-    backendAvatarId <= PROFILE_AVATAR_COUNT
+    backendAvatarId >= 1
   ) {
     return String(Math.floor(backendAvatarId))
   }
   const t = storedId?.trim()
-  if (t && isKnownAvatarId(t)) return t
+  if (t && (isLegacyOneToTenId(t) || /^\d+$/.test(t))) return t
   return undefined
 }
 
@@ -49,10 +65,14 @@ export function getProfileAvatarById(
   const s = String(id).trim()
   const fromList = PROFILE_AVATARS.find((a) => a.id === s)
   if (fromList) return fromList
-  if (!isKnownAvatarId(s)) return undefined
   const n = Number(s)
-  return {
-    id: s,
-    imageSrc: `/images/head/head${n}.png`,
+  if (!Number.isFinite(n) || n < 1) return undefined
+  const headIdx = ITEM_ID_TO_HEAD_INDEX.get(Math.floor(n))
+  if (headIdx !== undefined) {
+    return { id: s, imageSrc: headSrcForIndex(headIdx) }
   }
+  if (isLegacyOneToTenId(s)) {
+    return { id: s, imageSrc: headSrcForIndex(Number(s)) }
+  }
+  return undefined
 }

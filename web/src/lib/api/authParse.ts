@@ -29,21 +29,21 @@ function numField(
   return undefined;
 }
 
-/** 後端會用 avatarID／avatarId／avatar_id／avatar；僅接受 1–10，無效則略過 */
+/** 後端會用 avatarID／avatarId／avatar_id／avatar；有效正整數即接受（含 Item ID 如 401） */
 function avatarIdFromUserPayload(o: Record<string, unknown>): number | undefined {
   const keys = ["avatarID", "avatarId", "avatar_id", "avatar"] as const;
   for (const k of keys) {
     const v = o[k];
     if (typeof v === "number" && !Number.isNaN(v)) {
       const n = Math.floor(v);
-      if (n >= 1 && n <= 10) return n;
+      if (n >= 1) return n;
       return undefined;
     }
     if (typeof v === "string" && v !== "") {
       const n = Number(v);
       if (Number.isNaN(n)) continue;
       const f = Math.floor(n);
-      if (f >= 1 && f <= 10) return f;
+      if (f >= 1) return f;
       return undefined;
     }
   }

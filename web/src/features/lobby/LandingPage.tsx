@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
@@ -23,6 +23,16 @@ import {
   isWsLobbyGamesEnabled,
 } from "../../lib/env";
 import * as apiMock from "../../lib/api/mock";
+import { GATEWAY_API_GET_THIRD_PARTY_GAME_INFO } from "../../realtime/gatewayApi";
+import {
+  decodeGetThirdPartyGameInfoResponseBytes,
+  encodeGetThirdPartyGameInfoRequest,
+} from "../../realtime/playerAvatarWire";
+import {
+  type LobbyGameSortMenu,
+  lobbyThirdPartyListToApiGames,
+  sortLobbyGamesByMenu,
+} from "../../realtime/lobbyDecode";
 import { useGatewayLobby } from "../../realtime/useGatewayLobby";
 import {
   activeWalletToSlotMode,
@@ -91,6 +101,10 @@ function pickGuestDemoRowGames(
   });
 }
 
+function lobbySortMenuForTab(f: LobbyFilterTab): LobbyGameSortMenu {
+  return f;
+}
+
 function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
   if (f === "all") {
     return displayGames;
@@ -110,10 +124,6 @@ function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
       (g) => (g.lobbyCategory ?? "").toUpperCase() === "SLOT",
     );
     return slots.length > 0 ? slots : displayGames;
-  }
-  if (f === "providers") {
-    const withProv = displayGames.filter((g) => g.provider?.trim());
-    return withProv.length > 0 ? withProv : displayGames;
   }
   return displayGames;
 }
@@ -157,8 +167,14 @@ export function LandingPage() {
   const { token, user, refreshUser } = useAuth();
   const { activeWallet } = useWallet();
   const { open: openShell } = useGameShell();
-  const { lobbyGames, lobbyLoading, lobbyError, liveJackpotAmounts } =
-    useGatewayLobby();
+  const {
+    lobbyGames,
+    lobbyLoading,
+    lobbyError,
+    liveJackpotAmounts,
+    lobbyGet,
+    requestRef,
+  } = useGatewayLobby();
 
   const wsLobbyEnabled = isWsLobbyGamesEnabled();
   const mockLobby = isMockMode();
@@ -207,8 +223,13 @@ export function LandingPage() {
 
   const guestLobbyRows = useMemo(() => {
     if (lobbyGames !== null) {
+      const hotFiltered = filterHotGames(lobbyGames);
+      const top = sortLobbyGamesByMenu(
+        hotFiltered.length > 0 ? hotFiltered : lobbyGames,
+        "hot",
+      );
       return {
-        top: filterHotGames(lobbyGames),
+        top,
         demo: pickGuestDemoRowGames(lobbyGames, GUEST_DEMO_SLOT_IDS),
       };
     }
@@ -220,7 +241,8 @@ export function LandingPage() {
       return [UNITY_DEMO_LOBBY_GAME, ...mockGames];
     }
     if (user && wsLobbyEnabled && lobbyGames !== null) {
-      return [UNITY_DEMO_LOBBY_GAME, ...lobbyGames];
+      const sorted = sortLobbyGamesByMenu(lobbyGames, "all");
+      return [UNITY_DEMO_LOBBY_GAME, ...sorted];
     }
     if (!user) {
       return GUEST_DEMO_GAMES;
@@ -238,14 +260,81 @@ export function LandingPage() {
     });
   }, [displayGames, lobbySearch]);
 
+  /** 第三方遊戲：`thirdPartyGameInfoList` 順序，僅依搜尋過濾（不重排）。 */
+  const providerGamesFiltered = useMemo(() => {
+    const list = lobbyThirdPartyListToApiGames(
+      lobbyGet?.thirdPartyGameInfoList,
+    );
+    const q = lobbySearch.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((g) => {
+      const hay =
+        `${g.title} ${g.subtitle ?? ""} ${g.id} ${g.provider ?? ""} ${g.thirdPartyLaunch?.gameUID ?? ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [lobbyGet?.thirdPartyGameInfoList, lobbySearch]);
+
   /** 各分類一份列表（已登入分頁用） */
   const gamesByFilter = useMemo(() => {
     const out = {} as Record<LobbyFilterTab, Game[]>;
+    const sessionProviders =
+      user && wsLobbyEnabled && !mockLobby ? providerGamesFiltered : [];
     for (const f of LOBBY_FILTER_ORDER) {
-      out[f] = gamesForFilter(searchFilteredGames, f);
+      if (f === "providers") {
+        out[f] = sessionProviders;
+        continue;
+      }
+      const filtered = gamesForFilter(searchFilteredGames, f);
+      out[f] = sortLobbyGamesByMenu(filtered, lobbySortMenuForTab(f));
     }
     return out;
-  }, [searchFilteredGames]);
+  }, [
+    searchFilteredGames,
+    providerGamesFiltered,
+    user,
+    wsLobbyEnabled,
+    mockLobby,
+  ]);
+  console.log("gamesByFilter", gamesByFilter);
+
+  const launchThirdPartyGame = useCallback(
+    async (card: Game) => {
+      const tp = card.thirdPartyLaunch;
+      if (!tp) return;
+      const platform = tp.platform.trim();
+      const gameUID = tp.gameUID.trim();
+      const req = requestRef.current;
+      if (!req || !platform || !gameUID) return;
+      try {
+        const data = encodeGetThirdPartyGameInfoRequest(platform, gameUID);
+        const r = await req({
+          type: GATEWAY_API_GET_THIRD_PARTY_GAME_INFO,
+          data,
+          debugLabel: "GetThirdPartyGameInfo",
+        });
+        if (
+          String(r.code) === "200" &&
+          r.data instanceof Uint8Array &&
+          r.data.byteLength > 0
+        ) {
+          const decoded = decodeGetThirdPartyGameInfoResponseBytes(r.data);
+          const url = decoded.thirdPartyGameInfo?.gameLaunchURL?.trim();
+          if (url) {
+            openShell({
+              url,
+              widthPercent: card.embedWidthPercent,
+              heightPercent: card.embedHeightPercent,
+              isPayment: false,
+              openInNewWindow: card.openInNewWindow,
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("[gateway-ws] GetThirdPartyGameInfo failed", e);
+      }
+    },
+    [requestRef, openShell],
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -342,6 +431,10 @@ export function LandingPage() {
 
   function onPlayGame(g?: Game) {
     const card = g ?? UNITY_DEMO_LOBBY_GAME;
+    if (card.thirdPartyLaunch) {
+      void launchThirdPartyGame(card);
+      return;
+    }
     let url: string;
     if (isSlotWebEntryEnabled()) {
       const gameId = slotGameIdFromCard(card, unityWebEntryDefaultGameId());
@@ -377,11 +470,13 @@ export function LandingPage() {
     showTextLabels = true,
     onCardAction?: (g: Game) => void,
   ) {
-    const thumb = lobbyGameCardThumbnail(
-      g.id,
-      thumbBase + index,
-      g.thumbnailUrl,
-    );
+    const thumb = g.thirdPartyLaunch
+      ? undefined
+      : lobbyGameCardThumbnail(
+          g.id,
+          thumbBase + index,
+          g.thumbnailUrl,
+        );
     return (
       <button
         type="button"

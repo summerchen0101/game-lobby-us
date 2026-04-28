@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useId, useState } from "react"
+import { useCallback, useEffect, useId, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
+import type { HeadIconChoice } from "./profileAvatarChoices"
 import { PROFILE_AVATARS } from "./profileAvatars"
 import "./ChangeHeadIconModal.css"
 
@@ -8,6 +9,8 @@ type Props = {
   onClose: () => void
   currentAvatarId: string
   onConfirm: (selectedId: string) => void
+  /** 伺服器 ListPlayerAvatars；空則用本地 PROFILE_AVATARS */
+  choices?: HeadIconChoice[] | null
 }
 
 export function ChangeHeadIconModal({
@@ -15,19 +18,29 @@ export function ChangeHeadIconModal({
   onClose,
   currentAvatarId,
   onConfirm,
+  choices,
 }: Props) {
   const titleId = useId()
   const [draftId, setDraftId] = useState(currentAvatarId)
 
+  const tiles = useMemo((): HeadIconChoice[] => {
+    if (choices && choices.length > 0) {
+      return choices
+    }
+    return PROFILE_AVATARS.map((a) => ({
+      id: a.id,
+      imageSrc: a.imageSrc,
+    }))
+  }, [choices])
+
   useEffect(() => {
     if (open) {
-      setDraftId(
-        currentAvatarId ||
-          PROFILE_AVATARS[0]?.id ||
-          "1",
-      )
+      const fallback = tiles[0]?.id ?? PROFILE_AVATARS[0]?.id ?? "1"
+      const cur = currentAvatarId?.trim()
+      const exists = cur && tiles.some((t) => t.id === cur && !t.disabled)
+      setDraftId(exists ? cur! : fallback)
     }
-  }, [open, currentAvatarId])
+  }, [open, currentAvatarId, tiles])
 
   const onKey = useCallback(
     (e: KeyboardEvent) => {
@@ -43,9 +56,11 @@ export function ChangeHeadIconModal({
   }, [open, onKey])
 
   const handleConfirm = useCallback(() => {
+    const picked = tiles.find((t) => t.id === draftId)
+    if (picked?.disabled) return
     onConfirm(draftId)
     onClose()
-  }, [draftId, onConfirm, onClose])
+  }, [draftId, onConfirm, onClose, tiles])
 
   if (!open) return null
 
@@ -77,7 +92,7 @@ export function ChangeHeadIconModal({
         </div>
         <div className="change-head-icon-modal__body">
           <div className="change-head-icon-modal__grid">
-            {PROFILE_AVATARS.map((a) => (
+            {tiles.map((a) => (
               <button
                 key={a.id}
                 type="button"
@@ -85,9 +100,14 @@ export function ChangeHeadIconModal({
                   "change-head-icon-modal__tile" +
                   (draftId === a.id
                     ? " change-head-icon-modal__tile--selected"
-                    : "")
+                    : "") +
+                  (a.disabled ? " change-head-icon-modal__tile--disabled" : "")
                 }
-                onClick={() => setDraftId(a.id)}
+                disabled={a.disabled}
+                onClick={() => {
+                  if (a.disabled) return
+                  setDraftId(a.id)
+                }}
                 aria-pressed={draftId === a.id}
                 aria-label={`Select portrait ${a.id}`}
               >

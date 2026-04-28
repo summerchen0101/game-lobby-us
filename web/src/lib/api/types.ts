@@ -1,3 +1,6 @@
+/** LOBBY_GET `playerInfo.walletType`（與 megaman WalletType 數值對齊） */
+export type LobbyWalletType = "UNKNOWN" | "GC" | "SC";
+
 export type User = {
   id: string;
   displayName?: string;
@@ -7,9 +10,14 @@ export type User = {
   sweepstakesBalance?: number;
   /** VIP 等級（WebEntry `vip_lv`；API 未回傳時前端可視為 0） */
   vipLevel?: number;
-  /** 頭像 id 1–10，對應 `/images/head/head{id}.png`（API 鍵例：`avatarID`） */
+  /** LOBBY_GET `playerInfo.avatarID`（Item ID，如 401；本地預設圖僅覆蓋 1–10） */
   avatarId?: number;
-  /** LOBBY_GET `playerInfo.phone`：有值通常表示已綁定手機（商城購買前檢查） */
+  /** LOBBY_GET `playerInfo.walletType` */
+  lobbyWalletType?: LobbyWalletType;
+  /** LOBBY_GET `playerInfo.vipCurrentLevelBetExp` / `vipCurrentLevelBetExpRequired`（VIP 押注經驗條） */
+  vipCurrentLevelBetExp?: number;
+  vipCurrentLevelBetExpRequired?: number;
+  /** LOBBY_GET 根層 `phone` 或 `playerInfo.cellPhone` */
   phone?: string;
   /** LOBBY_GET 頂層 `email`（與後端欄位 20 對齊） */
   email?: string;
@@ -74,9 +82,23 @@ export type Game = {
   lobbyCategory?: string;
   /** 第三方／廠商名（LOBBY_GET `providerName`） */
   provider?: string;
+  /** LOBBY_GET 各分類排序欄位（依 docs/lobby 選一欄由大到小排序） */
+  lobbySortFields?: {
+    sort: number;
+    hotSort: number;
+    slotSort: number;
+    cardSort: number;
+    fishSort: number;
+    arcadeSort: number;
+    lotterySort: number;
+    battleSort: number;
+    classicSort: number;
+  };
   embedWidthPercent?: number;
   embedHeightPercent?: number;
   openInNewWindow?: boolean;
+  /** `LobbyGet.thirdPartyGameInfoList` 項目：點擊走 GetThirdPartyGameInfo，非站內 launchUrl */
+  thirdPartyLaunch?: { platform: string; gameUID: string };
 };
 
 export type GamesResponse = { items: Game[] };

@@ -7,6 +7,19 @@ export function formatWalletPillAmount(n: number | undefined): string {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(n);
 }
 
+/** docs/lobby：ScPointCurrency 換算基準 10000（與 LOBBY_GET currency 欄位對齊） */
+function sweepstakesDisplayAmount(
+  raw: number | undefined,
+  currency: string | undefined,
+): number {
+  const u = raw ?? 0;
+  const c = currency?.trim();
+  if (c === "10000" || c === "ScPointCurrency" || Number(c) === 10000) {
+    return u / 10000;
+  }
+  return u;
+}
+
 export function getWalletDisplay(
   user: User | null | undefined,
   active: ActiveWallet,
@@ -18,6 +31,9 @@ export function getWalletDisplay(
       amount: formatWalletPillAmount(user.balance),
     };
   }
-  const sc = user.sweepstakesBalance;
-  return { label: "SC" as const, amount: formatWalletPillAmount(sc ?? 0) };
+  const sc = sweepstakesDisplayAmount(
+    user.sweepstakesBalance,
+    user.currency,
+  );
+  return { label: "SC" as const, amount: formatWalletPillAmount(sc) };
 }

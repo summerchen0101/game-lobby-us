@@ -229,6 +229,13 @@ export default {
             }
           }
         },
+        "WalletType": {
+          "values": {
+            "UNKNOWN_WALLET_TYPE": 0,
+            "GC": 1,
+            "SC": 2
+          }
+        },
         "PlayerInfo": {
           "fields": {
             "userID": {
@@ -262,6 +269,75 @@ export default {
             "exp": {
               "type": "uint64",
               "id": 8
+            },
+            "avatarID": {
+              "type": "uint64",
+              "id": 10
+            },
+            "cellPhone": {
+              "type": "string",
+              "id": 26
+            },
+            "vipCurrentLevelBetExp": {
+              "type": "uint64",
+              "id": 41
+            },
+            "vipCurrentLevelBetExpRequired": {
+              "type": "uint64",
+              "id": 42
+            },
+            "walletType": {
+              "type": "WalletType",
+              "id": 85
+            }
+          }
+        },
+        "GoodState": {
+          "values": {
+            "UNKNOWN_GOOD_STATE": 0,
+            "IN_USE": 1,
+            "IN_ACTIVE": 2,
+            "UNUSABLE": 3
+          }
+        },
+        "PlayerAvatarsInfo": {
+          "fields": {
+            "avatarID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "avatarUrl": {
+              "type": "string",
+              "id": 2
+            },
+            "goodState": {
+              "type": "GoodState",
+              "id": 3
+            }
+          }
+        },
+        "ListPlayerAvatarsResponse": {
+          "fields": {
+            "avatarsInfo": {
+              "rule": "repeated",
+              "type": "PlayerAvatarsInfo",
+              "id": 1
+            }
+          }
+        },
+        "UpdatePlayerCurrentAvatarRequest": {
+          "fields": {
+            "avatarID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "avatarURL": {
+              "type": "string",
+              "id": 2
+            },
+            "isFBAvatar": {
+              "type": "YesNo",
+              "id": 3
             }
           }
         },
@@ -404,6 +480,26 @@ export default {
             "gameLaunchURL": {
               "type": "string",
               "id": 6
+            }
+          }
+        },
+        "GetThirdPartyGameInfoRequest": {
+          "fields": {
+            "platform": {
+              "type": "string",
+              "id": 1
+            },
+            "gameUID": {
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "GetThirdPartyGameInfoResponse": {
+          "fields": {
+            "thirdPartyGameInfo": {
+              "type": "ThirdPartyGameInfo",
+              "id": 1
             }
           }
         },

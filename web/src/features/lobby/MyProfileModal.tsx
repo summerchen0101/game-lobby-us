@@ -11,6 +11,8 @@ type Props = {
   userId: string | undefined;
   displayName: string | undefined;
   avatarId: string;
+  email?: string;
+  phone?: string;
 };
 
 export function MyProfileModal({
@@ -19,6 +21,8 @@ export function MyProfileModal({
   userId,
   displayName,
   avatarId,
+  email,
+  phone,
 }: Props) {
   const titleId = useId();
   const [avatarImgFailed, setAvatarImgFailed] = useState(false);
@@ -54,6 +58,8 @@ export function MyProfileModal({
   if (!open) return null;
 
   const idDisplay = userId?.trim() || "—";
+  const emailText = email?.trim() ?? "";
+  const phoneText = phone?.trim() ?? "";
 
   return createPortal(
     <div
@@ -135,19 +141,25 @@ export function MyProfileModal({
             <div className="my-profile-modal__field">
               <span className="my-profile-modal__field-label">Email:</span>
               <span
-                className="my-profile-modal__field-value my-profile-modal__field-value--empty"
+                className={
+                  "my-profile-modal__field-value" +
+                  (emailText ? "" : " my-profile-modal__field-value--empty")
+                }
                 aria-label="Email"
               >
-                Not set
+                {emailText || "Not set"}
               </span>
             </div>
             <div className="my-profile-modal__field">
               <span className="my-profile-modal__field-label">Phone:</span>
               <span
-                className="my-profile-modal__field-value my-profile-modal__field-value--empty"
+                className={
+                  "my-profile-modal__field-value" +
+                  (phoneText ? "" : " my-profile-modal__field-value--empty")
+                }
                 aria-label="Phone"
               >
-                Not set
+                {phoneText || "Not set"}
               </span>
             </div>
           </div>

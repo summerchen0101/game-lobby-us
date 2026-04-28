@@ -947,3 +947,56 @@ html.guest-lobby-page body::-webkit-scrollbar {
 .guest-landing__sticky-btn:hover {
   filter: brightness(1.06);
 }
+
+.lobby-third-party {
+  margin-bottom: var(--space-3);
+}
+
+.lobby-third-party__title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+  opacity: 0.9;
+}
+
+.lobby-third-party__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.lobby-third-party__btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 18%);
+  background: rgb(20 24 42 / 85%);
+  color: var(--color-text, #fff);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  max-width: 12rem;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lobby-third-party__btn:hover {
+  filter: brightness(1.06);
+}
+
+.lobby-third-party__meta {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+  text-transform: uppercase;
+}

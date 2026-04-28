@@ -116,7 +116,13 @@ message ListGameResponse {
   Pagination pagination = 2;
 }
 
-// 與 proto/playerinfo/model.proto PlayerInfo 前段欄位編號對齊，供 LOBBY_GET 解出玩家基本資訊。
+// 與 proto/playerinfo/model.proto PlayerInfo 欄位編號對齊（LOBBY_GET 常用子集）。
+enum WalletType {
+  UNKNOWN_WALLET_TYPE = 0;
+  GC = 1;
+  SC = 2;
+}
+
 message PlayerInfo {
   uint64 userID = 1;
   string nickname = 2;
@@ -126,6 +132,36 @@ message PlayerInfo {
   uint64 vipExp = 6;
   uint64 level = 7;
   uint64 exp = 8;
+  uint64 avatarID = 10;
+  string cellPhone = 26;
+  uint64 vipCurrentLevelBetExp = 41;
+  uint64 vipCurrentLevelBetExpRequired = 42;
+  WalletType walletType = 85;
+}
+
+// 對齊 proto/backpack/backpack.proto GoodState（頭像列表用）
+enum GoodState {
+  UNKNOWN_GOOD_STATE = 0;
+  IN_USE = 1;
+  IN_ACTIVE = 2;
+  UNUSABLE = 3;
+}
+
+// 對齊 proto/megaman/playerinfo.proto ListPlayerAvatars / UpdatePlayerCurrentAvatar
+message PlayerAvatarsInfo {
+  uint64 avatarID = 1;
+  string avatarUrl = 2;
+  GoodState goodState = 3;
+}
+
+message ListPlayerAvatarsResponse {
+  repeated PlayerAvatarsInfo avatarsInfo = 1;
+}
+
+message UpdatePlayerCurrentAvatarRequest {
+  uint64 avatarID = 1;
+  string avatarURL = 2;
+  YesNo isFBAvatar = 3;
 }
 
 // --- wallet.Bag（對齊 proto/wallet/wallet.proto）與 LOBBY_GET 衛星型別 ---
@@ -179,6 +215,16 @@ message ThirdPartyGameInfo {
   string gameUID = 4;
   string status = 5;
   string gameLaunchURL = 6;
+}
+
+// ApiType GetThirdPartyGameInfo = 701；對齊 proto/megaman/lobby.proto
+message GetThirdPartyGameInfoRequest {
+  string platform = 1;
+  string gameUID = 2;
+}
+
+message GetThirdPartyGameInfoResponse {
+  ThirdPartyGameInfo thirdPartyGameInfo = 1;
 }
 
 // 對齊 proto/megaman/campaign.proto 所依賴之 campaign 子集 + megaman.Campaign
