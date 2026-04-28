@@ -25,7 +25,11 @@ import {
 } from "./paymentTypeMap";
 import { isPhoneBound } from "./isPhoneBound";
 import { ShopCheckoutOverlay, type CheckoutStep } from "./ShopCheckoutOverlay";
-import type { ShopBindingFormPayload, ShopPack } from "./types";
+import type {
+  ShopBindingFormPayload,
+  ShopPack,
+  ShopBindingPrefill,
+} from "./types";
 import "./ShopPage.css";
 import "../lobby/SessionPageDecor.css";
 
@@ -530,6 +534,10 @@ export function ShopPage() {
           bindingBusy={bindingBusy}
           bindingError={bindingError}
           protectNeedSms={protectNeedSms}
+          bindingPrefill={{
+            email: user?.email,
+            phone: user?.phone,
+          } satisfies ShopBindingPrefill}
           onClose={closeCheckout}
           onProtectClose={handleProtectClose}
           onBindingSubmit={handleBindingSubmit}

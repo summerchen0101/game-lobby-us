@@ -9,6 +9,7 @@ import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import { ProtectAccountView } from "./ProtectAccountView";
 import type {
   ShopBindingFormPayload,
+  ShopBindingPrefill,
   ShopPack,
   ShopPaymentMethodId,
 } from "./types";
@@ -26,6 +27,7 @@ type Props = {
   bindingBusy: boolean;
   bindingError: string | null;
   protectNeedSms: boolean;
+  bindingPrefill?: ShopBindingPrefill;
   onClose: () => void;
   onProtectClose: () => void;
   onBindingSubmit: (payload: ShopBindingFormPayload) => Promise<void>;
@@ -252,6 +254,7 @@ export function ShopCheckoutOverlay({
   bindingBusy,
   bindingError,
   protectNeedSms,
+  bindingPrefill,
   onClose,
   onProtectClose,
   onBindingSubmit,
@@ -311,6 +314,7 @@ export function ShopCheckoutOverlay({
             bindingBusy={bindingBusy}
             bindingError={bindingError}
             protectNeedSms={protectNeedSms}
+            bindingPrefill={bindingPrefill}
             onClose={onProtectClose}
             onSubmit={onBindingSubmit}
           />

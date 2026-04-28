@@ -15,6 +15,12 @@ export type ShopPack = {
   paymentTypes: string[];
 };
 
+/** LOBBY_GET / account fields used to prefill the binding form when empty. */
+export type ShopBindingPrefill = {
+  email?: string;
+  phone?: string;
+};
+
 /** Payload for megaman.MegaAccountBindingRequest (shop binding step). */
 export type ShopBindingFormPayload = {
   countryCode: string;

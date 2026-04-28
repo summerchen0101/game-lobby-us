@@ -7,7 +7,8 @@ import {
   type FormEvent,
 } from "react";
 import { IoChevronBack } from "react-icons/io5";
-import type { ShopBindingFormPayload } from "./types";
+import { splitPhoneForBindingForm } from "./splitPhoneForBindingForm";
+import type { ShopBindingFormPayload, ShopBindingPrefill } from "./types";
 
 const US_STATE_CODES =
   "AL,AK,AZ,AR,CA,CO,CT,DE,FL,GA,HI,ID,IL,IN,IA,KS,KY,LA,ME,MD,MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,OH,OK,OR,PA,RI,SC,SD,TN,TX,UT,VT,VA,WA,WV,WI,WY,DC".split(
@@ -71,6 +72,7 @@ type Props = {
   bindingBusy: boolean;
   bindingError: string | null;
   protectNeedSms: boolean;
+  bindingPrefill?: ShopBindingPrefill;
   onClose: () => void;
   onSubmit: (payload: ShopBindingFormPayload) => Promise<void>;
 };
@@ -79,6 +81,7 @@ export function ProtectAccountView({
   bindingBusy,
   bindingError,
   protectNeedSms,
+  bindingPrefill,
   onClose,
   onSubmit,
 }: Props) {
@@ -150,6 +153,24 @@ export function ProtectAccountView({
     setInvalidFields(new Set());
     setLocalError(null);
   }, [protectNeedSms]);
+
+  useEffect(() => {
+    const e = bindingPrefill?.email?.trim();
+    if (!e) return;
+    setEmail((prev) => (prev.trim() ? prev : e));
+  }, [bindingPrefill?.email]);
+
+  useEffect(() => {
+    const raw = bindingPrefill?.phone?.trim();
+    if (!raw) return;
+    const split = splitPhoneForBindingForm(raw);
+    if (!split.national) return;
+    setPhoneNumber((pn) => {
+      if (pn.replace(/\D/g, "").length > 0) return pn;
+      setPhoneCountry(split.countryCode);
+      return split.national;
+    });
+  }, [bindingPrefill?.phone]);
 
   useEffect(() => {
     if (invalidFields.size === 0) {
