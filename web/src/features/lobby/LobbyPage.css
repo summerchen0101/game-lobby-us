@@ -1,3 +1,8 @@
+/* 已登入大廳：預留垂直捲軸槽，避免分類切換時置中內容因捲軸出現而水平跳動 */
+html.session-lobby-page {
+  scrollbar-gutter: stable;
+}
+
 .lobby-landing {
   position: relative;
   min-height: 100%;
@@ -194,6 +199,7 @@
 .lobby-games-panel-host {
   min-width: 0;
   perspective: 1000px;
+  overflow-x: clip;
 }
 
 @keyframes lobby-games-tab-in {

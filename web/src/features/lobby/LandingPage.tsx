@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { LandingHeader } from "../../components/LandingHeader";
@@ -131,6 +131,7 @@ export function LandingPage() {
   const [mockError, setMockError] = useState<string | null>(null);
   const [lobbyFilter, setLobbyFilter] = useState<LobbyFilterTab>("all");
   const [lobbySearch, setLobbySearch] = useState("");
+  const lobbyGameFilterRef = useRef<HTMLDivElement | null>(null);
 
   const loading =
     user && mockLobby ? mockLoading : user && wsLobbyEnabled ? lobbyLoading : false;
@@ -206,12 +207,17 @@ export function LandingPage() {
 
   useEffect(() => {
     if (!user) return;
-    const el = document.getElementById(`lobby-tab-${lobbyFilter}`);
-    el?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
+    const filterEl = lobbyGameFilterRef.current;
+    const tabEl = document.getElementById(`lobby-tab-${lobbyFilter}`);
+    if (!filterEl || !tabEl) return;
+    const filterRect = filterEl.getBoundingClientRect();
+    const tabRect = tabEl.getBoundingClientRect();
+    const tabCenter =
+      tabRect.left - filterRect.left + tabRect.width / 2 + filterEl.scrollLeft;
+    const maxScroll = Math.max(0, filterEl.scrollWidth - filterEl.clientWidth);
+    const targetScroll = tabCenter - filterEl.clientWidth / 2;
+    const left = Math.max(0, Math.min(maxScroll, targetScroll));
+    filterEl.scrollTo({ left, behavior: "smooth" });
   }, [user, lobbyFilter]);
 
   useEffect(() => {
@@ -277,13 +283,19 @@ export function LandingPage() {
     if (user) {
       documentElement.classList.remove("guest-lobby-page");
       body.classList.remove("guest-lobby-page");
+      documentElement.classList.add("session-lobby-page");
+      body.classList.add("session-lobby-page");
     } else {
+      documentElement.classList.remove("session-lobby-page");
+      body.classList.remove("session-lobby-page");
       documentElement.classList.add("guest-lobby-page");
       body.classList.add("guest-lobby-page");
     }
     return () => {
       documentElement.classList.remove("guest-lobby-page");
       body.classList.remove("guest-lobby-page");
+      documentElement.classList.remove("session-lobby-page");
+      body.classList.remove("session-lobby-page");
     };
   }, [user]);
 
@@ -534,6 +546,7 @@ export function LandingPage() {
                 />
               </label>
               <div
+                ref={lobbyGameFilterRef}
                 className="lobby-game-filter"
                 role="tablist"
                 aria-label="Game categories">
