@@ -155,6 +155,7 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
                 mergeUser(userPatch)
               }
               if (import.meta.env.DEV) {
+                console.info('[gateway-ws][dev] LOBBY_GET decoded (full)', decoded)
                 console.info(
                   '[gateway-ws][dev] LOBBY_GET decoded games:',
                   items.length,

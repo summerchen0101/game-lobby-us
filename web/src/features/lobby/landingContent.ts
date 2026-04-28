@@ -193,8 +193,7 @@ export function getGuestHeroImage(): string {
   return u || PANEL_BG_UNLOGIN;
 }
 
-export const FLOATING_CTA_IMAGE =
-  "https://crowncoinscasino.com/assets/landing-present-float-FhIAs5Kv.png";
+export const FLOATING_CTA_IMAGE = "/images/lobby/gift_box.png";
 
 export type BenefitItem = {
   alt: string;

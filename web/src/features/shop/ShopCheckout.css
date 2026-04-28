@@ -269,6 +269,16 @@
   box-shadow: 0 0 0 1px rgb(255 255 255 / 22%);
 }
 
+.shop-checkout__input--protect.shop-checkout__field-invalid,
+.shop-checkout__select.shop-checkout__field-invalid {
+  box-shadow: 0 0 0 2px #e85d5d;
+}
+
+.shop-checkout__input--protect.shop-checkout__field-invalid:focus,
+.shop-checkout__select.shop-checkout__field-invalid:focus {
+  box-shadow: 0 0 0 2px #e85d5d;
+}
+
 .shop-checkout__field--stack {
   gap: 0.35rem;
 }

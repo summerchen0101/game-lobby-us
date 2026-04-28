@@ -258,6 +258,10 @@ export default {
             "exp": {
               "type": "uint64",
               "id": 8
+            },
+            "phone": {
+              "type": "string",
+              "id": 9
             }
           }
         },
@@ -527,6 +531,78 @@ export default {
             },
             "paymentURL": {
               "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "MegaAccountBindingRequest": {
+          "fields": {
+            "userID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "countryCode": {
+              "type": "string",
+              "id": 2
+            },
+            "phone": {
+              "type": "string",
+              "id": 3
+            },
+            "email": {
+              "type": "string",
+              "id": 4
+            },
+            "answer": {
+              "type": "string",
+              "id": 5
+            },
+            "firstName": {
+              "type": "string",
+              "id": 6
+            },
+            "lastName": {
+              "type": "string",
+              "id": 7
+            },
+            "birthday": {
+              "type": "string",
+              "id": 8
+            },
+            "address": {
+              "type": "string",
+              "id": 9
+            },
+            "country": {
+              "type": "string",
+              "id": 10
+            },
+            "city": {
+              "type": "string",
+              "id": 11
+            },
+            "state": {
+              "type": "string",
+              "id": 12
+            },
+            "zip": {
+              "type": "string",
+              "id": 13
+            },
+            "language": {
+              "type": "string",
+              "id": 14
+            }
+          }
+        },
+        "MegaAccountBindingResponse": {
+          "fields": {
+            "phoneNum": {
+              "type": "string",
+              "id": 1
+            },
+            "needSMSAnswer": {
+              "type": "YesNo",
               "id": 2
             }
           }

@@ -15,4 +15,20 @@ export type ShopPack = {
   paymentTypes: string[];
 };
 
+/** Payload for megaman.MegaAccountBindingRequest (shop binding step). */
+export type ShopBindingFormPayload = {
+  countryCode: string;
+  phone: string;
+  email: string;
+  answer: string;
+  firstName: string;
+  lastName: string;
+  birthday: string;
+  address: string;
+  country: string;
+  city: string;
+  state: string;
+  zip: string;
+};
+
 export type { ShopPaymentMethodId };

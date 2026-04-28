@@ -1,3 +1,4 @@
+import Long from "long";
 import * as protobuf from "protobufjs/light.js";
 import type { User } from "../lib/api/types";
 import schema from "../gen/lobby_wire.schema.js";
@@ -20,6 +21,12 @@ const ListProductsRequestType = mustLookup("megaman.ListProductsRequest");
 const ListProductsResponseType = mustLookup("megaman.ListProductsResponse");
 const BuyProductRequestType = mustLookup("megaman.BuyProductRequest");
 const BuyProductResponseType = mustLookup("megaman.BuyProductResponse");
+const MegaAccountBindingRequestType = mustLookup(
+  "megaman.MegaAccountBindingRequest",
+);
+const MegaAccountBindingResponseType = mustLookup(
+  "megaman.MegaAccountBindingResponse",
+);
 const MsgRespType = mustLookup("megaman.MsgResp");
 const PaymentPushType = mustLookup("megaman.PaymentPush");
 
@@ -28,8 +35,10 @@ export function encodeListProductsRequestBytes(): Uint8Array {
   return Uint8Array.from(ListProductsRequestType.encode(msg).finish());
 }
 
-/** protobufjs verify/create 不接受 BigInt；uint64 在此以 ≤ MAX_SAFE_INTEGER 的 number 編碼。 */
-function wireUInt64Field(value: bigint | number | string): number {
+/**
+ * megaman uint64：超過 Number.MAX_SAFE_INTEGER 時使用 long.js，protobufjs 可正確編碼。
+ */
+function wireUInt64Field(value: bigint | number | string): number | Long {
   const bi =
     typeof value === "bigint"
       ? value
@@ -37,10 +46,51 @@ function wireUInt64Field(value: bigint | number | string): number {
         ? BigInt(Math.trunc(value))
         : BigInt(String(value).trim() || "0");
   if (bi < 0n) throw new Error("uint64 must be non-negative");
-  if (bi > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new Error("uint64 exceeds Number.MAX_SAFE_INTEGER for this client");
-  }
-  return Number(bi);
+  if (bi <= BigInt(Number.MAX_SAFE_INTEGER)) return Number(bi);
+  return Long.fromString(bi.toString(), true);
+}
+
+export type MegaAccountBindingRequestFields = {
+  userID: bigint | number | string;
+  countryCode: string;
+  phone: string;
+  email: string;
+  answer: string;
+  firstName: string;
+  lastName: string;
+  birthday: string;
+  address: string;
+  country: string;
+  city: string;
+  state: string;
+  zip: string;
+  language: string;
+};
+
+export function encodeMegaAccountBindingRequestBytes(
+  fields: MegaAccountBindingRequestFields,
+): Uint8Array {
+  const uid = wireUInt64Field(fields.userID);
+  const msg = {
+    userID: uid,
+    countryCode: fields.countryCode,
+    phone: fields.phone,
+    email: fields.email,
+    answer: fields.answer,
+    firstName: fields.firstName,
+    lastName: fields.lastName,
+    birthday: fields.birthday,
+    address: fields.address,
+    country: fields.country,
+    city: fields.city,
+    state: fields.state,
+    zip: fields.zip,
+    language: fields.language,
+  };
+  const err = MegaAccountBindingRequestType.verify(msg);
+  if (err) throw new Error(`MegaAccountBindingRequest: ${err}`);
+  const created = MegaAccountBindingRequestType.create(msg);
+  return Uint8Array.from(MegaAccountBindingRequestType.encode(created).finish());
 }
 
 export function encodeBuyProductRequestBytes(
@@ -104,6 +154,33 @@ export type BuyProductWireResult = {
   orderID: string;
   paymentURL: string;
 };
+
+export type MegaAccountBindingWireResult = {
+  phoneNum: string;
+  needSMSAnswer: boolean;
+};
+
+function yesNoWireToBool(v: unknown): boolean {
+  if (typeof v === "boolean") return v;
+  if (v === 1 || v === "1") return true;
+  if (typeof v === "string" && v.toUpperCase() === "YES") return true;
+  return false;
+}
+
+export function decodeMegaAccountBindingResponseBytes(
+  data: Uint8Array,
+): MegaAccountBindingWireResult {
+  const msg = MegaAccountBindingResponseType.decode(data);
+  const o = MegaAccountBindingResponseType.toObject(msg, {
+    longs: String,
+    defaults: true,
+    enums: String,
+  }) as { phoneNum?: string; needSMSAnswer?: string | number };
+  return {
+    phoneNum: String(o.phoneNum ?? ""),
+    needSMSAnswer: yesNoWireToBool(o.needSMSAnswer),
+  };
+}
 
 export function decodeBuyProductResponseBytes(
   data: Uint8Array,

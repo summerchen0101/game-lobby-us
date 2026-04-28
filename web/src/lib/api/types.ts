@@ -9,6 +9,8 @@ export type User = {
   vipLevel?: number;
   /** 頭像 id 1–10，對應 `/images/head/head{id}.png`（API 鍵例：`avatarID`） */
   avatarId?: number;
+  /** LOBBY_GET `playerInfo.phone`：有值通常表示已綁定手機（商城購買前檢查） */
+  phone?: string;
 };
 
 export type AuthResponse = {

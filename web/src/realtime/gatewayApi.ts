@@ -11,6 +11,8 @@ export const GATEWAY_API_WALLET_USE = 112
 export const GATEWAY_API_LIST_PRODUCTS = 316
 /** 建立購買訂單；body 為 megaman.BuyProductRequest */
 export const GATEWAY_API_BUY_PRODUCT = 317
+/** 帳號／手機綁定；body 為 megaman.MegaAccountBindingRequest */
+export const GATEWAY_API_MEGA_ACCOUNT_BINDING = 362
 
 /** 伺服器推播外層：內層 MsgResp（見 megaman.MsgResp） */
 export const GATEWAY_API_SEND_MESSAGE_PUSH = 1000

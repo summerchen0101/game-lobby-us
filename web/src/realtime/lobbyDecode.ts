@@ -134,10 +134,16 @@ export function lobbyDecodedPlayerToUserPatch(
   const displayName =
     typeof nickRaw === 'string' && nickRaw.trim() ? nickRaw.trim() : undefined
   const vipLevel = numFromWire(p.vipLevel)
-  if (!id && !displayName && vipLevel === undefined) return null
+  const phoneRaw = (p as { phone?: unknown }).phone
+  const phone =
+    typeof phoneRaw === 'string' && phoneRaw.trim()
+      ? phoneRaw.trim()
+      : undefined
+  if (!id && !displayName && vipLevel === undefined && !phone) return null
   const out: Partial<User> = {}
   if (id) out.id = id
   if (displayName) out.displayName = displayName
   if (vipLevel !== undefined) out.vipLevel = Math.floor(vipLevel)
+  if (phone) out.phone = phone
   return out
 }

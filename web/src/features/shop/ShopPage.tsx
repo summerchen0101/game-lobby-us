@@ -5,13 +5,16 @@ import { isMockMode } from "../../lib/env";
 import {
   GATEWAY_API_BUY_PRODUCT,
   GATEWAY_API_LIST_PRODUCTS,
+  GATEWAY_API_MEGA_ACCOUNT_BINDING,
 } from "../../realtime/gatewayApi";
 import { isGatewaySuccessCode } from "../../realtime/gatewayWire";
 import {
   decodeBuyProductResponseBytes,
   decodeListProductsResponseBytes,
+  decodeMegaAccountBindingResponseBytes,
   encodeBuyProductRequestBytes,
   encodeListProductsRequestBytes,
+  encodeMegaAccountBindingRequestBytes,
 } from "../../realtime/shopLobbyWire";
 import { useGatewayLobby } from "../../realtime/useGatewayLobby";
 import { mapListProductToShopPack } from "./mapListProductToShopPack";
@@ -20,8 +23,9 @@ import {
   serverPaymentTypesToMethods,
   type ShopPaymentMethodId,
 } from "./paymentTypeMap";
+import { isPhoneBound } from "./isPhoneBound";
 import { ShopCheckoutOverlay, type CheckoutStep } from "./ShopCheckoutOverlay";
-import type { ShopPack } from "./types";
+import type { ShopBindingFormPayload, ShopPack } from "./types";
 import "./ShopPage.css";
 import "../lobby/SessionPageDecor.css";
 
@@ -125,7 +129,7 @@ function coinPileSrc(n: 1 | 2 | 3 | 4 | 5) {
 }
 
 export function ShopPage() {
-  const { token } = useAuth();
+  const { token, user, mergeUser } = useAuth();
   const { requestRef, subscribePaymentFinish } = useGatewayLobby();
   const [packs, setPacks] = useState<ShopPack[]>([]);
   const [listLoading, setListLoading] = useState(true);
@@ -138,6 +142,11 @@ export function ShopPage() {
   const [buyBusy, setBuyBusy] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [pendingPaymentMethod, setPendingPaymentMethod] =
+    useState<ShopPaymentMethodId | null>(null);
+  const [protectNeedSms, setProtectNeedSms] = useState(false);
+  const [bindingBusy, setBindingBusy] = useState(false);
+  const [bindingError, setBindingError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -234,6 +243,9 @@ export function ShopPage() {
     setBuyError(null);
     setPaymentUrl(null);
     setCheckoutStep("summary");
+    setPendingPaymentMethod(null);
+    setProtectNeedSms(false);
+    setBindingError(null);
     const methods = serverPaymentTypesToMethods(p.paymentTypes);
     setVisibleMethods(methods);
     setCheckoutPack(p);
@@ -244,6 +256,9 @@ export function ShopPage() {
     setCheckoutStep("summary");
     setPaymentUrl(null);
     setBuyError(null);
+    setPendingPaymentMethod(null);
+    setProtectNeedSms(false);
+    setBindingError(null);
   }, []);
 
   const cancelPaymentFrame = useCallback(() => {
@@ -251,7 +266,14 @@ export function ShopPage() {
     setCheckoutStep("summary");
   }, []);
 
-  const handleSelectPayment = useCallback(
+  const handleProtectClose = useCallback(() => {
+    setCheckoutStep("summary");
+    setPendingPaymentMethod(null);
+    setProtectNeedSms(false);
+    setBindingError(null);
+  }, []);
+
+  const executeBuyProduct = useCallback(
     async (method: ShopPaymentMethodId) => {
       const pack = checkoutPack;
       if (!pack) return;
@@ -306,6 +328,103 @@ export function ShopPage() {
       }
     },
     [checkoutPack, requestRef],
+  );
+
+  const handleBindingSubmit = useCallback(
+    async (payload: ShopBindingFormPayload) => {
+      if (!checkoutPack || pendingPaymentMethod == null) return;
+      const req = requestRef.current;
+      if (!req) {
+        setBindingError("Not connected");
+        return;
+      }
+      const uid = user?.id;
+      if (!uid || !/^\d+$/.test(uid)) {
+        setBindingError("Missing user id");
+        return;
+      }
+      setBindingBusy(true);
+      setBindingError(null);
+      try {
+        const data = encodeMegaAccountBindingRequestBytes({
+          userID: uid,
+          countryCode: payload.countryCode,
+          phone: payload.phone,
+          email: payload.email,
+          answer: payload.answer,
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          birthday: payload.birthday,
+          address: payload.address,
+          country: payload.country,
+          city: payload.city,
+          state: payload.state,
+          zip: payload.zip,
+          language: "en",
+        });
+        const r = await req({
+          type: GATEWAY_API_MEGA_ACCOUNT_BINDING,
+          data,
+          debugLabel: "MEGA_ACCOUNT_BINDING",
+        });
+        const code = String(r.code ?? "");
+        if (!isGatewaySuccessCode(code)) {
+          setBindingError(r.errMessage?.trim() || `Binding failed (${code})`);
+          return;
+        }
+        const raw = r.data;
+        if (!(raw instanceof Uint8Array) || raw.byteLength === 0) {
+          setBindingError("Empty binding response");
+          return;
+        }
+        const decoded = decodeMegaAccountBindingResponseBytes(raw);
+        if (decoded.needSMSAnswer) {
+          setProtectNeedSms(true);
+          if (payload.answer.trim()) {
+            setBindingError("Invalid or expired verification code.");
+          }
+          return;
+        }
+        const phone = decoded.phoneNum.trim();
+        if (phone) mergeUser({ phone });
+        const method = pendingPaymentMethod;
+        setPendingPaymentMethod(null);
+        setProtectNeedSms(false);
+        await executeBuyProduct(method);
+      } catch (e) {
+        setBindingError(e instanceof Error ? e.message : "Binding failed");
+      } finally {
+        setBindingBusy(false);
+      }
+    },
+    [
+      checkoutPack,
+      pendingPaymentMethod,
+      user?.id,
+      requestRef,
+      mergeUser,
+      executeBuyProduct,
+    ],
+  );
+
+  const handleSelectPayment = useCallback(
+    async (method: ShopPaymentMethodId) => {
+      const pack = checkoutPack;
+      if (!pack) return;
+      if (isMockMode()) {
+        setBuyError("Turn off mock API mode to purchase (VITE_API_USE_MOCK).");
+        return;
+      }
+      if (!isPhoneBound(user)) {
+        setPendingPaymentMethod(method);
+        setProtectNeedSms(false);
+        setBindingError(null);
+        setCheckoutStep("protect");
+        return;
+      }
+      await executeBuyProduct(method);
+    },
+    [checkoutPack, user, executeBuyProduct],
   );
 
   return (
@@ -389,7 +508,12 @@ export function ShopPage() {
           buyBusy={buyBusy}
           buyError={buyError}
           paymentUrl={paymentUrl}
+          bindingBusy={bindingBusy}
+          bindingError={bindingError}
+          protectNeedSms={protectNeedSms}
           onClose={closeCheckout}
+          onProtectClose={handleProtectClose}
+          onBindingSubmit={handleBindingSubmit}
           onSelectPaymentMethod={handleSelectPayment}
           onCancelPaymentFrame={cancelPaymentFrame}
         />

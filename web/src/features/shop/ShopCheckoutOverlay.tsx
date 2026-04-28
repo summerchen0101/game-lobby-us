@@ -6,9 +6,14 @@ import { IoChevronBack } from "react-icons/io5";
 import { SiCashapp } from "react-icons/si";
 import "./ShopCheckout.css";
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
-import type { ShopPack, ShopPaymentMethodId } from "./types";
+import { ProtectAccountView } from "./ProtectAccountView";
+import type {
+  ShopBindingFormPayload,
+  ShopPack,
+  ShopPaymentMethodId,
+} from "./types";
 
-export type CheckoutStep = "summary" | "payment" | "success";
+export type CheckoutStep = "summary" | "protect" | "payment" | "success";
 
 type Props = {
   open: boolean;
@@ -18,7 +23,12 @@ type Props = {
   buyBusy: boolean;
   buyError: string | null;
   paymentUrl: string | null;
+  bindingBusy: boolean;
+  bindingError: string | null;
+  protectNeedSms: boolean;
   onClose: () => void;
+  onProtectClose: () => void;
+  onBindingSubmit: (payload: ShopBindingFormPayload) => Promise<void>;
   onSelectPaymentMethod: (method: ShopPaymentMethodId) => void;
   onCancelPaymentFrame: () => void;
 };
@@ -239,7 +249,12 @@ export function ShopCheckoutOverlay({
   buyBusy,
   buyError,
   paymentUrl,
+  bindingBusy,
+  bindingError,
+  protectNeedSms,
   onClose,
+  onProtectClose,
+  onBindingSubmit,
   onSelectPaymentMethod,
   onCancelPaymentFrame,
 }: Props) {
@@ -250,20 +265,21 @@ export function ShopCheckoutOverlay({
 
   const handleBackdrop = useCallback(() => {
     if (step === "payment") onCancelPaymentFrame();
-    else if (step === "success") closeOverlay();
+    else if (step === "protect") onProtectClose();
     else closeOverlay();
-  }, [step, onCancelPaymentFrame, closeOverlay]);
+  }, [step, onCancelPaymentFrame, onProtectClose, closeOverlay]);
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       if (step === "payment") onCancelPaymentFrame();
+      else if (step === "protect") onProtectClose();
       else closeOverlay();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, step, onCancelPaymentFrame, closeOverlay]);
+  }, [open, step, onCancelPaymentFrame, onProtectClose, closeOverlay]);
 
   if (!open) return null;
 
@@ -289,6 +305,14 @@ export function ShopCheckoutOverlay({
             buyError={buyError}
             onClose={closeOverlay}
             onSelectPayment={onSelectPaymentMethod}
+          />
+        ) : step === "protect" ? (
+          <ProtectAccountView
+            bindingBusy={bindingBusy}
+            bindingError={bindingError}
+            protectNeedSms={protectNeedSms}
+            onClose={onProtectClose}
+            onSubmit={onBindingSubmit}
           />
         ) : step === "payment" && paymentUrl ? (
           <PaymentFrameView
