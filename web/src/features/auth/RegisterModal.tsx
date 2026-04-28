@@ -69,14 +69,12 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
   const { openPhoneVerify } = useAuthModals()
   const formId = useId()
   const emailId = `${formId}-email`
-  const phoneId = `${formId}-phone`
   const passwordId = `${formId}-password`
   const password2Id = `${formId}-password2`
   const referralId = `${formId}-referral`
   const termsId = `${formId}-terms`
 
   const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [_referral, setReferral] = useState('')
@@ -104,11 +102,6 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
     setError(null)
     if (!termsAccepted) {
       setError('Please accept the terms to continue')
-      return
-    }
-    const phoneDigits = phone.replace(/\D/g, '')
-    if (phoneDigits.length < 10) {
-      setError('Please enter a valid phone number (at least 10 digits)')
       return
     }
     if (password !== passwordConfirm) {
@@ -187,21 +180,6 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
               placeholder="Enter email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-
-            <label className="auth-modal__field-label auth-modal__field-label--register" htmlFor={phoneId}>
-              Phone:
-            </label>
-            <input
-              id={phoneId}
-              className="auth-modal__input auth-modal__input--register"
-              type="tel"
-              autoComplete="tel"
-              inputMode="tel"
-              placeholder="Phone number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
               required
             />
 
