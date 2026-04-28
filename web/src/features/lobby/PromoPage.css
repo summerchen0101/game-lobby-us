@@ -85,6 +85,7 @@
   background-size: contain;
   background-clip: border-box;
   background-origin: border-box;
+  transform: scale(1.1) translate(-0.4rem, 0);
 }
 
 /* role="button" 的 div：滑鼠聚焦不強制 ring，keyboard :focus-visible 顯示金框 */

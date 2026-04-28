@@ -57,7 +57,8 @@ export function MyProfileModal({
 
   if (!open) return null;
 
-  const idDisplay = userId?.trim() || "—";
+  const headline =
+    displayName?.trim() || userId?.trim() || "—";
   const emailText = email?.trim() ?? "";
   const phoneText = phone?.trim() ?? "";
 
@@ -109,7 +110,7 @@ export function MyProfileModal({
               )}
             </span>
           </div>
-          <p className="my-profile-modal__id">{idDisplay}</p>
+          <p className="my-profile-modal__id">{headline}</p>
           <div className="my-profile-modal__level-row">
             <span className="my-profile-modal__level-label">Entry level</span>
             <InfoPopover
