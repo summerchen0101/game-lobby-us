@@ -116,6 +116,43 @@ function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
   return displayGames;
 }
 
+function LobbyGameCardThumb({
+  thumb,
+  title,
+}: {
+  thumb: string | undefined;
+  title: string;
+}) {
+  const [imageFailed, setImageFailed] = useState(!thumb);
+
+  useEffect(() => {
+    setImageFailed(!thumb);
+  }, [thumb]);
+
+  const showFallback = !thumb || imageFailed;
+  const bgStyle =
+    thumb && !imageFailed
+      ? { backgroundImage: `url("${thumb}")` }
+      : undefined;
+
+  return (
+    <div className="lobby-game-card__thumb" style={bgStyle}>
+      {thumb ? (
+        <img
+          src={thumb}
+          alt=""
+          className="lobby-game-card__thumb-probe"
+          aria-hidden
+          onError={() => setImageFailed(true)}
+        />
+      ) : null}
+      {showFallback ? (
+        <span className="lobby-game-card__fallback">{title}</span>
+      ) : null}
+    </div>
+  );
+}
+
 export function LandingPage() {
   const { token, user, refreshUser } = useAuth();
   const { activeWallet } = useWallet();
@@ -350,13 +387,7 @@ export function LandingPage() {
         }
         onClick={() => (onCardAction ? onCardAction(g) : onPlayGame(g))}
         aria-label={showTextLabels ? undefined : g.title}>
-        <div
-          className="lobby-game-card__thumb"
-          style={thumb ? { backgroundImage: `url("${thumb}")` } : undefined}>
-          {!thumb ? (
-            <span className="lobby-game-card__fallback">{g.title}</span>
-          ) : null}
-        </div>
+        <LobbyGameCardThumb thumb={thumb} title={g.title} />
         {showTextLabels ? (
           <>
             <span className="lobby-game-card__title">{g.title}</span>
