@@ -53,11 +53,6 @@
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
-  padding-top: clamp(0.55rem, 1.5vw, 0.85rem);
-}
-
-.promo-page__list > li:first-child {
-  padding-top: clamp(0.75rem, 1.95vw, 1.15rem);
 }
 
 /* 整卡可點：role=button 的 div，背景由 --promo-card-bg 提供 */

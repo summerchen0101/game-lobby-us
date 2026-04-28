@@ -1,0 +1,71 @@
+/* Search games — shell from AppModal.css */
+.app-modal.lobby-game-search-modal {
+  max-width: 22rem;
+}
+
+.lobby-game-search-modal__body {
+  padding: var(--space-4) var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-sizing: border-box;
+}
+
+.lobby-game-search-modal__label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.lobby-game-search-modal__input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  background: rgb(0 0 0 / 35%);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.lobby-game-search-modal__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.lobby-game-search-modal__input:focus {
+  outline: 2px solid var(--crown-gold);
+  outline-offset: 2px;
+}
+
+.lobby-game-search-modal__submit {
+  min-height: 2.6rem;
+  border: none;
+  border-radius: var(--crown-btn-radius, 999px);
+  background: var(--crown-button-primary-gradient);
+  color: var(--crown-button-primary-fg, #ffffff);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 var(--crown-btn-shadow-h, 2.5px) 0 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 20%);
+  transition:
+    filter 0.15s ease,
+    transform 0.08s ease;
+}
+
+.lobby-game-search-modal__submit:hover {
+  filter: brightness(1.08);
+}
+
+.lobby-game-search-modal__submit:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 calc(var(--crown-btn-shadow-h, 2.5px) - 1px) 0 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 15%);
+}

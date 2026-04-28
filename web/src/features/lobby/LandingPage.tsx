@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Search } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { LandingHeader } from "../../components/LandingHeader";
@@ -43,6 +44,7 @@ import {
   UNITY_DEMO_LOBBY_GAME,
   unityDemoGameUrl,
 } from "./landingContent";
+import { LobbyGameSearchModal } from "./LobbyGameSearchModal";
 import "./LobbyPage.css";
 
 type LobbyFilterTab = "all" | "hot" | "providers" | "slots";
@@ -131,9 +133,7 @@ function LobbyGameCardThumb({
 
   const showFallback = !thumb || imageFailed;
   const bgStyle =
-    thumb && !imageFailed
-      ? { backgroundImage: `url("${thumb}")` }
-      : undefined;
+    thumb && !imageFailed ? { backgroundImage: `url("${thumb}")` } : undefined;
 
   return (
     <div className="lobby-game-card__thumb" style={bgStyle}>
@@ -168,10 +168,15 @@ export function LandingPage() {
   const [mockError, setMockError] = useState<string | null>(null);
   const [lobbyFilter, setLobbyFilter] = useState<LobbyFilterTab>("all");
   const [lobbySearch, setLobbySearch] = useState("");
+  const [lobbySearchModalOpen, setLobbySearchModalOpen] = useState(false);
   const lobbyGameFilterRef = useRef<HTMLDivElement | null>(null);
 
   const loading =
-    user && mockLobby ? mockLoading : user && wsLobbyEnabled ? lobbyLoading : false;
+    user && mockLobby
+      ? mockLoading
+      : user && wsLobbyEnabled
+        ? lobbyLoading
+        : false;
   const error =
     user && mockLobby ? mockError : user && wsLobbyEnabled ? lobbyError : null;
   const {
@@ -302,8 +307,7 @@ export function LandingPage() {
         await refreshUser();
       } catch (e) {
         if (cancelled) return;
-        const msg =
-          e instanceof Error ? e.message : "Could not load games";
+        const msg = e instanceof Error ? e.message : "Could not load games";
         setMockError(msg);
         setMockGames([]);
       } finally {
@@ -564,40 +568,37 @@ export function LandingPage() {
           aria-label="Games">
           {user ? (
             <div className="lobby-games-toolbar">
-              <label className="lobby-games-search-wrap">
-                <span className="lobby-games-search-sr">Search games</span>
-                <input
-                  type="search"
-                  className="lobby-games-search-input"
-                  value={lobbySearch}
-                  onChange={(e) => setLobbySearch(e.target.value)}
-                  placeholder="Search games"
-                  autoComplete="off"
-                  enterKeyHint="search"
-                />
-              </label>
-              <div
-                ref={lobbyGameFilterRef}
-                className="lobby-game-filter"
-                role="tablist"
-                aria-label="Game categories">
-                {LOBBY_FILTER_TABS.map(({ id, label }) => (
-                  <button
-                    key={id}
-                    id={`lobby-tab-${id}`}
-                    type="button"
-                    className={
-                      "lobby-game-filter__tab" +
-                      (lobbyFilter === id ? " is-active" : "")
-                    }
-                    role="tab"
-                    aria-selected={lobbyFilter === id}
-                    aria-controls="lobby-games-panel"
-                    tabIndex={lobbyFilter === id ? 0 : -1}
-                    onClick={() => setLobbyFilter(id)}>
-                    {label}
-                  </button>
-                ))}
+              <div className="lobby-games-filter-strip">
+                <button
+                  type="button"
+                  className="lobby-game-search-trigger"
+                  aria-label="Search games"
+                  onClick={() => setLobbySearchModalOpen(true)}>
+                  <Search strokeWidth={2.25} aria-hidden />
+                </button>
+                <div
+                  ref={lobbyGameFilterRef}
+                  className="lobby-game-filter"
+                  role="tablist"
+                  aria-label="Game categories">
+                  {LOBBY_FILTER_TABS.map(({ id, label }) => (
+                    <button
+                      key={id}
+                      id={`lobby-tab-${id}`}
+                      type="button"
+                      className={
+                        "lobby-game-filter__tab" +
+                        (lobbyFilter === id ? " is-active" : "")
+                      }
+                      role="tab"
+                      aria-selected={lobbyFilter === id}
+                      aria-controls="lobby-games-panel"
+                      tabIndex={lobbyFilter === id ? 0 : -1}
+                      onClick={() => setLobbyFilter(id)}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           ) : null}
@@ -709,6 +710,12 @@ export function LandingPage() {
         onClose={closePhoneVerify}
         displayEmail={phoneVerifyPayload?.displayEmail ?? ""}
         pendingBody={phoneVerifyPayload?.body ?? null}
+      />
+      <LobbyGameSearchModal
+        open={lobbySearchModalOpen}
+        onClose={() => setLobbySearchModalOpen(false)}
+        initialQuery={lobbySearch}
+        onSubmit={(q) => setLobbySearch(q)}
       />
     </div>
   );
