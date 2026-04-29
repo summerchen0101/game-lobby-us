@@ -129,31 +129,65 @@ flowchart LR
 
 > **本 Web 大廳（`web`）**：帳密登入僅走 **REST** `POST /api/v1/login`；**不** 經 WebSocket 送下表之 `SERVER_LOGIN`（4）。大廳 WS 僅用 `PING_PONG`、`LOBBY_GET` 等。下表仍列出後端 `ApiType` 列舉供全專案 proto 參考。
 
+### 大廳 Jackpot（`GET_JACKPOT_INFO` vs `SLOT_JACKPOT_INFO_PUSH` vs `JACKPOT_INFO_PUSH`）
+
+與累積獎池相關的 Gateway `ApiType` 有三個常見代號，請勿混淆名稱或數值：
+
+| 名稱                     | 值   | 方向            | `data`／用途（依 [`proto/gateway/gateway.proto`](../../proto/gateway/gateway.proto) 與 [`web/proto/lobby_wire.proto`](../proto/lobby_wire.proto)）                                    |
+| ------------------------ | ---- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SLOT_JACKPOT_INFO_PUSH` | 14   | 伺服器 → 客戶端 | **Web 大廳輕量推播**：`megaman.SlotJackPotInfo`（`repeated int64 jackpot_amounts`），前端通常取前三格顯示於跑馬／ ticker。                                                            |
+| `GET_BET_LEVEL`          | 14   | （已棄用）      | **與上行同值**：`enum ApiType` 設有 `option allow_alias = true`；proto 註解標為 `deprecated`，請勿再當作下注等級語意。                                                                |
+| `GET_JACKPOT_INFO`       | 141  | 請求 / 回應     | **Ranking 區塊**（`gateway.proto`）；回應形狀以 **megaman** 下方 **`ListJackPotResp`／`JackPotInfo`** 為準（見 [`proto/megaman/ranking.proto`](../../proto/megaman/ranking.proto)）。 |
+| `JACKPOT_INFO_PUSH`      | 1043 | 伺服器 → 客戶端 | **Server push 區段（1000 後）**廣播；常見載荷與 **14** 同為 **`SlotJackPotInfo`**，若以結構化列表下發則對齊 **`ListJackPotResp`**（仍以伺服器實際 `data` 為準）。                     |
+
+#### 權威訊息形狀：`GET_JACKPOT_INFO`(141) 回應
+
+以下節錄自 [`proto/megaman/ranking.proto`](../../proto/megaman/ranking.proto)，作為 **`ListJackPotResp`**／**`JackPotInfo`** 的唯一依據（與 **`ranking.gRPC`** 的 **`ListJackPot` → `JackPotMoneyPool`** 不同路由，請勿混淆）：
+
+```protobuf
+message ListJackPotResp { repeated JackPotInfo info = 1; }
+
+message JackPotInfo {
+  ranking.JackPotType JackPotType = 1;
+  float amount = 2; // 現在金額倍率
+  int64 award = 3; // 獎項
+  WalletType walletType = 4; // 錢包類型（megaman，見下）
+}
+```
+
+- **`JackPotType`**：`megaman.JackPotInfo` 宣告為 **`ranking.JackPotType`**，數值見 [`proto/ranking/ranking.proto`](../../proto/ranking/ranking.proto) 之 `enum JackPotType`（`UNKNOWN_JACK_POT_TYPE`…`HUNDRED_COLOR_DICE_JACK_POT`…`BIG_WIN = 99` 等）。
+- **`WalletType`**：於 megaman 原始檔中對應 [`proto/megaman/lobby.proto`](../../proto/megaman/lobby.proto) 之 `enum WalletType`（`UNKNOWN_WALLET_TYPE = 0`、`GC = 1`、`SC = 2`）。此與 [`proto/ranking/ranking.proto`](../../proto/ranking/ranking.proto) 內同名之 `WalletType` **非同一型別定義**；二進位相容性僅依枚舉數值一致與否判斷。
+
+Web 單檔 mirror（供 protobufjs 編解碼，欄位編號須一致）：[`web/proto/lobby_wire.proto`](../proto/lobby_wire.proto) 內對應 **`ListJackPotResp`／`JackPotInfo`／`JackPotType`／`WalletType`**。
+
+`GAME_JACKPOT_INFO`（2001）等偏遊戲內／其他通道，與大廳 WS 並列於 [`proto/gateway/gateway.proto`](../../proto/gateway/gateway.proto) 「Slot」註解區塊，使用時請與上表區分。
+
 ### 5.1 基礎 / 大廳 / 錢包 / 系統
 
-| 名稱                        | 值  | 註釋（proto）                |
-| --------------------------- | --- | ---------------------------- |
-| `PING_PONG`                 | 0   |                              |
-| `JOIN_ROOM`                 | 1   |                              |
-| `USER_KICK_BEFORE`          | 2   | meesage UserKickBeforeReason |
-| `SERVER_UPDATE`             | 3   |                              |
-| `SERVER_LOGIN`              | 4   |                              |
-| `LOBBY_GET`                 | 11  |                              |
-| `WALLET_GET`                | 12  |                              |
-| `WALLET_USE`                | 112 |                              |
-| `GET_SYSTEM_TIME`           | 13  |                              |
-| `GET_BET_LEVEL`             | 14  |                              |
-| `SEND_MESSAGE`              | 15  |                              |
-| `GET_LOGIN_AWARD`           | 16  | 每日登入獎勵清單             |
-| `RECEIVE_LOGIN_AWARD`       | 17  | 領取登入獎勵                 |
-| `GetSummonedAwardList`      | 18  | 招回獎勵清單                 |
-| `ReceiveSummonedAward`      | 19  | 領取招回獎勵                 |
-| `GET_DAILY_AWARD`           | 945 | 每日回饋                     |
-| `RECEIVE_DAILY_AWARD`       | 946 | 領取回饋                     |
-| `LIST_DAILY_AWARD`          | 947 | 每日回饋獎勵紀錄             |
-| `LIST_DAILY_DETAIL_AWARD`   | 948 | 每日回饋明細紀錄             |
-| `GET_DAILY_AWARD_BONUS`     | 949 | 每日回饋加碼                 |
-| `RECEIVE_DAILY_AWARD_BONUS` | 950 | 領取回饋加碼                 |
+| 名稱                        | 值  | 註釋（proto）                                     |
+| --------------------------- | --- | ------------------------------------------------- |
+| `PING_PONG`                 | 0   |                                                   |
+| `JOIN_ROOM`                 | 1   |                                                   |
+| `USER_KICK_BEFORE`          | 2   | meesage UserKickBeforeReason                      |
+| `SERVER_UPDATE`             | 3   |                                                   |
+| `SERVER_LOGIN`              | 4   |                                                   |
+| `LOBBY_GET`                 | 11  |                                                   |
+| `WALLET_GET`                | 12  |                                                   |
+| `WALLET_USE`                | 112 |                                                   |
+| `GET_SYSTEM_TIME`           | 13  |                                                   |
+| `SLOT_JACKPOT_INFO_PUSH`    | 14  | Web/WebGL lobby：`data`=`megaman.SlotJackPotInfo` |
+| `GET_BET_LEVEL`             | 14  | `deprecated`，與 `SLOT_JACKPOT_INFO_PUSH` 別名    |
+| `SEND_MESSAGE`              | 15  |                                                   |
+| `GET_LOGIN_AWARD`           | 16  | 每日登入獎勵清單                                  |
+| `RECEIVE_LOGIN_AWARD`       | 17  | 領取登入獎勵                                      |
+| `GetSummonedAwardList`      | 18  | 招回獎勵清單                                      |
+| `ReceiveSummonedAward`      | 19  | 領取招回獎勵                                      |
+| `GET_DAILY_AWARD`           | 945 | 每日回饋                                          |
+| `RECEIVE_DAILY_AWARD`       | 946 | 領取回饋                                          |
+| `LIST_DAILY_AWARD`          | 947 | 每日回饋獎勵紀錄                                  |
+| `LIST_DAILY_DETAIL_AWARD`   | 948 | 每日回饋明細紀錄                                  |
+| `GET_DAILY_AWARD_BONUS`     | 949 | 每日回饋加碼                                      |
+| `RECEIVE_DAILY_AWARD_BONUS` | 950 | 領取回饋加碼                                      |
 
 ### 5.2 Player info
 
@@ -251,18 +285,18 @@ flowchart LR
 
 ### 5.7 Ranking
 
-| 名稱                             | 值  | 註釋（proto）      |
-| -------------------------------- | --- | ------------------ |
-| `ADD_RANKING`                    | 131 |                    |
-| `LIST_RANKING`                   | 132 |                    |
-| `GET_DISPLAY_MENUS`              | 136 |                    |
-| `LIST_COMPETITION`               | 137 |                    |
-| `LIST_COMPETITION_RANKING`       | 138 |                    |
-| `GET_COMPETITION_RANKING_REPLAY` | 139 | 取得競賽綁重播回放 |
-| `LIST_JACKPOT_PLAYER_INFO`       | 140 |                    |
-| `GET_JACKPOT_INFO`               | 141 |                    |
-| `LIST_PLAYER_BINGO`              | 142 |                    |
-| `LIST_TOP_BINGOS`                | 143 |                    |
+| 名稱                             | 值  | 註釋（proto）                                                                                                                                          |
+| -------------------------------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ADD_RANKING`                    | 131 |                                                                                                                                                        |
+| `LIST_RANKING`                   | 132 |                                                                                                                                                        |
+| `GET_DISPLAY_MENUS`              | 136 |                                                                                                                                                        |
+| `LIST_COMPETITION`               | 137 |                                                                                                                                                        |
+| `LIST_COMPETITION_RANKING`       | 138 |                                                                                                                                                        |
+| `GET_COMPETITION_RANKING_REPLAY` | 139 | 取得競賽綁重播回放                                                                                                                                     |
+| `LIST_JACKPOT_PLAYER_INFO`       | 140 |                                                                                                                                                        |
+| `GET_JACKPOT_INFO`               | 141 | 請求 JP 資訊；回應 **`megaman.ListJackPotResp`**；欄位定義見上節「權威訊息形狀」（[`proto/megaman/ranking.proto`](../../proto/megaman/ranking.proto)） |
+| `LIST_PLAYER_BINGO`              | 142 |                                                                                                                                                        |
+| `LIST_TOP_BINGOS`                | 143 |                                                                                                                                                        |
 
 ### 5.8 social
 
@@ -470,65 +504,65 @@ flowchart LR
 
 此類多為**伺服器主動下發**之 `type`，客戶端處理推播/訊息 UI；**實際行為**以產品與伺服器實作為準。
 
-| 名稱                                    | 值   | 註釋（proto）                                                                        |
-| --------------------------------------- | ---- | ------------------------------------------------------------------------------------ |
-| `SEND_MESSAGE_PUSH`                     | 1000 |                                                                                      |
-| `INVITE_TO_CHAT_ROOM_PUSH`              | 1001 |                                                                                      |
-| `INVITE_TO_GUILD_PUSH`                  | 1002 |                                                                                      |
-| `INVITE_ROOM_PUSH`                      | 1003 |                                                                                      |
-| `PLAY_TOGETHER_PUSH`                    | 1004 |                                                                                      |
-| `LEAVE_GROUP_PUSH`                      | 1005 |                                                                                      |
-| `ADD_GROUP_PUSH`                        | 1006 |                                                                                      |
-| `CHANGE_GROUP_NAME_PUSH`                | 1007 |                                                                                      |
-| `MEGA_WIN_PUSH`                         | 1008 |                                                                                      |
-| `PLAYER_VIP_LEVEL_UP`                   | 1009 |                                                                                      |
-| `GOT_RED_ENVELOPE_PUSH`                 | 1010 |                                                                                      |
-| `LAST_ORDER_PUSH`                       | 1011 |                                                                                      |
-| `RED_ENVELOPE_REFUND_PUSH`              | 1012 |                                                                                      |
-| `PAYMENT_FINISH_PUSH`                   | 1013 |                                                                                      |
-| `YOU_GOT_SOMETHING_PUSH`                | 1014 |                                                                                      |
-| `CAMPAIGN_PUSH`                         | 1020 |                                                                                      |
-| `INVITE_FRIEND_PUSH`                    | 1021 | player info                                                                          |
-| `GET_TREASURE_BOX_PUSH`                 | 1022 |                                                                                      |
-| `BLOCK_MSG_PUSH`                        | 1023 | 封鎖使用者 收到此訊息 可跳訊息並回到登入介面 (server 會再發出訊息後三秒內斷開連線)   |
-| `GIFT_MSG_PUSH`                         | 1024 | 送禮消息                                                                             |
-| `SERVER_MSG_PUSH`                       | 1025 | 系統訊息推送 SeverPushMessage                                                        |
-| `SYSTEM_MAINTENANCE_MSG_PUSH`           | 1026 | 系統維護 收到此訊息 可跳訊息並回到登入介面 (server 會再發出訊息後三秒內斷開連線) 204 |
-| `ADD_OR_LEAVE_GUILD_MSG_PUSH`           | 1027 | 加入或請離公會訊息                                                                   |
-| `CHANGE_GUILD_MEMBER_POSITION_MSG_PUSH` | 1028 | 更換公會成員職位訊息                                                                 |
-| `GUILD_DIVIDENDS_MSG_PUSH`              | 1029 | 公會分紅訊息                                                                         |
-| `GUILD_AUTO_MSG_PUSH`                   | 1030 | 公會自動推播訊息                                                                     |
-| `APPLY_LEAVE_GUILD_MSG_PUSH`            | 1031 | 申請離開退出後的訊息                                                                 |
-| `SNATCH_RED_ENVELOPE_PUSH`              | 1032 |                                                                                      |
-| `TOKEN_REFUND_PUSH`                     | 1033 |                                                                                      |
-| `CHANGE_DEALER_PUSH`                    | 1034 |                                                                                      |
-| `DAILY_LOGIN_AWARD_MSG_PUSH`            | 1035 | 每入登入獎勵的訊息                                                                   |
-| `BAN_PLAYER_MSG_PUSH`                   | 1036 |                                                                                      |
-| `ACTIVITY_LUCKY_MSG_PUSH`               | 1037 | 幸運輪盤送獎訊息                                                                     |
-| `QR_CODE_ADD_GUID_MSG_PUSH`             | 1038 | 透過 QR code 加入俱樂部系統訊息 to 推薦人                                            |
-| `RED_ENVELOPE_VERIFY_PUSH`              | 1039 |                                                                                      |
-| `UPDATE_GUILD_USER_TO_MANAGER_PUSH`     | 1040 | 俱樂部移除或是設定該會員為管理者訊息                                                 |
-| `GOT_LOTTERY_TICKETS`                   | 1041 | 獲得彩券通知                                                                         |
-| `GAME_END_PUSH`                         | 1042 | 獲得彩券通知                                                                         |
-| `JACKPOT_INFO_PUSH`                     | 1043 |                                                                                      |
-| `EVENT_JACKPOT_PUSH`                    | 1044 |                                                                                      |
-| `WITHDRAW_SUCCESS_PUSH`                 | 1048 | 提現成功推波                                                                         |
-| `DRAW_LOTTERY_AWARD`                    | 1050 | 樂透中獎通知                                                                         |
-| `RECEIVED_LOTTERY_TICKETS`              | 1051 | 獲得彩券通知                                                                         |
-| `PLAYER_LEVEL_UP`                       | 1052 |                                                                                      |
-| `SEND_ITEM_PUSH`                        | 1053 |                                                                                      |
-| `COMPETITION_AWARD_MSG_PUSH`            | 1054 | 競賽獎勵通知                                                                         |
-| `RICH_DADDAY_GIFT_MSG_PUSH`             | 1055 | 金主霸霸拜禮                                                                         |
-| `RICH_DADDAY_AWARD_MSG_PUSH`            | 1056 | 金主霸霸回饋                                                                         |
-| `RICH_DADDY_ONLINE_MSG_PUSH`            | 1057 | 金主霸霸上線                                                                         |
-| `SUMMONED_AWARD`                        | 1060 |                                                                                      |
-| `TOURNAMENTS_STARTING_SOON_PUSH`        | 1070 | 錦標賽即將開賽通知 (開賽前10分鐘、3分鐘、30秒)                                       |
-| `TOURNAMENTS_STARTING_PUSH`             | 1071 | 錦標賽開賽通知                                                                       |
-| `TOURNAMENTS_AWARDS_DISTRIBUTION_PUSH`  | 1072 | 獎勵發放通知                                                                         |
-| `AUCTION_DISCONTINED_PUSH`              | 1081 | 下架拍賣通知                                                                         |
-| `AUCTION_COMPLETED_PUSH`                | 1082 | 買家拍賣通知                                                                         |
-| `AUCTION_RECEIVED_PUSH`                 | 1083 | 賣家拍賣通知                                                                         |
-| `RECEIVE_DAILY_BONUS_PUSH`              | 1084 | 領取額外每日回饋通知                                                                 |
+| 名稱                                    | 值   | 註釋（proto）                                                                                     |
+| --------------------------------------- | ---- | ------------------------------------------------------------------------------------------------- |
+| `SEND_MESSAGE_PUSH`                     | 1000 |                                                                                                   |
+| `INVITE_TO_CHAT_ROOM_PUSH`              | 1001 |                                                                                                   |
+| `INVITE_TO_GUILD_PUSH`                  | 1002 |                                                                                                   |
+| `INVITE_ROOM_PUSH`                      | 1003 |                                                                                                   |
+| `PLAY_TOGETHER_PUSH`                    | 1004 |                                                                                                   |
+| `LEAVE_GROUP_PUSH`                      | 1005 |                                                                                                   |
+| `ADD_GROUP_PUSH`                        | 1006 |                                                                                                   |
+| `CHANGE_GROUP_NAME_PUSH`                | 1007 |                                                                                                   |
+| `MEGA_WIN_PUSH`                         | 1008 |                                                                                                   |
+| `PLAYER_VIP_LEVEL_UP`                   | 1009 |                                                                                                   |
+| `GOT_RED_ENVELOPE_PUSH`                 | 1010 |                                                                                                   |
+| `LAST_ORDER_PUSH`                       | 1011 |                                                                                                   |
+| `RED_ENVELOPE_REFUND_PUSH`              | 1012 |                                                                                                   |
+| `PAYMENT_FINISH_PUSH`                   | 1013 |                                                                                                   |
+| `YOU_GOT_SOMETHING_PUSH`                | 1014 |                                                                                                   |
+| `CAMPAIGN_PUSH`                         | 1020 |                                                                                                   |
+| `INVITE_FRIEND_PUSH`                    | 1021 | player info                                                                                       |
+| `GET_TREASURE_BOX_PUSH`                 | 1022 |                                                                                                   |
+| `BLOCK_MSG_PUSH`                        | 1023 | 封鎖使用者 收到此訊息 可跳訊息並回到登入介面 (server 會再發出訊息後三秒內斷開連線)                |
+| `GIFT_MSG_PUSH`                         | 1024 | 送禮消息                                                                                          |
+| `SERVER_MSG_PUSH`                       | 1025 | 系統訊息推送 SeverPushMessage                                                                     |
+| `SYSTEM_MAINTENANCE_MSG_PUSH`           | 1026 | 系統維護 收到此訊息 可跳訊息並回到登入介面 (server 會再發出訊息後三秒內斷開連線) 204              |
+| `ADD_OR_LEAVE_GUILD_MSG_PUSH`           | 1027 | 加入或請離公會訊息                                                                                |
+| `CHANGE_GUILD_MEMBER_POSITION_MSG_PUSH` | 1028 | 更換公會成員職位訊息                                                                              |
+| `GUILD_DIVIDENDS_MSG_PUSH`              | 1029 | 公會分紅訊息                                                                                      |
+| `GUILD_AUTO_MSG_PUSH`                   | 1030 | 公會自動推播訊息                                                                                  |
+| `APPLY_LEAVE_GUILD_MSG_PUSH`            | 1031 | 申請離開退出後的訊息                                                                              |
+| `SNATCH_RED_ENVELOPE_PUSH`              | 1032 |                                                                                                   |
+| `TOKEN_REFUND_PUSH`                     | 1033 |                                                                                                   |
+| `CHANGE_DEALER_PUSH`                    | 1034 |                                                                                                   |
+| `DAILY_LOGIN_AWARD_MSG_PUSH`            | 1035 | 每入登入獎勵的訊息                                                                                |
+| `BAN_PLAYER_MSG_PUSH`                   | 1036 |                                                                                                   |
+| `ACTIVITY_LUCKY_MSG_PUSH`               | 1037 | 幸運輪盤送獎訊息                                                                                  |
+| `QR_CODE_ADD_GUID_MSG_PUSH`             | 1038 | 透過 QR code 加入俱樂部系統訊息 to 推薦人                                                         |
+| `RED_ENVELOPE_VERIFY_PUSH`              | 1039 |                                                                                                   |
+| `UPDATE_GUILD_USER_TO_MANAGER_PUSH`     | 1040 | 俱樂部移除或是設定該會員為管理者訊息                                                              |
+| `GOT_LOTTERY_TICKETS`                   | 1041 | 獲得彩券通知                                                                                      |
+| `GAME_END_PUSH`                         | 1042 | 獲得彩券通知                                                                                      |
+| `JACKPOT_INFO_PUSH`                     | 1043 | JP 資訊廣播；`SlotJackPotInfo` 或 **`ListJackPotResp`**（細見上文「權威訊息形狀」，以伺服器為準） |
+| `EVENT_JACKPOT_PUSH`                    | 1044 |                                                                                                   |
+| `WITHDRAW_SUCCESS_PUSH`                 | 1048 | 提現成功推波                                                                                      |
+| `DRAW_LOTTERY_AWARD`                    | 1050 | 樂透中獎通知                                                                                      |
+| `RECEIVED_LOTTERY_TICKETS`              | 1051 | 獲得彩券通知                                                                                      |
+| `PLAYER_LEVEL_UP`                       | 1052 |                                                                                                   |
+| `SEND_ITEM_PUSH`                        | 1053 |                                                                                                   |
+| `COMPETITION_AWARD_MSG_PUSH`            | 1054 | 競賽獎勵通知                                                                                      |
+| `RICH_DADDAY_GIFT_MSG_PUSH`             | 1055 | 金主霸霸拜禮                                                                                      |
+| `RICH_DADDAY_AWARD_MSG_PUSH`            | 1056 | 金主霸霸回饋                                                                                      |
+| `RICH_DADDY_ONLINE_MSG_PUSH`            | 1057 | 金主霸霸上線                                                                                      |
+| `SUMMONED_AWARD`                        | 1060 |                                                                                                   |
+| `TOURNAMENTS_STARTING_SOON_PUSH`        | 1070 | 錦標賽即將開賽通知 (開賽前10分鐘、3分鐘、30秒)                                                    |
+| `TOURNAMENTS_STARTING_PUSH`             | 1071 | 錦標賽開賽通知                                                                                    |
+| `TOURNAMENTS_AWARDS_DISTRIBUTION_PUSH`  | 1072 | 獎勵發放通知                                                                                      |
+| `AUCTION_DISCONTINED_PUSH`              | 1081 | 下架拍賣通知                                                                                      |
+| `AUCTION_COMPLETED_PUSH`                | 1082 | 買家拍賣通知                                                                                      |
+| `AUCTION_RECEIVED_PUSH`                 | 1083 | 賣家拍賣通知                                                                                      |
+| `RECEIVE_DAILY_BONUS_PUSH`              | 1084 | 領取額外每日回饋通知                                                                              |
 
 ### 5.23 Slot
 

@@ -2,6 +2,8 @@ import {
   GATEWAY_API_BUY_PRODUCT,
   GATEWAY_API_CREATE_WITHDRAW_ORDER,
   GATEWAY_API_GET_THIRD_PARTY_GAME_INFO,
+  GATEWAY_API_GET_JACKPOT_INFO,
+  GATEWAY_API_JACKPOT_INFO_PUSH,
   GATEWAY_API_LIST_PLAYER_AVATARS,
   GATEWAY_API_LIST_PRODUCTS,
   GATEWAY_API_LIST_WITHDRAW_ORDERS,
@@ -17,7 +19,10 @@ import {
 } from "./gatewayApi";
 import type { GatewayWsResponseObject } from "./gatewayWs";
 import { hexPreview } from "./bytesHexPreview";
-import { decodeSlotJackPotInfoToObjectForDev } from "./jackpotLobbyWire";
+import {
+  decodeSlotJackPotInfoToObjectForDev,
+  decodeListJackPotRespToObjectForDev,
+} from "./jackpotLobbyWire";
 import { decodeLobbyGetResponseBytes } from "./lobbyDecode";
 import {
   decodeBuyProductResponseBytes,
@@ -92,12 +97,36 @@ export function decodeGatewayResponseDataForDevLog(
         data: decoded,
       };
     }
-    if (type === GATEWAY_API_SLOT_JACKPOT_PUSH) {
-      const o = decodeSlotJackPotInfoToObjectForDev(raw);
-      if (o) {
-        return { kind: "SLOT_JACKPOT", jackpotAmounts: o.jackpotAmounts };
+    if (
+      type === GATEWAY_API_SLOT_JACKPOT_PUSH ||
+      type === GATEWAY_API_JACKPOT_INFO_PUSH ||
+      type === GATEWAY_API_GET_JACKPOT_INFO
+    ) {
+      if (type === GATEWAY_API_GET_JACKPOT_INFO) {
+        const list = decodeListJackPotRespToObjectForDev(raw);
+        if (list && list.infoCount > 0) {
+          return {
+            kind: "LIST_JACKPOT",
+            list,
+          };
+        }
+        return fallbackHex(
+          raw,
+          new Error("ListJackPotResp decode empty or failed"),
+        );
       }
-      return fallbackHex(raw, new Error("SlotJackPotInfo decode failed"));
+      const slot = decodeSlotJackPotInfoToObjectForDev(raw);
+      if (slot && slot.jackpotAmounts.length > 0) {
+        return { kind: "SLOT_JACKPOT", slot };
+      }
+      const list = decodeListJackPotRespToObjectForDev(raw);
+      if (list && list.infoCount > 0) {
+        return {
+          kind: "LIST_JACKPOT",
+          list,
+        };
+      }
+      return fallbackHex(raw, new Error("jackpot wire decode failed"));
     }
     if (type === GATEWAY_API_WALLET_USE) {
       const w = tryDecodeWalletUseRequestForDev(raw);

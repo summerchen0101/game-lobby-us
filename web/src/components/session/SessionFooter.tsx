@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Gift, Home, ShoppingCart, User, Wallet, type LucideIcon } from 'lucide-react'
 import { matchPath, NavLink, useLocation } from 'react-router-dom'
+import { useGatewayLobby } from '../../realtime/useGatewayLobby'
 import { useWallet } from '../../wallet/walletContext'
 import './SessionChrome.css'
 
@@ -39,6 +40,7 @@ function useFooterActiveIndex(): number {
 
 export function SessionFooter() {
   const { activeWallet } = useWallet()
+  const { refreshLobbyGet } = useGatewayLobby()
   const activeIndex = useFooterActiveIndex()
   return (
     <nav
@@ -60,6 +62,9 @@ export function SessionFooter() {
               <NavLink
                 to={to}
                 end={end}
+                onClick={() => {
+                  void refreshLobbyGet()
+                }}
                 className={({ isActive }) =>
                   'session-footer__link' + (isActive ? ' is-active' : '')
                 }

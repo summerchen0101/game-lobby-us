@@ -76,6 +76,47 @@ export default {
             }
           }
         },
+        "JackPotType": {
+          "values": {
+            "UNKNOWN_JACK_POT_TYPE": 0,
+            "SLOT_JACK_POT": 1,
+            "HUNDRED_JACK_POT": 2,
+            "FISHING_JACK_POT": 3,
+            "VIDEO_JACK_POT": 4,
+            "EVENT_JACK_POT": 5,
+            "HUNDRED_COLOR_DICE_JACK_POT": 6,
+            "BIG_WIN": 99
+          }
+        },
+        "JackPotInfo": {
+          "fields": {
+            "JackPotType": {
+              "type": "JackPotType",
+              "id": 1
+            },
+            "amount": {
+              "type": "float",
+              "id": 2
+            },
+            "award": {
+              "type": "int64",
+              "id": 3
+            },
+            "walletType": {
+              "type": "WalletType",
+              "id": 4
+            }
+          }
+        },
+        "ListJackPotResp": {
+          "fields": {
+            "info": {
+              "rule": "repeated",
+              "type": "JackPotInfo",
+              "id": 1
+            }
+          }
+        },
         "Game": {
           "fields": {
             "ID": {

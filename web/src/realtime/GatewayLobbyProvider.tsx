@@ -15,13 +15,15 @@ import {
   isWsLobbyGamesEnabled,
 } from "../lib/env";
 import {
+  GATEWAY_API_GET_JACKPOT_INFO,
+  GATEWAY_API_JACKPOT_INFO_PUSH,
   GATEWAY_API_LOBBY_GET,
   GATEWAY_API_SEND_MESSAGE_PUSH,
   GATEWAY_API_SERVER_LOGIN,
   GATEWAY_API_SLOT_JACKPOT_PUSH,
   GATEWAY_API_WITHDRAW_SUCCESS_PUSH,
 } from "./gatewayApi";
-import { decodeSlotJackPotInfoBytes } from "./jackpotLobbyWire";
+import { decodeLobbyJackpotDisplayTriple } from "./jackpotLobbyWire";
 import type { GatewayWsRequestFn } from "./gatewayWs";
 import { isGatewaySuccessCode } from "./gatewayWire";
 import { hexPreview } from "./bytesHexPreview";
@@ -218,9 +220,13 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
       if (!isGatewaySuccessCode(codeStr)) return;
       const t = Number(msg.type);
       const raw = msg.data;
-      if (t === GATEWAY_API_SLOT_JACKPOT_PUSH) {
+      if (
+        t === GATEWAY_API_SLOT_JACKPOT_PUSH ||
+        t === GATEWAY_API_JACKPOT_INFO_PUSH ||
+        t === GATEWAY_API_GET_JACKPOT_INFO
+      ) {
         if (!(raw instanceof Uint8Array) || raw.byteLength === 0) return;
-        const triple = decodeSlotJackPotInfoBytes(raw);
+        const triple = decodeLobbyJackpotDisplayTriple(raw, t);
         if (triple) setLiveJackpotAmounts(triple);
         return;
       }
@@ -288,6 +294,16 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {
         console.warn("[gateway-ws] SERVER_LOGIN failed", e);
+      }
+
+      try {
+        await request({
+          type: GATEWAY_API_GET_JACKPOT_INFO,
+          data: new Uint8Array(0),
+          debugLabel: "GET_JACKPOT_INFO",
+        });
+      } catch (e) {
+        console.warn("[gateway-ws] GET_JACKPOT_INFO failed", e);
       }
 
       if (!shouldRunLobbyGetOnOpen) return;
