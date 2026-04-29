@@ -19,6 +19,7 @@ import {
   GATEWAY_API_SEND_MESSAGE_PUSH,
   GATEWAY_API_SERVER_LOGIN,
   GATEWAY_API_SLOT_JACKPOT_PUSH,
+  GATEWAY_API_WITHDRAW_SUCCESS_PUSH,
 } from "./gatewayApi";
 import { decodeSlotJackPotInfoBytes } from "./jackpotLobbyWire";
 import type { GatewayWsRequestFn } from "./gatewayWs";
@@ -40,6 +41,8 @@ import {
   tryDecodeSendMessagePushToPaymentPush,
   userPatchFromPaymentPush,
 } from "./shopLobbyWire";
+import { decodeWithdrawSuccessPushBytes } from "./withdrawLobbyWire";
+import type { WithdrawSuccessPushListener } from "./gatewayLobbyContext";
 import { wireUInt64Field } from "./wireUint64";
 
 function devGatewayWsProbeEnabled(): boolean {
@@ -64,9 +67,21 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
     readonly [number, number, number] | null
   >(null);
   const [lobbyGet, setLobbyGet] = useState<LobbyGetDecoded | null>(null);
+  const [gatewayRequestReady, setGatewayRequestReady] = useState(false);
 
   const requestRef = useRef<GatewayWsRequestFn | null>(null);
   const paymentFinishListenersRef = useRef(new Set<PaymentFinishListener>());
+  const withdrawSuccessListenersRef = useRef(new Set<WithdrawSuccessPushListener>());
+
+  const subscribeWithdrawSuccessPush = useCallback(
+    (listener: WithdrawSuccessPushListener) => {
+      withdrawSuccessListenersRef.current.add(listener);
+      return () => {
+        withdrawSuccessListenersRef.current.delete(listener);
+      };
+    },
+    [],
+  );
 
   const subscribePaymentFinish = useCallback(
     (listener: PaymentFinishListener) => {
@@ -98,6 +113,9 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
     setLiveJackpotAmounts(null);
     setLobbyGet(null);
     requestRef.current = null;
+    setGatewayRequestReady(false);
+    paymentFinishListenersRef.current.clear();
+    withdrawSuccessListenersRef.current.clear();
   }, [token]);
 
   useGatewayWs({
@@ -123,6 +141,19 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
         if (triple) setLiveJackpotAmounts(triple);
         return;
       }
+      if (t === GATEWAY_API_WITHDRAW_SUCCESS_PUSH) {
+        if (!(raw instanceof Uint8Array) || raw.byteLength === 0) return;
+        const push = decodeWithdrawSuccessPushBytes(raw);
+        if (!push) return;
+        for (const fn of withdrawSuccessListenersRef.current) {
+          try {
+            fn(push);
+          } catch (e) {
+            console.warn("[gateway-ws] withdraw success push listener", e);
+          }
+        }
+        return;
+      }
       if (t === GATEWAY_API_SEND_MESSAGE_PUSH) {
         const push = tryDecodeSendMessagePushToPaymentPush(
           t,
@@ -142,6 +173,7 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
     },
     onOpen: async ({ request }) => {
       requestRef.current = request;
+      setGatewayRequestReady(true);
 
       try {
         const loginRes = await request({
@@ -275,20 +307,24 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
   const value = useMemo<GatewayLobbyContextValue>(
     () => ({
       requestRef,
+      gatewayRequestReady,
       lobbyGames,
       lobbyLoading,
       lobbyError,
       liveJackpotAmounts,
       lobbyGet,
       subscribePaymentFinish,
+      subscribeWithdrawSuccessPush,
     }),
     [
+      gatewayRequestReady,
       lobbyGames,
       lobbyLoading,
       lobbyError,
       liveJackpotAmounts,
       lobbyGet,
       subscribePaymentFinish,
+      subscribeWithdrawSuccessPush,
     ],
   );
 

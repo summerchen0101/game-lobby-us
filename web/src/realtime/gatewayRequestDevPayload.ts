@@ -1,7 +1,9 @@
 import { hexPreview } from './bytesHexPreview'
 import {
   GATEWAY_API_BUY_PRODUCT,
+  GATEWAY_API_CREATE_WITHDRAW_ORDER,
   GATEWAY_API_LIST_PRODUCTS,
+  GATEWAY_API_LIST_WITHDRAW_ORDERS,
   GATEWAY_API_LOBBY_GET,
   GATEWAY_API_MEGA_ACCOUNT_BINDING,
   GATEWAY_API_PING_PONG,
@@ -13,6 +15,10 @@ import {
   decodeListProductsRequestForDevLog,
   decodeMegaAccountBindingRequestForDevLog,
 } from './shopLobbyWire'
+import {
+  decodeCreateWithdrawOrderRequestForDevLog,
+  decodeListWithdrawOrdersRequestForDevLog,
+} from './withdrawLobbyWire'
 import { tryDecodeWalletUseRequestForDev } from './walletLobbyWire'
 
 const HEX_MAX = 48
@@ -98,6 +104,22 @@ export function decodeGatewayRequestDataForDevLog(
     return {
       decodeError: 'body not decodable as WalletUseRequest',
       hexPreview: hexPreview(raw, HEX_MAX),
+    }
+  }
+
+  if (apiType === GATEWAY_API_LIST_WITHDRAW_ORDERS) {
+    try {
+      return decodeListWithdrawOrdersRequestForDevLog(raw)
+    } catch (e) {
+      return fallbackHex(raw, e)
+    }
+  }
+
+  if (apiType === GATEWAY_API_CREATE_WITHDRAW_ORDER) {
+    try {
+      return decodeCreateWithdrawOrderRequestForDevLog(raw)
+    } catch (e) {
+      return fallbackHex(raw, e)
     }
   }
 

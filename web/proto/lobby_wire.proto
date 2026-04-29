@@ -426,3 +426,63 @@ message MegaAccountBindingResponse {
   YesNo needSMSAnswer = 1;
   string phoneNum = 2;
 }
+
+// --- Withdraw / redeem — 對齊 proto/megaman/payment.proto；Gateway ApiType ListWithdrawOrders=621, CreateWithdrawOrder=623, WithdrawSuccessPush=1048 ---
+
+// 對齊 proto/payment/payment.proto WithdrawOrderPaymentStatus（ListWithdrawOrdersReq 篩選為 repeated int32）
+enum WithdrawOrderPaymentStatus {
+  UnknownWithdrawOrderPaymentStatus = 0;
+  Reviewing = 1;
+  Passed = 2;
+  Rejected = 3;
+  Proccessing = 4;
+  Success = 5;
+  Failed = 6;
+  ExpirationRejected = 7;
+}
+
+message WithdrawSuccessPush {
+  uint64 userID = 1;
+  string actualAmount = 2;
+  string nickname = 3;
+}
+
+message ListWithdrawOrdersReq {
+  repeated int64 userIDIn = 1;
+  repeated int32 withdrawOrderPaymentStatusIn = 2;
+  int64 startedAtTimestampMillisecond = 11;
+  int64 endedAtTimestampMillisecond = 12;
+  int64 page = 13;
+  int64 perPage = 14;
+}
+
+message ListWithdrawOrdersRespWithdrawOrder {
+  string withdrawOrderUID = 1;
+  string amount = 2;
+  string fee = 3;
+  int32 withdrawOrderPaymentStatus = 4;
+  int64 createdAtTimestampMillisecond = 5;
+  string remark = 6;
+}
+
+message ListWithdrawOrdersResp {
+  int64 total = 1;
+  repeated ListWithdrawOrdersRespWithdrawOrder withdrawOrders = 2;
+}
+
+// paymentType：proto/dsk/dsk.proto PaymentTypeRec（美國提現 PayPal=13、CreditCard=14、CashAPP=15、ACH=16）。
+message CreateWithdrawOrderReq {
+  int64 userID = 1;
+  string amount = 2;
+  int64 paymentType = 3;
+  string paypalEmail = 101;
+  string cardNumber = 102;
+  string cardValidCode = 103;
+  string appAccount = 104;
+  string accountNumber = 105;
+  string routingNumber = 106;
+}
+
+message CreateWithdrawOrderResp {
+  string withdrawOrderUID = 1;
+}

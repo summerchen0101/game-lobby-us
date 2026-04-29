@@ -123,3 +123,153 @@
 .redeem-method-modal__method-btn:active {
   transform: scale(0.99);
 }
+
+/* Withdraw success — order number + recap */
+.redeem-method-modal__body--success {
+  padding-inline: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+.redeem-method-modal__success {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.redeem-method-modal__success-hero-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.redeem-method-modal__success-summary-card {
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--crown-surface-card-radius);
+  /* Darker than modal panel so white / accent copy reads clearly */
+  background: #121421;
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  box-shadow: var(--crown-surface-card-shadow);
+}
+
+.redeem-method-modal__success-summary-label {
+  margin: 0 0 var(--space-3);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--crown-locale-green);
+  letter-spacing: 0.06em;
+  text-transform: capitalize;
+}
+
+.redeem-method-modal__success-amount {
+  margin: 0;
+  font-size: clamp(2rem, 1rem + 3vw, 2.65rem);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.redeem-method-modal__success-line {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--crown-locale-green);
+  letter-spacing: 0.04em;
+}
+
+.redeem-method-modal__success-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.redeem-method-modal__success-detail-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--crown-surface-card-radius);
+  background: var(--crown-surface-card-bg);
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  box-shadow: var(--crown-surface-card-shadow);
+}
+
+.redeem-method-modal__success-field-label {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--color-text-muted);
+}
+
+.redeem-method-modal__success-order-box {
+  margin: 0 0 var(--space-3);
+  padding: 0.72rem 0.95rem;
+  border-radius: 0.5rem;
+  background: rgb(0 0 0 / 55%);
+  color: var(--color-text);
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-align: left;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.redeem-method-modal__success-status-box {
+  margin: 0 0 var(--space-4);
+  padding: 0.72rem 0.95rem;
+  border-radius: 0.5rem;
+  background: rgb(0 0 0 / 55%);
+  color: color-mix(in srgb, #b8c6ff 70%, white);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: left;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+}
+
+.redeem-method-modal__success-cta {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  margin-top: auto;
+  border: none;
+  border-radius: var(--crown-btn-radius);
+  background: var(--crown-button-primary-gradient);
+  color: var(--crown-button-primary-fg);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 var(--crown-btn-shadow-h) 0 0 var(--crown-gold-shadow),
+    inset 0 1px 0 rgb(0 0 0 / 20%);
+  transition:
+    transform 0.08s ease,
+    filter 0.15s ease;
+}
+
+.redeem-method-modal__success-cta:hover {
+  filter: brightness(1.08);
+}
+
+.redeem-method-modal__success-cta:active {
+  transform: translateY(1px);
+}

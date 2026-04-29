@@ -983,6 +983,153 @@ export default {
               "id": 2
             }
           }
+        },
+        "WithdrawOrderPaymentStatus": {
+          "values": {
+            "UnknownWithdrawOrderPaymentStatus": 0,
+            "Reviewing": 1,
+            "Passed": 2,
+            "Rejected": 3,
+            "Proccessing": 4,
+            "Success": 5,
+            "Failed": 6,
+            "ExpirationRejected": 7
+          }
+        },
+        "WithdrawSuccessPush": {
+          "fields": {
+            "userID": {
+              "type": "uint64",
+              "id": 1
+            },
+            "actualAmount": {
+              "type": "string",
+              "id": 2
+            },
+            "nickname": {
+              "type": "string",
+              "id": 3
+            }
+          }
+        },
+        "ListWithdrawOrdersReq": {
+          "fields": {
+            "userIDIn": {
+              "rule": "repeated",
+              "type": "int64",
+              "id": 1
+            },
+            "withdrawOrderPaymentStatusIn": {
+              "rule": "repeated",
+              "type": "int32",
+              "id": 2
+            },
+            "startedAtTimestampMillisecond": {
+              "type": "int64",
+              "id": 11
+            },
+            "endedAtTimestampMillisecond": {
+              "type": "int64",
+              "id": 12
+            },
+            "page": {
+              "type": "int64",
+              "id": 13
+            },
+            "perPage": {
+              "type": "int64",
+              "id": 14
+            }
+          }
+        },
+        "ListWithdrawOrdersRespWithdrawOrder": {
+          "fields": {
+            "withdrawOrderUID": {
+              "type": "string",
+              "id": 1
+            },
+            "amount": {
+              "type": "string",
+              "id": 2
+            },
+            "fee": {
+              "type": "string",
+              "id": 3
+            },
+            "withdrawOrderPaymentStatus": {
+              "type": "int32",
+              "id": 4
+            },
+            "createdAtTimestampMillisecond": {
+              "type": "int64",
+              "id": 5
+            },
+            "remark": {
+              "type": "string",
+              "id": 6
+            }
+          }
+        },
+        "ListWithdrawOrdersResp": {
+          "fields": {
+            "total": {
+              "type": "int64",
+              "id": 1
+            },
+            "withdrawOrders": {
+              "rule": "repeated",
+              "type": "ListWithdrawOrdersRespWithdrawOrder",
+              "id": 2
+            }
+          }
+        },
+        "CreateWithdrawOrderReq": {
+          "fields": {
+            "userID": {
+              "type": "int64",
+              "id": 1
+            },
+            "amount": {
+              "type": "string",
+              "id": 2
+            },
+            "paymentType": {
+              "type": "int64",
+              "id": 3
+            },
+            "paypalEmail": {
+              "type": "string",
+              "id": 101
+            },
+            "cardNumber": {
+              "type": "string",
+              "id": 102
+            },
+            "cardValidCode": {
+              "type": "string",
+              "id": 103
+            },
+            "appAccount": {
+              "type": "string",
+              "id": 104
+            },
+            "accountNumber": {
+              "type": "string",
+              "id": 105
+            },
+            "routingNumber": {
+              "type": "string",
+              "id": 106
+            }
+          }
+        },
+        "CreateWithdrawOrderResp": {
+          "fields": {
+            "withdrawOrderUID": {
+              "type": "string",
+              "id": 1
+            }
+          }
         }
       }
     }

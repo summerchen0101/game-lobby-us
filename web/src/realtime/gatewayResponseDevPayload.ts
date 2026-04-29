@@ -1,8 +1,10 @@
 import {
   GATEWAY_API_BUY_PRODUCT,
+  GATEWAY_API_CREATE_WITHDRAW_ORDER,
   GATEWAY_API_GET_THIRD_PARTY_GAME_INFO,
   GATEWAY_API_LIST_PLAYER_AVATARS,
   GATEWAY_API_LIST_PRODUCTS,
+  GATEWAY_API_LIST_WITHDRAW_ORDERS,
   GATEWAY_API_LOBBY_GET,
   GATEWAY_API_MEGA_ACCOUNT_BINDING,
   GATEWAY_API_PING_PONG,
@@ -11,6 +13,7 @@ import {
   GATEWAY_API_SLOT_JACKPOT_PUSH,
   GATEWAY_API_UPDATE_PLAYER_AVATAR,
   GATEWAY_API_WALLET_USE,
+  GATEWAY_API_WITHDRAW_SUCCESS_PUSH,
 } from "./gatewayApi";
 import type { GatewayWsResponseObject } from "./gatewayWs";
 import { hexPreview } from "./bytesHexPreview";
@@ -31,6 +34,11 @@ import {
   decodeGetThirdPartyGameInfoResponseBytes,
   decodeListPlayerAvatarsResponseBytes,
 } from "./playerAvatarWire";
+import {
+  decodeCreateWithdrawOrderResponseBytes,
+  decodeListWithdrawOrdersResponseBytes,
+  decodeWithdrawSuccessPushBytes,
+} from "./withdrawLobbyWire";
 
 const HEX_MAX = 48;
 
@@ -204,6 +212,45 @@ export function decodeGatewayResponseDataForDevLog(
         note: "not PaymentFinishPush(1013) or inner decode failed",
         hexPreview: hexPreview(raw, HEX_MAX),
       };
+    }
+    if (type === GATEWAY_API_LIST_WITHDRAW_ORDERS) {
+      try {
+        const decoded = decodeListWithdrawOrdersResponseBytes(raw);
+        return {
+          kind: "LIST_WITHDRAW_ORDERS",
+          orderCount: decoded.orders.length,
+          total: decoded.total,
+        };
+      } catch (e) {
+        return fallbackHex(raw, e);
+      }
+    }
+    if (type === GATEWAY_API_CREATE_WITHDRAW_ORDER) {
+      try {
+        const { withdrawOrderUID } = decodeCreateWithdrawOrderResponseBytes(raw);
+        return {
+          kind: "CREATE_WITHDRAW_ORDER",
+          withdrawOrderUID,
+        };
+      } catch (e) {
+        return fallbackHex(raw, e);
+      }
+    }
+    if (type === GATEWAY_API_WITHDRAW_SUCCESS_PUSH) {
+      try {
+        const p = decodeWithdrawSuccessPushBytes(raw);
+        if (p) {
+          return {
+            kind: "WITHDRAW_SUCCESS_PUSH",
+            userID: p.userID,
+            nickname: p.nickname,
+            actualAmount: p.actualAmount,
+          };
+        }
+        return fallbackHex(raw, new Error("WithdrawSuccessPush decode failed"));
+      } catch (e) {
+        return fallbackHex(raw, e);
+      }
     }
   } catch (e) {
     return fallbackHex(raw, e);
