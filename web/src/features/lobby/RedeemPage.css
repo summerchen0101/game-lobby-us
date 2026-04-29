@@ -288,7 +288,23 @@
 .redeem-page__history-status {
   font-size: 0.8rem;
   font-weight: 800;
-  color: var(--crown-gold);
+}
+
+/* Withdraw order status tones — distinct on dark cards. */
+.redeem-page__history-status--positive {
+  color: #6ee7a0;
+}
+
+.redeem-page__history-status--progress {
+  color: #7dd3fc;
+}
+
+.redeem-page__history-status--negative {
+  color: #fca5a8;
+}
+
+.redeem-page__history-status--muted {
+  color: var(--color-text-muted);
 }
 
 .redeem-page__history-pager {

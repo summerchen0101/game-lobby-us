@@ -43,6 +43,18 @@ export function formatScFromRaw(raw: number | undefined): string {
 }
 
 /**
+ * List withdraw orders：`amount` 為法幣顯示數值（不經 {@link SC_POINT_SCALE}）。
+ */
+export function formatWithdrawHistoryFiatAmount(amountWire: string): string {
+  const t = String(amountWire ?? "")
+    .trim()
+    .replace(/,/g, "");
+  if (t === "") return "—";
+  const n = Number(t);
+  return formatWalletScAmountForDisplay(Number.isFinite(n) ? n : undefined);
+}
+
+/**
  * Header SC：`sweepstakesBalance` 一律視為後端萬分之一（與 Lobby bag／Redeem 相同），不依賴
  * `user.currency`。避免未帶 ScPointCurrency 時誤將 raw 當畫面值顯示（例如 18000→應為 1.8）。
  */

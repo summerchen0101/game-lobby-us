@@ -6,6 +6,7 @@ import { CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import { isMockMode } from "../../lib/env";
 import {
   formatScFromRaw,
+  formatWithdrawHistoryFiatAmount,
   MIN_REDEEM_SC_DISPLAY,
   MIN_REDEEM_SC_RAW,
 } from "../../wallet/formatWalletAmount";
@@ -28,6 +29,28 @@ import "./SessionPageDecor.css";
 const SC_INLINE_PX = 18;
 
 const ORDERS_PER_PAGE = 4;
+
+/** Aligns with withdrawOrderPaymentStatusToLabel() labels in withdrawLobbyWire. */
+const WITHDRAW_HISTORY_STATUS_MOD: Record<
+  string,
+  "positive" | "progress" | "negative" | "muted"
+> = {
+  Success: "positive",
+  Passed: "positive",
+  Reviewing: "progress",
+  Processing: "progress",
+  Rejected: "negative",
+  Failed: "negative",
+  Expired: "negative",
+  Unknown: "muted",
+};
+
+function redeemHistoryStatusClassName(statusLabel: string): string {
+  const base = "redeem-page__history-status";
+  const mod =
+    WITHDRAW_HISTORY_STATUS_MOD[statusLabel] ?? "muted";
+  return `${base} ${base}--${mod}`;
+}
 
 function ScInlineIcon() {
   return (
@@ -300,9 +323,10 @@ export function RedeemPage() {
                       i
                     </span>
                     <span className="redeem-page__history-desc">
-                      {formatScFromRaw(Number(row.amount) || 0)} SC
+                      {formatWithdrawHistoryFiatAmount(row.amount)} BankTransfer
                     </span>
-                    <span className="redeem-page__history-status">
+                    <span
+                      className={redeemHistoryStatusClassName(row.statusLabel)}>
                       {row.statusLabel}
                     </span>
                   </li>
