@@ -13,6 +13,8 @@ type Props = {
   avatarId: string;
   email?: string;
   phone?: string;
+  /** Gateway LOBBY_GET 尚在載入時為 true，可避免誤以為聯絡資料未注入 */
+  profileSyncPending?: boolean;
 };
 
 export function MyProfileModal({
@@ -23,6 +25,7 @@ export function MyProfileModal({
   avatarId,
   email,
   phone,
+  profileSyncPending = false,
 }: Props) {
   const titleId = useId();
   const [avatarImgFailed, setAvatarImgFailed] = useState(false);
@@ -90,6 +93,11 @@ export function MyProfileModal({
         </div>
         <hr className="app-modal__rule" />
         <div className="my-profile-modal__inner">
+          {profileSyncPending ? (
+            <p className="my-profile-modal__sync-hint" role="status">
+              Loading account details…
+            </p>
+          ) : null}
           <div
             className="my-profile-modal__avatar"
             role="img"

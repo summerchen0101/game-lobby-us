@@ -1,5 +1,11 @@
 import { ApiError, ClientVersionError } from "./client";
-import type { AuthResponse, SignupResult, SignUpRequest, User } from "./types";
+import type {
+  AuthResponse,
+  LobbyWalletType,
+  SignupResult,
+  SignUpRequest,
+  User,
+} from "./types";
 
 function strField(
   o: Record<string, unknown>,
@@ -26,6 +32,38 @@ function numField(
       if (!Number.isNaN(n)) return n;
     }
   }
+  return undefined;
+}
+
+function optStr(
+  o: Record<string, unknown>,
+  ...keys: string[]
+): string | undefined {
+  for (const k of keys) {
+    const v = o[k];
+    if (typeof v === "string" && v) return v;
+  }
+  return undefined;
+}
+
+/** LOBBY mergeUser 寫入 storage 之 wallet 類型與 wire 對齊 */
+function lobbyWalletTypeFromPayload(
+  o: Record<string, unknown>,
+): LobbyWalletType | undefined {
+  const raw =
+    o.lobbyWalletType ??
+    o.lobby_wallet_type ??
+    o.walletType ??
+    o.wallet_type;
+  if (raw === "GC" || raw === 1 || raw === "1") return "GC";
+  if (raw === "SC" || raw === 2 || raw === "2") return "SC";
+  if (
+    raw === "UNKNOWN" ||
+    raw === "UNKNOWN_WALLET_TYPE" ||
+    raw === 0 ||
+    raw === "0"
+  )
+    return "UNKNOWN";
   return undefined;
 }
 
@@ -77,18 +115,28 @@ export function normalizeUserPayload(raw: unknown): User {
   if (vl !== undefined) u.vipLevel = Math.floor(vl);
   const av = avatarIdFromUserPayload(o);
   if (av !== undefined) u.avatarId = av;
-  return u;
-}
 
-function optStr(
-  o: Record<string, unknown>,
-  ...keys: string[]
-): string | undefined {
-  for (const k of keys) {
-    const v = o[k];
-    if (typeof v === "string" && v) return v;
-  }
-  return undefined;
+  const email = optStr(o, "email", "user_email");
+  if (email !== undefined) u.email = email.trim();
+
+  const phone = optStr(o, "phone", "cell_phone", "cellPhone");
+  if (phone !== undefined) u.phone = phone.trim();
+
+  const lwt = lobbyWalletTypeFromPayload(o);
+  if (lwt !== undefined) u.lobbyWalletType = lwt;
+
+  const vipBet = numField(o, "vipCurrentLevelBetExp", "vip_current_level_bet_exp");
+  if (vipBet !== undefined) u.vipCurrentLevelBetExp = Math.floor(vipBet);
+
+  const vipBetReq = numField(
+    o,
+    "vipCurrentLevelBetExpRequired",
+    "vip_current_level_bet_exp_required",
+  );
+  if (vipBetReq !== undefined)
+    u.vipCurrentLevelBetExpRequired = Math.floor(vipBetReq);
+
+  return u;
 }
 
 export function throwIfClientVersionError(raw: unknown): void {

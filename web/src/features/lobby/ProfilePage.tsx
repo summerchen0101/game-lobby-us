@@ -38,7 +38,7 @@ type ZendeskWindow = Window & { zE?: (a: string, b: string) => void };
 export function ProfilePage() {
   const { show } = useAlert();
   const { user, mergeUser, refreshUser, logout } = useAuth();
-  const { requestRef } = useGatewayLobby();
+  const { requestRef, lobbyLoading } = useGatewayLobby();
   const { avatarId, setAvatarId } = useProfileAvatarId();
   const [headIconOpen, setHeadIconOpen] = useState(false);
   const [headIconChoices, setHeadIconChoices] = useState<
@@ -184,6 +184,8 @@ export function ProfilePage() {
   );
 
   const displayHandle = user?.displayName?.trim() || user?.id?.trim() || "—";
+
+  const profileSyncPending = isWsLobbyGamesEnabled() && lobbyLoading;
 
   function toggleSound() {
     setSoundOn((prev) => {
@@ -394,6 +396,7 @@ export function ProfilePage() {
         avatarId={displayAvatarId ?? ""}
         email={user?.email}
         phone={user?.phone}
+        profileSyncPending={profileSyncPending}
       />
 
       <ChangeHeadIconModal

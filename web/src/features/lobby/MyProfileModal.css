@@ -17,6 +17,13 @@
   text-align: center;
 }
 
+.my-profile-modal__sync-hint {
+  margin: 0 0 var(--space-3);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .my-profile-modal__avatar {
   position: relative;
   width: 5.5rem;
