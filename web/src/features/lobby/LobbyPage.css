@@ -80,6 +80,11 @@ html.session-lobby-page {
   padding-bottom: var(--space-6);
 }
 
+/* scrollIntoView 時預留 fixed session header，避免分類列被擋住 */
+.lobby-landing--session .lobby-games-section {
+  scroll-margin-top: calc(var(--safe-top) + var(--session-header-stripe-h));
+}
+
 .lobby-games-toolbar {
   margin-bottom: var(--space-3);
 }
@@ -272,7 +277,7 @@ html.session-lobby-page {
 
   .lobby-games-panel-swap .lobby-games-grid__item,
   .lobby-games-panel-swap .lobby-games-track > li,
-  .lobby-games-panel-swap .lobby-games-group-title {
+  .lobby-games-panel-swap .lobby-games-group-head {
     animation: none;
   }
 }
@@ -420,7 +425,7 @@ html.session-lobby-page {
   }
 }
 
-.lobby-games-panel-swap .lobby-games-group-title {
+.lobby-games-panel-swap .lobby-games-group-head {
   animation: lobby-games-group-title-in 0.38s cubic-bezier(0.22, 1, 0.36, 1)
     both;
 }
@@ -438,7 +443,7 @@ html.session-lobby-page {
     animation: none;
   }
 
-  .lobby-games-panel-swap .lobby-games-group-title {
+  .lobby-games-panel-swap .lobby-games-group-head {
     animation: none;
   }
 
@@ -455,13 +460,49 @@ html.session-lobby-page {
   margin-bottom: 0;
 }
 
-.lobby-games-group-title {
+.lobby-games-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
   margin: 0 0 var(--space-4);
+}
+
+.lobby-games-group-title {
+  margin: 0;
+  min-width: 0;
   font-size: clamp(0.95rem, 0.85rem + 0.5vw, 1.1rem);
   font-weight: 800;
   color: var(--color-text);
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.lobby-games-group-see-all {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.35rem 0.25rem;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: clamp(0.8rem, 0.74rem + 0.35vw, 0.9rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.lobby-games-group-see-all:hover {
+  color: var(--color-text);
+}
+
+.lobby-games-group-see-all:focus-visible {
+  outline: 2px solid var(--color-accent, currentColor);
+  outline-offset: 2px;
+  border-radius: 0.2rem;
 }
 
 /* ALL 橫列與格狀同寬：n 欄 = (容器寬 − (n−1) 個 gap) / n；預設 3 欄，寬螢 4 欄見下方 media */

@@ -357,6 +357,7 @@ export function LandingPage() {
   const [lobbySearch, setLobbySearch] = useState("");
   const [lobbySearchModalOpen, setLobbySearchModalOpen] = useState(false);
   const lobbyGameFilterRef = useRef<HTMLDivElement | null>(null);
+  const lobbyGamesSectionRef = useRef<HTMLElement | null>(null);
 
   const loading =
     user && mockLobby
@@ -504,6 +505,27 @@ export function LandingPage() {
       }
     },
     [requestRef, openShell],
+  );
+
+  const scrollLobbyGamesSectionIntoView = useCallback(() => {
+    const el = lobbyGamesSectionRef.current;
+    if (!el) return;
+    const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches;
+    el.scrollIntoView({
+      behavior: smooth ? "smooth" : "auto",
+      block: "start",
+    });
+  }, []);
+
+  const onSeeAllSubcategory = useCallback(
+    (subId: Exclude<LobbyFilterTab, "all">) => {
+      setLobbyFilter(subId);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scrollLobbyGamesSectionIntoView);
+      });
+    },
+    [scrollLobbyGamesSectionIntoView],
   );
 
   useEffect(() => {
@@ -817,6 +839,7 @@ export function LandingPage() {
         </section>
 
         <section
+          ref={lobbyGamesSectionRef}
           className="lobby-games-section page-container"
           aria-label="Games">
           {user ? (
@@ -891,11 +914,20 @@ export function LandingPage() {
                             ?.label ?? subId;
                         return (
                           <div key={subId} className="lobby-games-group">
-                            <h3
-                              className="lobby-games-group-title"
-                              id={`lobby-group-${subId}`}>
-                              {subLabel}
-                            </h3>
+                            <div className="lobby-games-group-head">
+                              <h3
+                                className="lobby-games-group-title"
+                                id={`lobby-group-${subId}`}>
+                                {subLabel}
+                              </h3>
+                              <button
+                                type="button"
+                                className="lobby-games-group-see-all"
+                                aria-label={`See all in ${subLabel}`}
+                                onClick={() => onSeeAllSubcategory(subId)}>
+                                See All
+                              </button>
+                            </div>
                             <PaginatedGameTrack
                               key={`${lobbySearch}\u0000${subId}`}
                               games={games}
