@@ -198,6 +198,7 @@ export function ForgotPasswordModal({ open, onClose, onSwitchToLogin }: Props) {
         <div className="app-modal__body">
           {phase === 'email' ? (
             <form onSubmit={onSendEmail} noValidate>
+              <fieldset disabled={submitting} className="auth-form-fieldset-reset">
               <p className="auth-modal__text">
                 Enter the email on your account. We will send a verification code you can use to
                 choose a new password.
@@ -223,11 +224,13 @@ export function ForgotPasswordModal({ open, onClose, onSwitchToLogin }: Props) {
               <button type="submit" className="auth-modal__submit" disabled={submitting}>
                 {submitting ? '…' : 'SEND RESET CODE'}
               </button>
+              </fieldset>
             </form>
           ) : null}
 
           {phase === 'form' ? (
             <form onSubmit={onSubmitNewPassword} noValidate>
+              <fieldset disabled={submitting} className="auth-form-fieldset-reset">
               <p className="auth-modal__text">
                 We sent a code to <strong>{email}</strong>. Enter it below with your new password.
               </p>
@@ -308,6 +311,7 @@ export function ForgotPasswordModal({ open, onClose, onSwitchToLogin }: Props) {
               <button type="submit" className="auth-modal__submit" disabled={submitting}>
                 {submitting ? '…' : 'UPDATE PASSWORD'}
               </button>
+              </fieldset>
             </form>
           ) : null}
 

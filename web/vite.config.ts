@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => {
     base: "/",
     plugins: [react()],
     server: {
+      host: true,
       // 不設 VITE_API_BASE 時，可將同源的 /api 代理到後端
       proxy: proxyTarget
         ? {

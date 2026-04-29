@@ -228,6 +228,13 @@
 }
 
 /* ---- Protect account ---- */
+.shop-checkout__fieldset-reset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
 .shop-checkout__protect-form {
   padding-top: 0.5rem;
 }

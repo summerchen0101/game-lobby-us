@@ -102,34 +102,36 @@ export function RegisterPage() {
           <h1 className="auth-page__title">Verify your email</h1>
           <p className="auth-page__lede">Enter the code sent to {pending.email}.</p>
           <form className="auth-form auth-form--card" onSubmit={onSubmitCode} noValidate>
-            <div className="auth-form__field">
-              <label className="auth-form__label" htmlFor="reg-code">
-                Verification code
-              </label>
-              <AuthClearableInputWrap
-                variant="page"
-                value={answer}
-                onClear={() => setAnswer('')}
-                clearAriaLabel="Clear verification code"
-              >
-                <input
-                  id="reg-code"
-                  className="auth-form__input"
-                  name="code"
-                  autoComplete="one-time-code"
-                  inputMode="numeric"
+            <fieldset disabled={submitting} className="auth-form-fieldset-reset">
+              <div className="auth-form__field">
+                <label className="auth-form__label" htmlFor="reg-code">
+                  Verification code
+                </label>
+                <AuthClearableInputWrap
+                  variant="page"
                   value={answer}
-                  onChange={(e) => setAnswer(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                  required
-                />
-              </AuthClearableInputWrap>
-            </div>
-            {error ? <p className="auth-form__error">{error}</p> : null}
-            <div className="auth-form__actions">
-              <button type="submit" className="btn-crown-primary auth-form__submit" disabled={submitting}>
-                {submitting ? 'Submitting…' : 'Complete registration'}
-              </button>
-            </div>
+                  onClear={() => setAnswer('')}
+                  clearAriaLabel="Clear verification code"
+                >
+                  <input
+                    id="reg-code"
+                    className="auth-form__input"
+                    name="code"
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                    required
+                  />
+                </AuthClearableInputWrap>
+              </div>
+              {error ? <p className="auth-form__error">{error}</p> : null}
+              <div className="auth-form__actions">
+                <button type="submit" className="btn-crown-primary auth-form__submit" disabled={submitting}>
+                  {submitting ? 'Submitting…' : 'Complete registration'}
+                </button>
+              </div>
+            </fieldset>
           </form>
         </div>
       </div>
@@ -143,80 +145,82 @@ export function RegisterPage() {
         <h1 className="auth-page__title">Register</h1>
         <p className="auth-page__lede">Create an account to use the lobby and games.</p>
         <form className="auth-form auth-form--card" onSubmit={onSubmitFirst} noValidate>
-          <div className="auth-form__field">
-            <label className="auth-form__label" htmlFor="reg-email">
-              Email
-            </label>
-            <AuthClearableInputWrap
-              variant="page"
-              value={email}
-              onClear={() => setEmail('')}
-              clearAriaLabel="Clear email"
-            >
-              <input
-                id="reg-email"
-                className="auth-form__input"
-                name="email"
-                type="email"
-                autoComplete="email"
+          <fieldset disabled={submitting} className="auth-form-fieldset-reset">
+            <div className="auth-form__field">
+              <label className="auth-form__label" htmlFor="reg-email">
+                Email
+              </label>
+              <AuthClearableInputWrap
+                variant="page"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </AuthClearableInputWrap>
-          </div>
-          <div className="auth-form__field">
-            <label className="auth-form__label" htmlFor="reg-password">
-              Password
-            </label>
-            <AuthClearableInputWrap
-              variant="page"
-              value={password}
-              onClear={() => setPassword('')}
-              clearAriaLabel="Clear password"
-            >
-              <input
-                id="reg-password"
-                className="auth-form__input"
-                name="password"
-                type="password"
-                autoComplete="new-password"
+                onClear={() => setEmail('')}
+                clearAriaLabel="Clear email"
+              >
+                <input
+                  id="reg-email"
+                  className="auth-form__input"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </AuthClearableInputWrap>
+            </div>
+            <div className="auth-form__field">
+              <label className="auth-form__label" htmlFor="reg-password">
+                Password
+              </label>
+              <AuthClearableInputWrap
+                variant="page"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
-            </AuthClearableInputWrap>
-          </div>
-          <div className="auth-form__field">
-            <label className="auth-form__label" htmlFor="reg-password2">
-              Confirm password
-            </label>
-            <AuthClearableInputWrap
-              variant="page"
-              value={password2}
-              onClear={() => setPassword2('')}
-              clearAriaLabel="Clear confirm password"
-            >
-              <input
-                id="reg-password2"
-                className="auth-form__input"
-                name="password2"
-                type="password"
-                autoComplete="new-password"
+                onClear={() => setPassword('')}
+                clearAriaLabel="Clear password"
+              >
+                <input
+                  id="reg-password"
+                  className="auth-form__input"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </AuthClearableInputWrap>
+            </div>
+            <div className="auth-form__field">
+              <label className="auth-form__label" htmlFor="reg-password2">
+                Confirm password
+              </label>
+              <AuthClearableInputWrap
+                variant="page"
                 value={password2}
-                onChange={(e) => setPassword2(e.target.value)}
-                required
-                minLength={6}
-              />
-            </AuthClearableInputWrap>
-          </div>
-          {error ? <p className="auth-form__error">{error}</p> : null}
-          <div className="auth-form__actions">
-            <button type="submit" className="btn-crown-primary auth-form__submit" disabled={submitting}>
-              {submitting ? 'Submitting…' : 'Register'}
-            </button>
-          </div>
+                onClear={() => setPassword2('')}
+                clearAriaLabel="Clear confirm password"
+              >
+                <input
+                  id="reg-password2"
+                  className="auth-form__input"
+                  name="password2"
+                  type="password"
+                  autoComplete="new-password"
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </AuthClearableInputWrap>
+            </div>
+            {error ? <p className="auth-form__error">{error}</p> : null}
+            <div className="auth-form__actions">
+              <button type="submit" className="btn-crown-primary auth-form__submit" disabled={submitting}>
+                {submitting ? 'Submitting…' : 'Register'}
+              </button>
+            </div>
+          </fieldset>
         </form>
         <p className="auth-page__link">
           Already have an account? <Link to="/login">Log in</Link>

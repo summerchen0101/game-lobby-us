@@ -3,6 +3,14 @@
   max-width: 26rem;
 }
 
+/** Reset default `<fieldset>` chrome when using `disabled` to lock forms during submit */
+.auth-form-fieldset-reset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
 .auth-modal__text {
   margin: 0 0 var(--space-3);
   font-size: 0.9rem;

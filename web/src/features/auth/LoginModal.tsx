@@ -142,6 +142,7 @@ export function LoginModal({
         <hr className="app-modal__rule" />
         <div className="app-modal__body">
           <form onSubmit={onSignIn} noValidate>
+            <fieldset disabled={submitting} className="auth-form-fieldset-reset">
             <label
               className="auth-modal__field-label auth-modal__field-label--register"
               htmlFor={emailId}>
@@ -212,6 +213,7 @@ export function LoginModal({
               disabled={submitting}>
               {submitting ? "…" : "SIGN IN"}
             </button>
+            </fieldset>
           </form>
           <p className="auth-modal__footer">
             Need an account?{" "}

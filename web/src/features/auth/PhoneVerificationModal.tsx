@@ -112,6 +112,7 @@ export function PhoneVerificationModal({ open, onClose, displayEmail, pendingBod
           </p>
 
           <form onSubmit={onSubmit} noValidate>
+            <fieldset disabled={submitting} className="auth-form-fieldset-reset">
             <div className="phone-verify-modal__row">
               <label className="phone-verify-modal__otp-label" htmlFor={otpId}>
                 Verification code
@@ -142,6 +143,7 @@ export function PhoneVerificationModal({ open, onClose, displayEmail, pendingBod
             <button type="submit" className="auth-modal__submit phone-verify-modal__submit" disabled={submitting}>
               {submitting ? '…' : 'Sign Up'}
             </button>
+            </fieldset>
           </form>
         </div>
       </div>

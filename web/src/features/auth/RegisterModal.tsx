@@ -82,6 +82,7 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
   const [showPassword, setShowPassword] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -115,6 +116,7 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
       rePassword: passwordConfirm,
       referrer: _referral,
     })
+    setSubmitting(true)
     try {
       const result = await signUp(body)
       if (result.auth) {
@@ -145,6 +147,8 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
       const msg =
         err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Registration failed'
       setError(msg)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -170,6 +174,7 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
         <hr className="app-modal__rule" />
         <div className="app-modal__body">
           <form onSubmit={onSubmit} noValidate>
+            <fieldset disabled={submitting} className="auth-form-fieldset-reset">
             <label className="auth-modal__field-label auth-modal__field-label--register" htmlFor={emailId}>
               Email:
             </label>
@@ -289,9 +294,10 @@ export function RegisterModal({ open, onClose, onSwitchLogin }: Props) {
             </div>
 
             {error ? <p className="auth-modal__error">{error}</p> : null}
-            <button type="submit" className="auth-modal__submit">
-              REGISTER
+            <button type="submit" className="auth-modal__submit" disabled={submitting}>
+              {submitting ? '…' : 'REGISTER'}
             </button>
+            </fieldset>
           </form>
           <p className="auth-modal__footer">
             Already have an account?{' '}

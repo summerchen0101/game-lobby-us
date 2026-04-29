@@ -55,55 +55,57 @@ export function LoginPage() {
         <h1 className="auth-page__title">Log in</h1>
         <p className="auth-page__lede">Enter your account and password to open the lobby.</p>
         <form className="auth-form auth-form--card" onSubmit={onSubmit} noValidate>
-          <div className="auth-form__field">
-            <label className="auth-form__label" htmlFor="login-account">
-              Account
-            </label>
-            <AuthClearableInputWrap
-              variant="page"
-              value={account}
-              onClear={() => setAccount('')}
-              clearAriaLabel="Clear account"
-            >
-              <input
-                id="login-account"
-                className="auth-form__input"
-                name="account"
-                autoComplete="username"
+          <fieldset disabled={submitting} className="auth-form-fieldset-reset">
+            <div className="auth-form__field">
+              <label className="auth-form__label" htmlFor="login-account">
+                Account
+              </label>
+              <AuthClearableInputWrap
+                variant="page"
                 value={account}
-                onChange={(e) => setAccount(e.target.value)}
-                required
-              />
-            </AuthClearableInputWrap>
-          </div>
-          <div className="auth-form__field">
-            <label className="auth-form__label" htmlFor="login-password">
-              Password
-            </label>
-            <AuthClearableInputWrap
-              variant="page"
-              value={password}
-              onClear={() => setPassword('')}
-              clearAriaLabel="Clear password"
-            >
-              <input
-                id="login-password"
-                className="auth-form__input"
-                name="password"
-                type="password"
-                autoComplete="current-password"
+                onClear={() => setAccount('')}
+                clearAriaLabel="Clear account"
+              >
+                <input
+                  id="login-account"
+                  className="auth-form__input"
+                  name="account"
+                  autoComplete="username"
+                  value={account}
+                  onChange={(e) => setAccount(e.target.value)}
+                  required
+                />
+              </AuthClearableInputWrap>
+            </div>
+            <div className="auth-form__field">
+              <label className="auth-form__label" htmlFor="login-password">
+                Password
+              </label>
+              <AuthClearableInputWrap
+                variant="page"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </AuthClearableInputWrap>
-          </div>
-          {error ? <p className="auth-form__error">{error}</p> : null}
-          <div className="auth-form__actions">
-            <button type="submit" className="btn-crown-primary auth-form__submit" disabled={submitting}>
-              {submitting ? 'Signing in…' : 'Log in'}
-            </button>
-          </div>
+                onClear={() => setPassword('')}
+                clearAriaLabel="Clear password"
+              >
+                <input
+                  id="login-password"
+                  className="auth-form__input"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </AuthClearableInputWrap>
+            </div>
+            {error ? <p className="auth-form__error">{error}</p> : null}
+            <div className="auth-form__actions">
+              <button type="submit" className="btn-crown-primary auth-form__submit" disabled={submitting}>
+                {submitting ? 'Signing in…' : 'Log in'}
+              </button>
+            </div>
+          </fieldset>
         </form>
         <p className="auth-page__link">
           <Link to={forgotPasswordHref}>Forgot password?</Link>

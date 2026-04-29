@@ -334,6 +334,7 @@ export function ProtectAccountView({
         className="shop-checkout__card-form shop-checkout__protect-form"
         onSubmit={(e) => void handleSubmit(e)}
         noValidate>
+        <fieldset disabled={bindingBusy} className="shop-checkout__fieldset-reset">
         {protectNeedSms ? (
           <>
             <p className="shop-checkout__protect-lead">
@@ -754,6 +755,7 @@ export function ProtectAccountView({
           disabled={bindingBusy}>
           {bindingBusy ? "Please wait…" : "SUBMIT"}
         </button>
+        </fieldset>
       </form>
     </>
   );
