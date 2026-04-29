@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { InfoPopover } from "../../components/InfoPopover";
 import { useAuth } from "../../auth/useAuth";
@@ -5,10 +6,18 @@ import { CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import { formatWalletPillAmount } from "../../wallet/formatWalletAmount";
 import { RedeemNotifyPill } from "./RedeemNotifyPill";
 import { useRedeemPillMessages } from "./useRedeemPillMessages";
+import { RedeemMethodModal } from "./RedeemMethodModal";
 import "./RedeemPage.css";
 import "./SessionPageDecor.css";
 
 const SC_INLINE_PX = 18;
+
+const MOCK_REDEMPTION_HISTORY = [
+  { id: "1", description: "1BankTransfer", status: "Rejected" as const },
+  { id: "2", description: "2BankTransfer", status: "Rejected" as const },
+  { id: "3", description: "1BankTransfer", status: "Rejected" as const },
+  { id: "4", description: "2BankTransfer", status: "Rejected" as const },
+];
 
 function ScInlineIcon() {
   return (
@@ -27,6 +36,7 @@ export const MIN_REDEEM_SC = 50;
 export function RedeemPage() {
   const { user } = useAuth();
   const pillMessages = useRedeemPillMessages();
+  const [methodModalOpen, setMethodModalOpen] = useState(false);
 
   const sc = user?.sweepstakesBalance ?? 0;
   const redeemableSc = 0;
@@ -93,13 +103,54 @@ export function RedeemPage() {
           </span>
           <p className="redeem-page__amount">{scDisplay}</p>
         </div>
-
-        {canRedeem ? (
-          <p className="redeem-page__ok">
-            You meet the minimum balance for redemption (preview).
-          </p>
-        ) : null}
       </div>
+
+      {canRedeem ? (
+        <div className="redeem-page__card redeem-page__history-card">
+          <h2 className="redeem-page__history-title">Redemption History:</h2>
+          <ul className="redeem-page__history-list" aria-label="Redemption history">
+            {MOCK_REDEMPTION_HISTORY.map((row) => (
+              <li key={row.id} className="redeem-page__history-row">
+                <span className="redeem-page__history-icon" aria-hidden>
+                  i
+                </span>
+                <span className="redeem-page__history-desc">{row.description}</span>
+                <span className="redeem-page__history-status">{row.status}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="redeem-page__history-pager">
+            <button
+              type="button"
+              className="redeem-page__history-pager-btn"
+              aria-label="Previous page"
+              disabled>
+              ‹
+            </button>
+            <button
+              type="button"
+              className="redeem-page__history-pager-link"
+              onClick={() => {
+                /* placeholder until history API */
+              }}>
+              For older redemption requests
+            </button>
+            <button
+              type="button"
+              className="redeem-page__history-pager-btn"
+              aria-label="Next page"
+              disabled>
+              ›
+            </button>
+          </div>
+          <button
+            type="button"
+            className="redeem-page__new-redeem"
+            onClick={() => setMethodModalOpen(true)}>
+            NEW REDEEM
+          </button>
+        </div>
+      ) : null}
 
       {!canRedeem ? (
         <div className="redeem-page__insufficient-card">
@@ -113,6 +164,11 @@ export function RedeemPage() {
           </Link>
         </div>
       ) : null}
+
+      <RedeemMethodModal
+        open={methodModalOpen}
+        onClose={() => setMethodModalOpen(false)}
+      />
     </section>
   );
 }

@@ -46,6 +46,10 @@ export default function App() {
                       <Route path="/events" element={<EventsRedirect />} />
                       <Route element={<SessionLayout />}>
                         <Route path="/shop" element={<ShopPage />} />
+                        <Route
+                          path="/redeem/form/:method"
+                          element={<Navigate to="/redeem" replace />}
+                        />
                         <Route path="/redeem" element={<RedeemPage />} />
                         <Route path="/promo" element={<PromoPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
