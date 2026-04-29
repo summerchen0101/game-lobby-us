@@ -41,7 +41,7 @@
   --icon-rwd-sm: clamp(0.875rem, 0.8rem + 0.4vw, 1.0625rem);
   --icon-rwd-md: clamp(0.9375rem, 0.85rem + 0.5vw, 1.125rem);
   --icon-rwd-lg: clamp(1.25rem, 1.05rem + 0.75vw, 1.5rem);
-  --icon-rwd-nav: clamp(1.1rem, 0.95rem + 0.5vw, 1.45rem);
+  --icon-rwd-nav: clamp(1.3rem, 0.95rem + 0.5vw, 1.45rem);
 }
 
 *,
