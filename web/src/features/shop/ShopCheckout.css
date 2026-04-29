@@ -294,7 +294,7 @@
 
 .shop-checkout__row-phone {
   display: grid;
-  grid-template-columns: 4.25rem 1fr;
+  grid-template-columns: 5.75rem 1fr;
   gap: 0.5rem;
 }
 
@@ -456,6 +456,10 @@
   padding: 0.5rem 1rem;
 }
 
+.shop-checkout__submit--protect-sms.shop-checkout__submit--blue {
+  margin-top: 1rem;
+}
+
 .shop-checkout__submit:hover,
 .shop-checkout__submit--blue:hover {
   filter: brightness(1.05);
@@ -482,16 +486,32 @@
 
 .shop-checkout__payment-frame-wrap {
   flex: 1;
-  min-height: 320px;
-  padding: 0 0.75rem 0.75rem;
+  min-height: auto;
+  padding: 0 0.75rem 1.25rem;
 }
 
-.shop-checkout__payment-frame {
-  width: 100%;
-  height: min(70dvh, 560px);
-  border: none;
-  border-radius: 8px;
-  background: #fff;
+.shop-checkout__payment-wait-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.shop-checkout__payment-wait-text {
+  margin: 0;
+  line-height: 1.45;
+  color: #fff;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.shop-checkout__payment-wait-link {
+  color: #7ec8ff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.shop-checkout__payment-wait-link:hover {
+  color: #b8ddff;
 }
 
 .shop-checkout__strike {

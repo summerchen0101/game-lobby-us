@@ -199,8 +199,6 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
           if (len > 0 && raw instanceof Uint8Array) {
             try {
               const decoded = decodeLobbyGetResponseBytes(raw);
-              console.log("raw", raw);
-              console.log("decoded", decoded);
               const items = lobbyDecodedGamesToApiGames(decoded);
               const userPatch = lobbyDecodedToUserPatch(decoded);
               if (Object.keys(userPatch).length > 0) {

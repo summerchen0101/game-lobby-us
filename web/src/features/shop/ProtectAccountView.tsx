@@ -15,6 +15,13 @@ const US_STATE_CODES =
     ",",
   );
 
+const PHONE_COUNTRY_CODES = ["886", "1"] as const;
+
+/** Digits only, leading zeros removed (e.g. 09… → 9…) for binding payload. */
+function normalizePhoneDigitsForSubmit(input: string): string {
+  return input.replace(/\D/g, "").replace(/^0+/, "");
+}
+
 type FieldKey =
   | "firstName"
   | "lastName"
@@ -73,7 +80,10 @@ type Props = {
   bindingError: string | null;
   protectNeedSms: boolean;
   bindingPrefill?: ShopBindingPrefill;
+  /** Full exit from protect flow (e.g. to order summary). */
   onClose: () => void;
+  /** From SMS verification: return to the full binding form without leaving checkout. */
+  onBackToProtectForm: () => void;
   onSubmit: (payload: ShopBindingFormPayload) => Promise<void>;
 };
 
@@ -104,6 +114,7 @@ export function ProtectAccountView({
   protectNeedSms,
   bindingPrefill,
   onClose,
+  onBackToProtectForm,
   onSubmit,
 }: Props) {
   const idPrefix = useId();
@@ -171,8 +182,15 @@ export function ProtectAccountView({
   }, []);
 
   useEffect(() => {
+    if (!(PHONE_COUNTRY_CODES as readonly string[]).includes(phoneCountry)) {
+      setPhoneCountry("1");
+    }
+  }, [phoneCountry]);
+
+  useEffect(() => {
     setInvalidFields(new Set());
     setLocalError(null);
+    if (!protectNeedSms) setSmsAnswer("");
   }, [protectNeedSms]);
 
   useEffect(() => {
@@ -218,7 +236,7 @@ export function ProtectAccountView({
     const address = addrParts.join(", ");
     return {
       countryCode: phoneCountry.trim(),
-      phone: phoneNumber.replace(/\D/g, ""),
+      phone: normalizePhoneDigitsForSubmit(phoneNumber),
       email: email.trim(),
       answer,
       firstName: firstName.trim(),
@@ -284,8 +302,14 @@ export function ProtectAccountView({
         <button
           type="button"
           className="app-modal__head-btn"
-          onClick={onClose}
-          aria-label="Back to order summary">
+          onClick={
+            protectNeedSms ? onBackToProtectForm : onClose
+          }
+          aria-label={
+            protectNeedSms
+              ? "Back to protect account form"
+              : "Back to order summary"
+          }>
           <BackIcon />
         </button>
         <h2
@@ -293,13 +317,17 @@ export function ProtectAccountView({
           id="shop-checkout-dialog-title">
           PROTECT YOUR ACCOUNT
         </h2>
-        <button
-          type="button"
-          className="app-modal__close"
-          onClick={onClose}
-          aria-label="Close and return to order summary">
-          ×
-        </button>
+        {protectNeedSms ? (
+          <span className="app-modal__head-spacer" aria-hidden />
+        ) : (
+          <button
+            type="button"
+            className="app-modal__close"
+            onClick={onClose}
+            aria-label="Close and return to order summary">
+            ×
+          </button>
+        )}
       </header>
       <hr className="app-modal__rule shop-checkout__head-rule" />
       <form
@@ -428,27 +456,29 @@ export function ProtectAccountView({
                   className="shop-checkout__row-phone"
                   role="group"
                   aria-labelledby={`${idPrefix}-phone-legend`}>
-                  <input
+                  <select
                     id={`${idPrefix}-phone-cc`}
                     className={
-                      pi +
-                      " shop-checkout__input--code" +
+                      "shop-checkout__input shop-checkout__input--protect shop-checkout__select shop-checkout__input--code" +
                       (inv("phoneCountry")
                         ? " shop-checkout__field-invalid"
                         : "")
                     }
                     name="phoneCountry"
-                    type="text"
-                    inputMode="numeric"
                     autoComplete="tel-country-code"
-                    placeholder="1"
+                    aria-label="Country code"
                     value={phoneCountry}
                     aria-invalid={inv("phoneCountry")}
                     onChange={(e) => {
                       setPhoneCountry(e.target.value);
                       removeInvalid("phoneCountry");
-                    }}
-                  />
+                    }}>
+                    {PHONE_COUNTRY_CODES.map((code) => (
+                      <option key={code} value={code}>
+                        +{code}
+                      </option>
+                    ))}
+                  </select>
                   <input
                     id={`${idPrefix}-phone-num`}
                     className={
@@ -717,7 +747,10 @@ export function ProtectAccountView({
         ) : null}
         <button
           type="submit"
-          className="shop-checkout__submit shop-checkout__submit--blue"
+          className={
+            "shop-checkout__submit shop-checkout__submit--blue" +
+            (protectNeedSms ? " shop-checkout__submit--protect-sms" : "")
+          }
           disabled={bindingBusy}>
           {bindingBusy ? "Please wait…" : "SUBMIT"}
         </button>

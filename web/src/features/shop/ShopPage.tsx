@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../auth/useAuth";
 import { CURRENCY_ICON_GC, CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import { isMockMode } from "../../lib/env";
@@ -151,6 +151,7 @@ export function ShopPage() {
   const [protectNeedSms, setProtectNeedSms] = useState(false);
   const [bindingBusy, setBindingBusy] = useState(false);
   const [bindingError, setBindingError] = useState<string | null>(null);
+  const protectAutoBuyStartedRef = useRef(false);
 
   useEffect(() => {
     if (!token) {
@@ -277,6 +278,11 @@ export function ShopPage() {
     setBindingError(null);
   }, []);
 
+  const handleBackToProtectForm = useCallback(() => {
+    setProtectNeedSms(false);
+    setBindingError(null);
+  }, []);
+
   const executeBuyProduct = useCallback(
     async (method: ShopPaymentMethodId) => {
       const pack = checkoutPack;
@@ -302,7 +308,12 @@ export function ShopPage() {
       }
       setBuyBusy(true);
       setBuyError(null);
+      let paymentTab: Window | null = null;
       try {
+        // Open before first await so the call stays in the user-gesture chain (popup friendly).
+        // Do not pass noopener/noreferrer: those can yield null or a window that cannot be
+        // navigated from here via location.href, leaving about:blank stuck on screen.
+        paymentTab = window.open("about:blank", "_blank");
         const r = await req({
           type: GATEWAY_API_BUY_PRODUCT,
           data: encodeBuyProductRequestBytes(pack.productID, serverType),
@@ -310,22 +321,34 @@ export function ShopPage() {
         });
         const code = String(r.code ?? "");
         if (!isGatewaySuccessCode(code)) {
+          paymentTab?.close();
           setBuyError(r.errMessage?.trim() || `Purchase failed (${code})`);
           return;
         }
         const raw = r.data;
         if (!(raw instanceof Uint8Array) || raw.byteLength === 0) {
+          paymentTab?.close();
           setBuyError("Empty purchase response");
           return;
         }
         const { paymentURL: url } = decodeBuyProductResponseBytes(raw);
         if (!url?.trim()) {
+          paymentTab?.close();
           setBuyError("No payment URL returned");
           return;
         }
-        setPaymentUrl(url.trim());
+        const trimmed = url.trim();
+        if (paymentTab && !paymentTab.closed) {
+          try {
+            paymentTab.location.href = trimmed;
+          } catch {
+            paymentTab.close();
+          }
+        }
+        setPaymentUrl(trimmed);
         setCheckoutStep("payment");
       } catch (e) {
+        paymentTab?.close();
         setBuyError(e instanceof Error ? e.message : "Purchase failed");
       } finally {
         setBuyBusy(false);
@@ -350,25 +373,6 @@ export function ShopPage() {
       setBindingBusy(true);
       setBindingError(null);
       try {
-        if (import.meta.env.DEV) {
-          console.log("[MEGA_ACCOUNT_BINDING]", {
-            apiType: GATEWAY_API_MEGA_ACCOUNT_BINDING,
-            userID: uid,
-            countryCode: payload.countryCode,
-            phoneNum: payload.phone,
-            answer: payload.answer,
-            email: payload.email,
-            firstName: payload.firstName,
-            lastName: payload.lastName,
-            birthday: payload.birthday,
-            address: payload.address,
-            country: payload.country,
-            city: payload.city,
-            state: payload.state,
-            zip: payload.zip,
-            language: "en",
-          });
-        }
         const data = encodeMegaAccountBindingRequestBytes({
           userID: uid,
           countryCode: payload.countryCode,
@@ -396,11 +400,10 @@ export function ShopPage() {
           return;
         }
         const raw = r.data;
-        if (!(raw instanceof Uint8Array) || raw.byteLength === 0) {
-          setBindingError("Empty binding response");
-          return;
-        }
-        const decoded = decodeMegaAccountBindingResponseBytes(raw);
+        const decoded =
+          raw instanceof Uint8Array && raw.byteLength > 0
+            ? decodeMegaAccountBindingResponseBytes(raw)
+            : decodeMegaAccountBindingResponseBytes(new Uint8Array(0));
         if (decoded.needSMSAnswer) {
           setProtectNeedSms(true);
           if (payload.answer.trim()) {
@@ -449,6 +452,31 @@ export function ShopPage() {
     },
     [checkoutPack, user, executeBuyProduct],
   );
+
+  useEffect(() => {
+    if (checkoutStep !== "protect") {
+      protectAutoBuyStartedRef.current = false;
+      return;
+    }
+    if (!isPhoneBound(user)) return;
+
+    if (pendingPaymentMethod == null) {
+      setProtectNeedSms(false);
+      setBindingError(null);
+      setCheckoutStep("summary");
+      return;
+    }
+
+    if (protectAutoBuyStartedRef.current) return;
+    protectAutoBuyStartedRef.current = true;
+
+    const method = pendingPaymentMethod;
+    setPendingPaymentMethod(null);
+    setProtectNeedSms(false);
+    setBindingError(null);
+    setCheckoutStep("summary");
+    void executeBuyProduct(method);
+  }, [checkoutStep, user, pendingPaymentMethod, executeBuyProduct]);
 
   return (
     <div className="shop-page page-container session-page session-page--pattern">
@@ -534,12 +562,15 @@ export function ShopPage() {
           bindingBusy={bindingBusy}
           bindingError={bindingError}
           protectNeedSms={protectNeedSms}
-          bindingPrefill={{
-            email: user?.email,
-            phone: user?.phone,
-          } satisfies ShopBindingPrefill}
+          bindingPrefill={
+            {
+              email: user?.email,
+              phone: user?.phone,
+            } satisfies ShopBindingPrefill
+          }
           onClose={closeCheckout}
           onProtectClose={handleProtectClose}
+          onBackToProtectForm={handleBackToProtectForm}
           onBindingSubmit={handleBindingSubmit}
           onSelectPaymentMethod={handleSelectPayment}
           onCancelPaymentFrame={cancelPaymentFrame}

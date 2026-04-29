@@ -14,9 +14,12 @@ function mustLookup(name: string): protobuf.Type {
 export const GatewayRequestType = mustLookup("gateway.Request");
 export const GatewayResponseType = mustLookup("gateway.Response");
 
-/** 與 gateway.proto 註解一致：200 有資料、204 成功無 data。 */
+/**
+ * Gateway HTTP 語意對應：200／201／204 皆可代表成功。
+ * 成功時 response data 為空也可能是正常（例如綁定完成無 MegaAccountBindingResponse）。
+ */
 export function isGatewaySuccessCode(code: string): boolean {
-  return code === "200" || code === "204";
+  return code === "200" || code === "201" || code === "204";
 }
 
 export function encodeGatewayRequest(message: object): Uint8Array {

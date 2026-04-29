@@ -30,6 +30,7 @@ type Props = {
   bindingPrefill?: ShopBindingPrefill;
   onClose: () => void;
   onProtectClose: () => void;
+  onBackToProtectForm: () => void;
   onBindingSubmit: (payload: ShopBindingFormPayload) => Promise<void>;
   onSelectPaymentMethod: (method: ShopPaymentMethodId) => void;
   onCancelPaymentFrame: () => void;
@@ -197,13 +198,21 @@ function PaymentFrameView({
         <span className="app-modal__head-spacer" aria-hidden />
       </header>
       <hr className="app-modal__rule shop-checkout__head-rule" />
-      <div className="shop-checkout__payment-frame-wrap">
-        <iframe
-          title="Secure payment"
-          className="shop-checkout__payment-frame"
-          src={paymentUrl}
-          sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
-        />
+      <div className="shop-checkout__payment-frame-wrap shop-checkout__payment-wait-body">
+        <p className="shop-checkout__payment-wait-text">
+          Complete your payment in the new browser tab or window. This dialog
+          will update when your purchase is confirmed.
+        </p>
+        <p className="shop-checkout__payment-wait-text">
+          <a
+            className="shop-checkout__payment-wait-link"
+            href={paymentUrl}
+            target="_blank"
+            rel="noopener noreferrer">
+            Open payment page
+          </a>{" "}
+          if it did not open automatically.
+        </p>
       </div>
     </>
   );
@@ -257,6 +266,7 @@ export function ShopCheckoutOverlay({
   bindingPrefill,
   onClose,
   onProtectClose,
+  onBackToProtectForm,
   onBindingSubmit,
   onSelectPaymentMethod,
   onCancelPaymentFrame,
@@ -316,6 +326,7 @@ export function ShopCheckoutOverlay({
             protectNeedSms={protectNeedSms}
             bindingPrefill={bindingPrefill}
             onClose={onProtectClose}
+            onBackToProtectForm={onBackToProtectForm}
             onSubmit={onBindingSubmit}
           />
         ) : step === "payment" && paymentUrl ? (

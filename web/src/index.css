@@ -55,6 +55,19 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* 全站隱藏卷軸 UI，捲動行為不變 */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
 /* 平板起略放大 1rem 基準；凡用 rem 的字、間距、Session 頂底欄等一併略增 */
 @media (min-width: 48rem) {
   html {

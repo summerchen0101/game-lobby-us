@@ -182,7 +182,6 @@ export function decodeGatewayResponseDataForDevLog(
       try {
         const { thirdPartyGameInfo } =
           decodeGetThirdPartyGameInfoResponseBytes(raw);
-        console.log("thirdPartyGameInfo", thirdPartyGameInfo);
         const url = thirdPartyGameInfo?.gameLaunchURL?.trim() ?? "";
         return {
           kind: "GET_THIRD_PARTY_GAME_INFO",

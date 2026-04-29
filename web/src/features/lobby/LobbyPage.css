@@ -505,7 +505,7 @@ html.session-lobby-page {
   margin-inline: calc(-1 * var(--page-pad-inline));
   padding-inline: var(--page-pad-inline);
   padding-bottom: var(--space-2);
-  scrollbar-width: thin;
+  scrollbar-width: none;
   overscroll-behavior-x: contain;
   touch-action: pan-x;
 }
