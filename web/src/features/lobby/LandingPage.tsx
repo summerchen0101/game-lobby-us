@@ -56,6 +56,7 @@ import {
   GUEST_TOP_GAMES,
   getGuestHeroImage,
   lobbyGameCardThumbnail,
+  thirdPartyGameEntryThumbnailUrl,
   getSessionLobbyBannerImage,
   LOBBY_DEMO_JACKPOT_AMOUNTS,
   UNITY_DEMO_LOBBY_GAME,
@@ -432,7 +433,7 @@ export function LandingPage() {
     });
   }, [displayGames, lobbySearch]);
 
-  /** 第三方遊戲：`thirdPartyGameInfoList` 順序，僅依搜尋過濾（不重排）。 */
+  /** 第三方遊戲：`thirdPartyGameInfoList` 僅 `status === "ACTIVE"`，順序不變，僅依搜尋過濾（不重排）。 */
   const providerGamesFiltered = useMemo(() => {
     const list = lobbyThirdPartyListToApiGames(
       lobbyGet?.thirdPartyGameInfoList,
@@ -679,7 +680,10 @@ export function LandingPage() {
     onCardAction?: (g: Game) => void,
   ) {
     const thumb = g.thirdPartyLaunch
-      ? undefined
+      ? thirdPartyGameEntryThumbnailUrl(
+          g.thirdPartyLaunch.platform,
+          g.thirdPartyLaunch.gameUID,
+        )
       : lobbyGameCardThumbnail(
           g.id,
           thumbBase + index,

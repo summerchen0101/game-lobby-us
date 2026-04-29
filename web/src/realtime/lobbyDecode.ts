@@ -211,6 +211,18 @@ type LobbyThirdPartyRow = NonNullable<
   NonNullable<LobbyGetDecoded["thirdPartyGameInfoList"]>
 >[number];
 
+/** 大廳僅顯示後端標為上架中之第三方遊戲。 */
+function lobbyThirdPartyRowIsActive(row: LobbyThirdPartyRow): boolean {
+  const raw = row.status;
+  const s =
+    typeof raw === "string"
+      ? raw.trim()
+      : raw === undefined || raw === null
+        ? ""
+        : String(raw).trim();
+  return s === "ACTIVE";
+}
+
 /**
  * `LobbyGet.thirdPartyGameInfoList` 單筆 → 大廳卡片（順序交由呼叫端維持後端順序）。
  * 無效列（缺少 platform／gameUID）回傳 null。
@@ -238,13 +250,14 @@ export function lobbyThirdPartyRowToApiGame(
   };
 }
 
-/** 後端已排序之第三方列表；勿再呼叫 sortLobbyGamesByMenu。 */
+/** 後端已排序之第三方列表（僅 `status === "ACTIVE"`）；勿再呼叫 sortLobbyGamesByMenu。 */
 export function lobbyThirdPartyListToApiGames(
   list: LobbyGetDecoded["thirdPartyGameInfoList"] | undefined | null,
 ): Game[] {
   const rows = list ?? [];
   const out: Game[] = [];
   for (const row of rows) {
+    if (!lobbyThirdPartyRowIsActive(row)) continue;
     const g = lobbyThirdPartyRowToApiGame(row);
     if (g) out.push(g);
   }

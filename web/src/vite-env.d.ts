@@ -51,6 +51,11 @@ interface ImportMetaEnv {
   readonly VITE_TRUSTPILOT_BUSINESS_UNIT_ID?: string;
   /** 浮動 CTA 點擊導向（預設 /profile） */
   readonly VITE_FLOATING_CTA_PATH?: string;
+  /**
+   * 第三方遊戲大廳卡片縮圖基底（HTTPS，不帶尾隨 /）。
+   * Alpha 範例：https://nas01.ffglobaltech.com；Prod：https://unityweb-cdn.boss-fun.com
+   */
+  readonly VITE_THIRD_PARTY_GAME_THUMB_BASE?: string;
 }
 
 interface ImportMeta {

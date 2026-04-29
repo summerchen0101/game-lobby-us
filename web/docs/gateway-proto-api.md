@@ -99,6 +99,21 @@ flowchart LR
 
 **完整大廳資料**：伺服器在 `LOBBY_GET` 回傳的 `data` 於完整協定中可能為 megaman 的 `LobbyGetResponse`（另含錢包、玩家資訊、活動等），欄位多於 `lobby_wire`。專案內針對遊戲列表的轉換見 [`web/src/realtime/lobbyDecode.ts`](../src/realtime/lobbyDecode.ts)。
 
+### 第三方遊戲（`ThirdPartyGameInfo`／`thirdPartyGameInfoList`）
+
+完整協定中的 **`LobbyGetResponse`** 另含 **`repeated ThirdPartyGameInfo thirdPartyGameInfoList`**（見 [`web/proto/lobby_wire.proto`](../proto/lobby_wire.proto) 之 `ThirdPartyGameInfo`：`platform`、`gameUID`、`gameName`、`status` 等）。Web **僅顯示 `status === "ACTIVE"`** 之項目為大廳卡片；其餘略過。卡片點擊後以 **`GetThirdPartyGameInfo`**（`ApiType` 對應 megaman）取得啟動連結。
+
+**入口圖（大廳卡片縮圖）** 不由 proto 欄位下發；資產預設放在 CDN／NAS 上，URL 規則為：
+
+`{BASE}/{ThirdPartyGame.platform}/{ThirdPartyGame.gameUID}.png`
+
+| 環境  | BASE（HTTPS）                       |
+| ----- | ----------------------------------- |
+| Alpha | `https://nas01.ffglobaltech.com`    |
+| Prod  | `https://unityweb-cdn.boss-fun.com` |
+
+前端以環境變數 **`VITE_THIRD_PARTY_GAME_THUMB_BASE`** 設定上述 `{BASE}`（不帶尾隨 `/`）；未設定時大廳不請求該 PNG。組 URL 時對 **`platform` 與 `gameUID` 各路徑段落** 使用段落級編碼（例如 `encodeURIComponent`），避免 `/`、空白等字元破壞路徑。
+
 ---
 
 ## 4. gRPC 服務 `GatewayService`（`proto/gateway/gateway.proto`）

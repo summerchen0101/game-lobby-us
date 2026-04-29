@@ -70,6 +70,23 @@ export function lobbyGameCardThumbnail(
 }
 
 /**
+ * 第三方遊戲入口圖：`{VITE_THIRD_PARTY_GAME_THUMB_BASE}/{platform}/{gameUID}.png`。
+ * 未設定基底或欄位為空時回傳 undefined（見 docs/gateway-proto-api.md §3）。
+ */
+export function thirdPartyGameEntryThumbnailUrl(
+  platform: string,
+  gameUID: string,
+): string | undefined {
+  const base = (import.meta.env.VITE_THIRD_PARTY_GAME_THUMB_BASE ?? "")
+    .trim()
+    .replace(/\/+$/, "");
+  const p = platform.trim();
+  const uid = gameUID.trim();
+  if (!base || !p || !uid) return undefined;
+  return `${base}/${encodeURIComponent(p)}/${encodeURIComponent(uid)}.png`;
+}
+
+/**
  * 「Our Top Games」內用於 Unity WebGL iframe 試玩之遊戲卡（與訪客首列 Olympia 為同一筆體感）。
  * 已登入時會再插入 API 回傳列表前方，方便同區塊測試。
  */
