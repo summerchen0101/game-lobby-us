@@ -7,19 +7,45 @@ export function formatWalletPillAmount(n: number | undefined): string {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(n);
 }
 
-/** docs/lobby：ScPointCurrency 換算基準 10000（與 LOBBY_GET currency 欄位對齊） */
-function sweepstakesDisplayAmount(
-  raw: number | undefined,
-  currency: string | undefined,
-): number {
-  const u = raw ?? 0;
-  const c = currency?.trim();
-  if (c === "10000" || c === "ScPointCurrency" || Number(c) === 10000) {
-    return u / 10000;
-  }
-  return u;
+/**
+ * Sweeps Coins 畫面值：小數第 3 位起無條件捨去（向零截斷），至多顯示兩位（en-US 千分位）。
+ * Header SC 與 {@link formatScFromRaw} 共用。
+ */
+export function formatWalletScAmountForDisplay(n: number | undefined): string {
+  if (n === undefined) return "—";
+  if (!Number.isFinite(n)) return "—";
+  const truncatedTowardZero = Math.trunc(n * 100) / 100;
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(truncatedTowardZero);
 }
 
+/** LOBBY / redeem wire：後端 SC 整數為「萬分之一」顯示單位（見 ScPointCurrency）。 */
+export const SC_POINT_SCALE = 10000;
+
+/** 可提領下限：畫面上的整數 SC。 */
+export const MIN_REDEEM_SC_DISPLAY = 50;
+
+/** 可提領下限：後端原始值（= MIN_REDEEM_SC_DISPLAY × SC_POINT_SCALE）。 */
+export const MIN_REDEEM_SC_RAW =
+  MIN_REDEEM_SC_DISPLAY * SC_POINT_SCALE;
+
+/** 將後端原始 SC（萬分之一）換成畫面上的 SC 數值（可含小數）。 */
+export function scRawToDisplay(raw: number): number {
+  return raw / SC_POINT_SCALE;
+}
+
+/** 後端原始值 → 顯示字串（向零捨去至小數兩位，與 header SC 一致）。 */
+export function formatScFromRaw(raw: number | undefined): string {
+  if (raw === undefined) return "—";
+  return formatWalletScAmountForDisplay(scRawToDisplay(raw));
+}
+
+/**
+ * Header SC：`sweepstakesBalance` 一律視為後端萬分之一（與 Lobby bag／Redeem 相同），不依賴
+ * `user.currency`。避免未帶 ScPointCurrency 時誤將 raw 當畫面值顯示（例如 18000→應為 1.8）。
+ */
 export function getWalletDisplay(
   user: User | null | undefined,
   active: ActiveWallet,
@@ -31,9 +57,8 @@ export function getWalletDisplay(
       amount: formatWalletPillAmount(user.balance),
     };
   }
-  const sc = sweepstakesDisplayAmount(
-    user.sweepstakesBalance,
-    user.currency,
-  );
-  return { label: "SC" as const, amount: formatWalletPillAmount(sc) };
+  return {
+    label: "SC" as const,
+    amount: formatScFromRaw(user.sweepstakesBalance),
+  };
 }

@@ -18,11 +18,7 @@ import {
 import type { GatewayWsResponseObject } from "./gatewayWs";
 import { hexPreview } from "./bytesHexPreview";
 import { decodeSlotJackPotInfoToObjectForDev } from "./jackpotLobbyWire";
-import {
-  decodeLobbyGetResponseBytes,
-  lobbyDecodedGamesToApiGames,
-  lobbyDecodedToUserPatch,
-} from "./lobbyDecode";
+import { decodeLobbyGetResponseBytes } from "./lobbyDecode";
 import {
   decodeBuyProductResponseBytes,
   decodeListProductsResponseBytes,
@@ -91,21 +87,9 @@ export function decodeGatewayResponseDataForDevLog(
   try {
     if (type === GATEWAY_API_LOBBY_GET) {
       const decoded = decodeLobbyGetResponseBytes(raw);
-      const items = lobbyDecodedGamesToApiGames(decoded);
-      const userPatch = lobbyDecodedToUserPatch(decoded);
       return {
         kind: "LOBBY_GET",
-        gameCount: items.length,
-        gamesPreview: items.slice(0, 3).map((g) => ({
-          id: g.id,
-          title: g.title,
-        })),
-        userPatch,
-        currency: decoded.currency,
-        jackPotGameCount: decoded.jackPotGameList?.length ?? 0,
-        thirdPartyGameCount: decoded.thirdPartyGameInfoList?.length ?? 0,
-        campaignCount: decoded.campaign?.campaign?.length ?? 0,
-        canShowRichDaddies: decoded.canShowRichDaddies,
+        data: decoded,
       };
     }
     if (type === GATEWAY_API_SLOT_JACKPOT_PUSH) {
@@ -218,8 +202,7 @@ export function decodeGatewayResponseDataForDevLog(
         const decoded = decodeListWithdrawOrdersResponseBytes(raw);
         return {
           kind: "LIST_WITHDRAW_ORDERS",
-          orderCount: decoded.orders.length,
-          total: decoded.total,
+          data: decoded,
         };
       } catch (e) {
         return fallbackHex(raw, e);
@@ -227,7 +210,8 @@ export function decodeGatewayResponseDataForDevLog(
     }
     if (type === GATEWAY_API_CREATE_WITHDRAW_ORDER) {
       try {
-        const { withdrawOrderUID } = decodeCreateWithdrawOrderResponseBytes(raw);
+        const { withdrawOrderUID } =
+          decodeCreateWithdrawOrderResponseBytes(raw);
         return {
           kind: "CREATE_WITHDRAW_ORDER",
           withdrawOrderUID,

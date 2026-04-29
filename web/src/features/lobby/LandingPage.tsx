@@ -491,6 +491,14 @@ export function LandingPage() {
           const decoded = decodeGetThirdPartyGameInfoResponseBytes(r.data);
           const url = decoded.thirdPartyGameInfo?.gameLaunchURL?.trim();
           if (url) {
+            try {
+              console.log(
+                "[lobby] iframe game URL:",
+                new URL(url, window.location.href).href,
+              );
+            } catch {
+              console.log("[lobby] iframe game URL:", url);
+            }
             openShell({
               url,
               widthPercent: card.embedWidthPercent,
@@ -635,12 +643,20 @@ export function LandingPage() {
         mode: activeWalletToSlotMode(activeWallet),
         amount: amountForActiveWallet(user, activeWallet),
         vipLevel: user?.vipLevel ?? 0,
-        token: token ?? undefined,
+        token: user ? (token?.trim() || undefined) : undefined,
       });
     } else if (card.launchUrl?.trim()) {
       url = card.launchUrl.trim();
     } else {
       url = unityDemoGameUrl();
+    }
+    try {
+      console.log(
+        "[lobby] iframe game URL:",
+        new URL(url, window.location.href).href,
+      );
+    } catch {
+      console.log("[lobby] iframe game URL:", url);
     }
     openShell({
       url,

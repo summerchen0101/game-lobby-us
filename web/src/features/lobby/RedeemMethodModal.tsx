@@ -17,6 +17,11 @@ import {
   encodeCreateWithdrawOrderRequestBytes,
 } from "../../realtime/withdrawLobbyWire";
 import { useGatewayLobby } from "../../realtime/useGatewayLobby";
+import {
+  MIN_REDEEM_SC_DISPLAY,
+  MIN_REDEEM_SC_RAW,
+  SC_POINT_SCALE,
+} from "../../wallet/formatWalletAmount";
 import { REDEEM_METHOD_TO_WITHDRAW_PAYMENT_TYPE } from "./redeemPaymentTypeMap";
 import { REDEEM_METHOD_SLUGS, type RedeemMethodSlug } from "./redeemFlow";
 import "./RedeemFormPage.css";
@@ -38,6 +43,8 @@ type Props = {
   onClose: () => void;
   /** 建立訂單成功後（刷新列表等） */
   onOrderCreated?: () => void | Promise<void>;
+  /** Lobby 可提領餘額（後端萬分之一單位），用於金額驗證 */
+  redeemableAmountRaw?: number;
 };
 
 type SubmitFields = {
@@ -51,11 +58,12 @@ type SubmitFields = {
   appAccount?: string;
 };
 
-function parseWithdrawAmountToWire(amountStr: string): bigint | null {
+/** 使用者輸入為整數 SC，後端為 ×SC_POINT_SCALE 之原始值 */
+function parseWithdrawDisplayToWire(amountStr: string): bigint | null {
   const t = amountStr.trim().replace(/,/g, "");
   if (!/^\d+$/.test(t)) return null;
   try {
-    return BigInt(t);
+    return BigInt(t) * BigInt(SC_POINT_SCALE);
   } catch {
     return null;
   }
@@ -354,7 +362,12 @@ function RedeemWithdrawSuccessView({
   );
 }
 
-export function RedeemMethodModal({ open, onClose, onOrderCreated }: Props) {
+export function RedeemMethodModal({
+  open,
+  onClose,
+  onOrderCreated,
+  redeemableAmountRaw,
+}: Props) {
   const { show } = useAlert();
   const { user } = useAuth();
   const { requestRef, gatewayRequestReady } = useGatewayLobby();
@@ -395,6 +408,24 @@ export function RedeemMethodModal({ open, onClose, onOrderCreated }: Props) {
   const submitWithdrawOrder = useCallback(
     async (fields: SubmitFields) => {
       const mock = isMockMode();
+      const wireAmt = parseWithdrawDisplayToWire(fields.amountStr);
+      if (wireAmt === null || wireAmt <= BigInt(0)) {
+        show("Enter a valid whole-number SC amount.", { variant: "error" });
+        return;
+      }
+      if (wireAmt < BigInt(MIN_REDEEM_SC_RAW)) {
+        show(`Minimum redemption is ${MIN_REDEEM_SC_DISPLAY} SC.`, {
+          variant: "error",
+        });
+        return;
+      }
+      if (redeemableAmountRaw !== undefined) {
+        const maxRaw = BigInt(Math.floor(Math.max(0, redeemableAmountRaw)));
+        if (wireAmt > maxRaw) {
+          show("Amount exceeds your redeemable balance.", { variant: "error" });
+          return;
+        }
+      }
       if (mock) {
         await finalizeSuccessFlow(MOCK_WITHDRAW_ORDER_UID, fields.amountStr);
         return;
@@ -404,15 +435,10 @@ export function RedeemMethodModal({ open, onClose, onOrderCreated }: Props) {
         show("Not connected to server. Try again.", { variant: "error" });
         return;
       }
-      const amt = parseWithdrawAmountToWire(fields.amountStr);
-      if (amt === null || amt <= BigInt(0)) {
-        show("Enter a valid whole-number SC amount.", { variant: "error" });
-        return;
-      }
       const paymentType = REDEEM_METHOD_TO_WITHDRAW_PAYMENT_TYPE[fields.method];
       const data = encodeCreateWithdrawOrderRequestBytes({
         userID: user?.id,
-        amount: amt,
+        amount: wireAmt,
         paymentType,
         cardNumber: fields.cardNumber,
         cardValidCode: fields.cardValidCode,
@@ -459,6 +485,7 @@ export function RedeemMethodModal({ open, onClose, onOrderCreated }: Props) {
     [
       finalizeSuccessFlow,
       gatewayRequestReady,
+      redeemableAmountRaw,
       requestRef,
       show,
       user?.id,

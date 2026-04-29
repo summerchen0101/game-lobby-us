@@ -6,7 +6,7 @@ export type User = {
   displayName?: string;
   balance?: number;
   currency?: string;
-  /** Sweepstakes / SC coin balance（可選，API 未回傳時前端可顯示 0） */
+  /** Sweepstakes / SC：`sweepstakesBalance` 為後端萬分之一單位（與 lobby bag / withdraw 一致）；畫面請用 `formatWalletAmount`／`formatScFromRaw`。API 未回傳時依專案情境可為 0。 */
   sweepstakesBalance?: number;
   /** VIP 等級（WebEntry `vip_lv`；API 未回傳時前端可視為 0） */
   vipLevel?: number;

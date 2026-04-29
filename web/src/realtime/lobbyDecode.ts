@@ -31,6 +31,15 @@ type LobbyGameRow = NonNullable<
   NonNullable<LobbyGetDecoded["games"]>["games"]
 >[number];
 
+/** megaman.GameStatus.ENABLE（僅此狀態列於大廳） */
+function isLobbyGameRowEnabled(row: LobbyGameRow): boolean {
+  const st = row.status;
+  if (st === 1 || st === "1") return true;
+  if (typeof st === "string" && st.trim().toUpperCase() === "ENABLE")
+    return true;
+  return false;
+}
+
 function numFromWire(v: unknown): number | undefined {
   if (typeof v === "number" && Number.isFinite(v)) return v;
   if (typeof v === "string" && v !== "") {
@@ -193,7 +202,9 @@ export function sortLobbyGamesByMenu(
 /** 將 LOBBY_GET 解碼結果轉成大廳 Game 列表（launchUrl 僅在 path 為 http(s) 或可組 WebEntry 時填入）。 */
 export function lobbyDecodedGamesToApiGames(decoded: LobbyGetDecoded): Game[] {
   const games: LobbyGameRow[] = decoded.games?.games ?? [];
-  return games.map((row) => lobbyGameRowToApiGame(row));
+  return games
+    .filter(isLobbyGameRowEnabled)
+    .map((row) => lobbyGameRowToApiGame(row));
 }
 
 type LobbyThirdPartyRow = NonNullable<

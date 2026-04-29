@@ -19,6 +19,8 @@ export type GatewayLobbyContextValue = {
   liveJackpotAmounts: readonly [number, number, number] | null
   /** 最近一次成功解碼的 LOBBY_GET（與 megaman.LobbyGetResponse 對齊） */
   lobbyGet: LobbyGetDecoded | null
+  /** 再次請求 LOBBY_GET 並更新遊戲列表／錢包（例如關閉遊戲 iframe 後） */
+  refreshLobbyGet: () => Promise<void>
   subscribePaymentFinish: (listener: PaymentFinishListener) => () => void
   subscribeWithdrawSuccessPush: (listener: WithdrawSuccessPushListener) => () => void
 }

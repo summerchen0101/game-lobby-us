@@ -4,7 +4,11 @@ import { InfoPopover } from "../../components/InfoPopover";
 import { useAuth } from "../../auth/useAuth";
 import { CURRENCY_ICON_SC } from "../../lib/currencyIcons";
 import { isMockMode } from "../../lib/env";
-import { formatWalletPillAmount } from "../../wallet/formatWalletAmount";
+import {
+  formatScFromRaw,
+  MIN_REDEEM_SC_DISPLAY,
+  MIN_REDEEM_SC_RAW,
+} from "../../wallet/formatWalletAmount";
 import { GATEWAY_API_LIST_WITHDRAW_ORDERS } from "../../realtime/gatewayApi";
 import { isGatewaySuccessCode } from "../../realtime/gatewayWire";
 import {
@@ -23,7 +27,7 @@ import "./SessionPageDecor.css";
 
 const SC_INLINE_PX = 18;
 
-const ORDERS_PER_PAGE = 10;
+const ORDERS_PER_PAGE = 4;
 
 function ScInlineIcon() {
   return (
@@ -37,7 +41,8 @@ function ScInlineIcon() {
   );
 }
 
-export const MIN_REDEEM_SC = 50;
+/** Re-export: minimum redeemable SC shown to the user (50). */
+export const MIN_REDEEM_SC = MIN_REDEEM_SC_DISPLAY;
 
 export function RedeemPage() {
   const { user } = useAuth();
@@ -54,7 +59,7 @@ export function RedeemPage() {
   useEffect(() => {
     return subscribeWithdrawSuccessPush((p) => {
       setPillExtras((prev) => {
-        const line = `${p.nickname} redeemed ${formatWalletPillAmount(p.actualAmount)} SC`;
+        const line = `${p.nickname} redeemed ${formatScFromRaw(p.actualAmount)} SC`;
         return [line, ...prev].slice(0, 24);
       });
     });
@@ -76,7 +81,7 @@ export function RedeemPage() {
       sweepstakesFallback: user?.sweepstakesBalance,
     });
 
-  const scDisplay = formatWalletPillAmount(scAmount);
+  const redeemableDisplay = formatScFromRaw(redeemableAmount);
 
   const hasOrderHistory =
     ordersTotal > 0 || ordersRows.length > 0;
@@ -175,15 +180,24 @@ export function RedeemPage() {
     [ordersPage, totalPages],
   );
 
-  /** 文件：SC < 50 且無訂單紀錄 → 不足畫面 */
-  const showInsufficient =
+  const cannotRedeem = redeemableAmount < MIN_REDEEM_SC_RAW;
+
+  /** 未達可提領門檻且無任何提領紀錄 → 全頁不足卡（不顯示空白 history 區） */
+  const showInsufficientFullPage =
     initialOrdersFetched &&
     !ordersLoading &&
-    !hasOrderHistory &&
-    scAmount < MIN_REDEEM_SC;
+    cannotRedeem &&
+    !hasOrderHistory;
+
+  /** 有紀錄但不可提領 → 仍顯示紀錄，並顯示 Insufficient 提示 */
+  const showInsufficientWithHistory =
+    initialOrdersFetched &&
+    !ordersLoading &&
+    cannotRedeem &&
+    hasOrderHistory;
 
   const showRedeemHistoryUi =
-    (mock || gatewayRequestReady) && !showInsufficient;
+    (mock || gatewayRequestReady) && !showInsufficientFullPage;
 
   return (
     <section className="redeem-page page-container session-page session-page--pattern">
@@ -206,15 +220,15 @@ export function RedeemPage() {
               <div className="redeem-page__info-panel">
                 <p>
                   <strong>Your Sweeps Coins Balance:</strong>{" "}
-                  {formatWalletPillAmount(scAmount)} <ScInlineIcon />
+                  {formatScFromRaw(scAmount)} <ScInlineIcon />
                 </p>
                 <p>
                   <strong>Redeemable Sweeps Coins:</strong>{" "}
-                  {formatWalletPillAmount(redeemableAmount)} <ScInlineIcon />
+                  {formatScFromRaw(redeemableAmount)} <ScInlineIcon />
                 </p>
                 <p>
                   <strong>Unplayed Sweeps Coins Balance:</strong>{" "}
-                  {formatWalletPillAmount(unplayed)} <ScInlineIcon />
+                  {formatScFromRaw(unplayed)} <ScInlineIcon />
                 </p>
                 <p>
                   <ScInlineIcon /> 1 Sweeps Coin = $1
@@ -242,13 +256,22 @@ export function RedeemPage() {
           <span className="redeem-page__sc-badge" aria-hidden>
             <img src={CURRENCY_ICON_SC} alt="" width={40} height={40} />
           </span>
-          <p className="redeem-page__amount">{scDisplay}</p>
+          <p className="redeem-page__amount">{redeemableDisplay}</p>
         </div>
       </div>
 
       {!mock && !gatewayRequestReady ? (
         <div className="redeem-page__card redeem-page__history-card">
           <p className="redeem-page__history-title">Connecting…</p>
+        </div>
+      ) : null}
+
+      {showInsufficientWithHistory ? (
+        <div className="redeem-page__card redeem-page__insufficient-card redeem-page__insufficient-card--with-history">
+          <h3 className="redeem-page__insufficient-title">Insufficient SC</h3>
+          <p className="redeem-page__insufficient-text">
+            Win a minimum of {MIN_REDEEM_SC_DISPLAY} SC to redeem.
+          </p>
         </div>
       ) : null}
 
@@ -277,7 +300,7 @@ export function RedeemPage() {
                       i
                     </span>
                     <span className="redeem-page__history-desc">
-                      {formatWalletPillAmount(Number(row.amount) || 0)} SC
+                      {formatScFromRaw(Number(row.amount) || 0)} SC
                     </span>
                     <span className="redeem-page__history-status">
                       {row.statusLabel}
@@ -318,18 +341,22 @@ export function RedeemPage() {
           <button
             type="button"
             className="redeem-page__new-redeem"
-            disabled={ordersLoading || (!mock && !gatewayRequestReady)}
+            disabled={
+              ordersLoading ||
+              (!mock && !gatewayRequestReady) ||
+              cannotRedeem
+            }
             onClick={() => setMethodModalOpen(true)}>
             NEW REDEEM
           </button>
         </div>
       ) : null}
 
-      {showInsufficient ? (
+      {showInsufficientFullPage ? (
         <div className="redeem-page__insufficient-card">
           <h3 className="redeem-page__insufficient-title">Insufficient SC</h3>
           <p className="redeem-page__insufficient-text">
-            Win a minimum of {MIN_REDEEM_SC} SC to redeem.
+            Win a minimum of {MIN_REDEEM_SC_DISPLAY} SC to redeem.
           </p>
           <p className="redeem-page__insufficient-accent">Keep playing!</p>
           <Link to="/" className="redeem-page__to-lobby">
@@ -342,6 +369,7 @@ export function RedeemPage() {
         open={methodModalOpen}
         onClose={() => setMethodModalOpen(false)}
         onOrderCreated={refetchOrdersAfterWithdraw}
+        redeemableAmountRaw={redeemableAmount}
       />
     </section>
   );

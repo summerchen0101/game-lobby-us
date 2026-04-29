@@ -95,6 +95,87 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const runLobbyGetRequest = useCallback(
+    async (request: GatewayWsRequestFn) => {
+      if (wsLobbyEnabled) setLobbyLoading(true);
+      try {
+        const r = await request({
+          type: GATEWAY_API_LOBBY_GET,
+          data: new Uint8Array(0),
+          debugLabel: "LOBBY_GET",
+        });
+        const raw = r.data;
+        const len = raw instanceof Uint8Array ? raw.byteLength : 0;
+        if (String(r.code) === "200") {
+          if (len > 0 && raw instanceof Uint8Array) {
+            try {
+              const decoded = decodeLobbyGetResponseBytes(raw);
+              const items = lobbyDecodedGamesToApiGames(decoded);
+              const userPatch = lobbyDecodedToUserPatch(decoded);
+              if (Object.keys(userPatch).length > 0) {
+                mergeUser(userPatch);
+                if (
+                  userPatch.lobbyWalletType === "GC" ||
+                  userPatch.lobbyWalletType === "SC"
+                ) {
+                  setActiveWallet(userPatch.lobbyWalletType);
+                }
+              }
+              setLobbyGames(items);
+              setLobbyGet(decoded);
+              if (wsLobbyEnabled) setLobbyError(null);
+            } catch (decodeErr) {
+              console.warn("[gateway-ws] LOBBY_GET decode failed", decodeErr);
+              setLobbyGet(null);
+              if (wsLobbyEnabled) {
+                setLobbyGames([]);
+                setLobbyError("Could not decode lobby games");
+              } else {
+                setLobbyGames(null);
+              }
+            }
+          } else {
+            setLobbyGames([]);
+            setLobbyGet(null);
+            if (wsLobbyEnabled) setLobbyError(null);
+          }
+        } else {
+          setLobbyGet(null);
+          if (wsLobbyEnabled) {
+            setLobbyGames([]);
+            setLobbyError(
+              r.errMessage?.trim() ||
+                `Lobby request failed (${String(r.code ?? "")})`,
+            );
+          } else {
+            setLobbyGames(null);
+          }
+        }
+      } catch (e) {
+        console.warn("[gateway-ws] LOBBY_GET failed", e);
+        setLobbyGet(null);
+        if (wsLobbyEnabled) {
+          setLobbyGames([]);
+          setLobbyError(
+            e instanceof Error ? e.message : "Lobby WebSocket request failed",
+          );
+        } else {
+          setLobbyGames(null);
+        }
+      } finally {
+        if (wsLobbyEnabled) setLobbyLoading(false);
+      }
+    },
+    [mergeUser, setActiveWallet, wsLobbyEnabled],
+  );
+
+  const refreshLobbyGet = useCallback(async () => {
+    if (!shouldRunLobbyGetOnOpen) return;
+    const request = requestRef.current;
+    if (!request) return;
+    await runLobbyGetRequest(request);
+  }, [runLobbyGetRequest, shouldRunLobbyGetOnOpen]);
+
   const getRequestBasicExtras = useCallback((): Record<string, unknown> => {
     const uid = user?.id;
     if (!uid || !/^\d+$/.test(uid)) {
@@ -210,84 +291,7 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
       }
 
       if (!shouldRunLobbyGetOnOpen) return;
-      if (wsLobbyEnabled) setLobbyLoading(true);
-      try {
-        const r = await request({
-          type: GATEWAY_API_LOBBY_GET,
-          data: new Uint8Array(0),
-          debugLabel: "LOBBY_GET",
-        });
-        const raw = r.data;
-        const len = raw instanceof Uint8Array ? raw.byteLength : 0;
-        if (import.meta.env.DEV) {
-          console.info("[gateway-ws][dev] LOBBY_GET", {
-            code: r.code,
-            type: r.type,
-            errMessage: r.errMessage,
-            dataLength: len,
-            dataHexPreview24:
-              len > 0 && raw instanceof Uint8Array ? hexPreview(raw, 24) : "",
-          });
-        }
-        if (String(r.code) === "200") {
-          if (len > 0 && raw instanceof Uint8Array) {
-            try {
-              const decoded = decodeLobbyGetResponseBytes(raw);
-              const items = lobbyDecodedGamesToApiGames(decoded);
-              const userPatch = lobbyDecodedToUserPatch(decoded);
-              if (Object.keys(userPatch).length > 0) {
-                mergeUser(userPatch);
-                if (
-                  userPatch.lobbyWalletType === "GC" ||
-                  userPatch.lobbyWalletType === "SC"
-                ) {
-                  setActiveWallet(userPatch.lobbyWalletType);
-                }
-              }
-              setLobbyGames(items);
-              setLobbyGet(decoded);
-              if (wsLobbyEnabled) setLobbyError(null);
-            } catch (decodeErr) {
-              console.warn("[gateway-ws] LOBBY_GET decode failed", decodeErr);
-              setLobbyGet(null);
-              if (wsLobbyEnabled) {
-                setLobbyGames([]);
-                setLobbyError("Could not decode lobby games");
-              } else {
-                setLobbyGames(null);
-              }
-            }
-          } else {
-            setLobbyGames([]);
-            setLobbyGet(null);
-            if (wsLobbyEnabled) setLobbyError(null);
-          }
-        } else {
-          setLobbyGet(null);
-          if (wsLobbyEnabled) {
-            setLobbyGames([]);
-            setLobbyError(
-              r.errMessage?.trim() ||
-                `Lobby request failed (${String(r.code ?? "")})`,
-            );
-          } else {
-            setLobbyGames(null);
-          }
-        }
-      } catch (e) {
-        console.warn("[gateway-ws] LOBBY_GET failed", e);
-        setLobbyGet(null);
-        if (wsLobbyEnabled) {
-          setLobbyGames([]);
-          setLobbyError(
-            e instanceof Error ? e.message : "Lobby WebSocket request failed",
-          );
-        } else {
-          setLobbyGames(null);
-        }
-      } finally {
-        if (wsLobbyEnabled) setLobbyLoading(false);
-      }
+      await runLobbyGetRequest(request);
     },
     onSocketError: (ev) => {
       console.warn("[gateway-ws] WebSocket error:", ev);
@@ -315,6 +319,7 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
       lobbyError,
       liveJackpotAmounts,
       lobbyGet,
+      refreshLobbyGet,
       subscribePaymentFinish,
       subscribeWithdrawSuccessPush,
     }),
@@ -325,6 +330,7 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
       lobbyError,
       liveJackpotAmounts,
       lobbyGet,
+      refreshLobbyGet,
       subscribePaymentFinish,
       subscribeWithdrawSuccessPush,
     ],

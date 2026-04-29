@@ -1,9 +1,11 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { shouldOpenInNewWindow } from '../lib/gameShell'
+import { useGatewayLobby } from '../realtime/useGatewayLobby'
 import { GameOverlay } from './GameOverlay'
 import { GameShellContext, type OpenShellOptions } from './game-shell-context'
 
 export function GameShellProvider({ children }: { children: ReactNode }) {
+  const { refreshLobbyGet } = useGatewayLobby()
   const [overlay, setOverlay] = useState<{
     url: string
     widthPercent: number
@@ -29,7 +31,14 @@ export function GameShellProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const close = useCallback(() => setOverlay(null), [])
+  const close = useCallback(() => {
+    setOverlay((prev) => {
+      if (prev && !prev.isPayment) {
+        void refreshLobbyGet()
+      }
+      return null
+    })
+  }, [refreshLobbyGet])
 
   const value = useMemo(
     () => ({

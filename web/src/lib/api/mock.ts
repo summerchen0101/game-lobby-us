@@ -1,5 +1,6 @@
 import { DEFAULT_REDEEM_PILL_MESSAGES } from "../../features/lobby/redeemPillMessages";
 import { MOCK_GAMES } from "../mockGames";
+import { SC_POINT_SCALE } from "../../wallet/formatWalletAmount";
 import type {
   AuthResponse,
   GamesResponse,
@@ -26,9 +27,9 @@ const mockUser: User = {
   id: "mock-user-1",
   displayName: "Test player",
   balance: 89800,
-  currency: "GC",
-  /** 低於 Redeem 門檻，Redeem 頁可顯示 insufficient 卡片（對齊 UI 稿） */
-  sweepstakesBalance: 200,
+  currency: "ScPointCurrency",
+  /** Mock：顯示為 200 SC（與線上相同，數值為後端萬分之一 raw） */
+  sweepstakesBalance: 200 * SC_POINT_SCALE,
   /** 對應 `public/images/head/head3.png`（mock 大廳頭像） */
   avatarId: 3,
 };
