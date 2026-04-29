@@ -497,6 +497,16 @@ html.session-lobby-page {
   min-width: 0;
 }
 
+.lobby-games-grid__sentinel {
+  grid-column: 1 / -1;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .lobby-games-grid .lobby-game-card {
   width: 100%;
   max-width: 100%;
@@ -541,6 +551,18 @@ html.session-lobby-page {
   margin: 0;
   padding: 0;
   width: max-content;
+}
+
+.lobby-games-track__sentinel {
+  flex-shrink: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  pointer-events: none;
+  align-self: stretch;
 }
 
 .lobby-game-card {

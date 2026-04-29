@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Search } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
@@ -75,6 +82,140 @@ const LOBBY_ALL_SUBSECTIONS: Array<Exclude<LobbyFilterTab, "all">> = [
   "slots",
 ];
 
+/** 已登入大廳：每批渲染的遊戲卡數量 */
+const LOBBY_GAMES_PAGE_SIZE = 50;
+const LOBBY_GRID_LOAD_ROOT_MARGIN = "200px 0px 280px 0px";
+/** 橫向列：向右預載（root = scroller） */
+const LOBBY_TRACK_LOAD_ROOT_MARGIN = "0px 240px 0px 0px";
+
+type LobbyGameCardRenderer = (
+  g: Game,
+  index: number,
+  thumbBase: number,
+  showTextLabels?: boolean,
+  onCardAction?: (g: Game) => void,
+) => ReactNode;
+
+function PaginatedGameGrid({
+  games,
+  thumbOffset,
+  gameCard,
+}: {
+  games: Game[];
+  thumbOffset: number;
+  gameCard: LobbyGameCardRenderer;
+}) {
+  const sentinelRef = useRef<HTMLLIElement | null>(null);
+  const total = games.length;
+  const [visible, setVisible] = useState(() =>
+    Math.min(LOBBY_GAMES_PAGE_SIZE, total),
+  );
+
+  useEffect(() => {
+    setVisible((v) => Math.min(v, games.length));
+  }, [games.length]);
+
+  useEffect(() => {
+    if (visible >= total) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setVisible((c) => Math.min(c + LOBBY_GAMES_PAGE_SIZE, total));
+        }
+      },
+      { root: null, rootMargin: LOBBY_GRID_LOAD_ROOT_MARGIN, threshold: 0 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [visible, total]);
+
+  const slice = games.slice(0, visible);
+  const hasMore = visible < total;
+
+  return (
+    <ul className="lobby-games-grid" role="list">
+      {slice.map((g, index) => (
+        <li key={g.id} className="lobby-games-grid__item">
+          {gameCard(g, index, thumbOffset, false)}
+        </li>
+      ))}
+      {hasMore ? (
+        <li
+          ref={sentinelRef}
+          className="lobby-games-grid__sentinel"
+          aria-hidden
+        />
+      ) : null}
+    </ul>
+  );
+}
+
+function PaginatedGameTrack({
+  games,
+  thumbOffset,
+  showTextLabels,
+  onCardAction,
+  gameCard,
+}: {
+  games: Game[];
+  thumbOffset: number;
+  showTextLabels: boolean;
+  onCardAction?: (g: Game) => void;
+  gameCard: LobbyGameCardRenderer;
+}) {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLLIElement | null>(null);
+  const total = games.length;
+  const [visible, setVisible] = useState(() =>
+    Math.min(LOBBY_GAMES_PAGE_SIZE, total),
+  );
+
+  useEffect(() => {
+    setVisible((v) => Math.min(v, games.length));
+  }, [games.length]);
+
+  useEffect(() => {
+    if (visible >= total) return;
+    const root = scrollerRef.current;
+    const target = sentinelRef.current;
+    if (!root || !target) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setVisible((c) => Math.min(c + LOBBY_GAMES_PAGE_SIZE, total));
+        }
+      },
+      { root, rootMargin: LOBBY_TRACK_LOAD_ROOT_MARGIN, threshold: 0 },
+    );
+    obs.observe(target);
+    return () => obs.disconnect();
+  }, [visible, total]);
+
+  const slice = games.slice(0, visible);
+  const hasMore = visible < total;
+
+  return (
+    <div ref={scrollerRef} className="lobby-games-scroller">
+      <ul className="lobby-games-track" role="list">
+        {slice.map((g, index) => (
+          <li key={g.id}>
+            {gameCard(g, index, thumbOffset, showTextLabels, onCardAction)}
+          </li>
+        ))}
+        {hasMore ? (
+          <li
+            ref={sentinelRef}
+            className="lobby-games-track__sentinel"
+            aria-hidden
+          />
+        ) : null}
+      </ul>
+    </div>
+  );
+}
+
 function slotGameIdFromCard(g: Game, fallback: number): number {
   const n = Number.parseInt(g.id, 10);
   if (Number.isFinite(n) && n > 0) return n;
@@ -128,6 +269,9 @@ function gamesForFilter(displayGames: Game[], f: LobbyFilterTab): Game[] {
   return displayGames;
 }
 
+/** 進入視窗（含上下預載）後才載入縮圖，避免大廳一次打滿 HTTP */
+const LOBBY_THUMB_ROOT_MARGIN = "200px 0px 220px 0px";
+
 function LobbyGameCardThumb({
   thumb,
   title,
@@ -135,28 +279,55 @@ function LobbyGameCardThumb({
   thumb: string | undefined;
   title: string;
 }) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const [inView, setInView] = useState(() => !thumb);
   const [imageFailed, setImageFailed] = useState(!thumb);
 
   useEffect(() => {
     setImageFailed(!thumb);
+    if (!thumb) {
+      setInView(true);
+      return;
+    }
+    setInView(false);
   }, [thumb]);
 
-  const showFallback = !thumb || imageFailed;
+  useEffect(() => {
+    if (!thumb || inView) return;
+    const el = wrapRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+        }
+      },
+      { root: null, rootMargin: LOBBY_THUMB_ROOT_MARGIN, threshold: 0 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [thumb, inView]);
+
+  const loadThumb = Boolean(thumb && inView);
+  const showTextFallback = !thumb || (loadThumb && imageFailed);
   const bgStyle =
-    thumb && !imageFailed ? { backgroundImage: `url("${thumb}")` } : undefined;
+    thumb && loadThumb && !imageFailed
+      ? { backgroundImage: `url("${thumb}")` }
+      : undefined;
 
   return (
-    <div className="lobby-game-card__thumb" style={bgStyle}>
-      {thumb ? (
+    <div ref={wrapRef} className="lobby-game-card__thumb" style={bgStyle}>
+      {loadThumb ? (
         <img
           src={thumb}
           alt=""
           className="lobby-game-card__thumb-probe"
           aria-hidden
+          decoding="async"
           onError={() => setImageFailed(true)}
         />
       ) : null}
-      {showFallback ? (
+      {showTextFallback ? (
         <span className="lobby-game-card__fallback">{title}</span>
       ) : null}
     </div>
@@ -517,18 +688,6 @@ export function LandingPage() {
     );
   }
 
-  function renderGameGrid(games: Game[], thumbOffset = 0) {
-    return (
-      <ul className="lobby-games-grid" role="list">
-        {games.map((g, index) => (
-          <li key={g.id} className="lobby-games-grid__item">
-            {gameCard(g, index, thumbOffset, false)}
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
   const guestLandingMain = (
     <>
       <main className="lobby-landing__main guest-landing__main">
@@ -737,12 +896,25 @@ export function LandingPage() {
                               id={`lobby-group-${subId}`}>
                               {subLabel}
                             </h3>
-                            {renderGameTrack(games, off, false)}
+                            <PaginatedGameTrack
+                              key={`${lobbySearch}\u0000${subId}`}
+                              games={games}
+                              thumbOffset={off}
+                              showTextLabels={false}
+                              gameCard={gameCard}
+                            />
                           </div>
                         );
                       });
                     })()
-                  : renderGameGrid(gamesByFilter[lobbyFilter], 0)}
+                  : (
+                      <PaginatedGameGrid
+                        key={`${lobbyFilter}\u0000${lobbySearch}`}
+                        games={gamesByFilter[lobbyFilter]}
+                        thumbOffset={0}
+                        gameCard={gameCard}
+                      />
+                    )}
               </div>
             </div>
           ) : null}
