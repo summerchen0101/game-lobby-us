@@ -295,7 +295,6 @@ export function LandingPage() {
     wsLobbyEnabled,
     mockLobby,
   ]);
-  console.log("gamesByFilter", gamesByFilter);
 
   const launchThirdPartyGame = useCallback(
     async (card: Game) => {

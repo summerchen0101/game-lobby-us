@@ -251,12 +251,29 @@ html.session-lobby-page {
   transform-origin: center top;
   transform-style: preserve-3d;
   animation: lobby-games-tab-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: transform, opacity;
 }
 
 @media (min-width: 48rem) {
   .lobby-games-panel-swap {
     animation-name: lobby-games-tab-in-desk;
+  }
+}
+
+/* 窄螢幕：關閉入場動畫與 3D perspective，避免捲動時過多合成層與主執行緒壓力 */
+@media (max-width: 47.99rem) {
+  .lobby-games-panel-host {
+    perspective: none;
+  }
+
+  .lobby-games-panel-swap {
+    animation: none;
+    transform-style: flat;
+  }
+
+  .lobby-games-panel-swap .lobby-games-grid__item,
+  .lobby-games-panel-swap .lobby-games-track > li,
+  .lobby-games-panel-swap .lobby-games-group-title {
+    animation: none;
   }
 }
 
@@ -275,7 +292,6 @@ html.session-lobby-page {
 
 .lobby-games-panel-swap .lobby-games-grid__item {
   animation: lobby-grid-item-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: transform, opacity;
 }
 
 .lobby-games-panel-swap .lobby-games-grid__item:nth-child(1) {
@@ -335,7 +351,6 @@ html.session-lobby-page {
 
 .lobby-games-panel-swap .lobby-games-track > li {
   animation: lobby-grid-item-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: transform, opacity;
 }
 
 .lobby-games-panel-swap .lobby-games-track > li:nth-child(1) {
@@ -408,28 +423,23 @@ html.session-lobby-page {
 .lobby-games-panel-swap .lobby-games-group-title {
   animation: lobby-games-group-title-in 0.38s cubic-bezier(0.22, 1, 0.36, 1)
     both;
-  will-change: transform, opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .lobby-games-panel-swap {
     animation: none;
-    will-change: auto;
   }
 
   .lobby-games-panel-swap .lobby-games-grid__item {
     animation: none;
-    will-change: auto;
   }
 
   .lobby-games-panel-swap .lobby-games-track > li {
     animation: none;
-    will-change: auto;
   }
 
   .lobby-games-panel-swap .lobby-games-group-title {
     animation: none;
-    will-change: auto;
   }
 
   .lobby-game-filter__tab {
@@ -507,7 +517,8 @@ html.session-lobby-page {
   padding-bottom: var(--space-2);
   scrollbar-width: none;
   overscroll-behavior-x: contain;
-  touch-action: pan-x;
+  /* pan-x pan-y：保留橫滑，避免 pan-x 單獨鎖死垂直捲入手勢 */
+  touch-action: pan-x pan-y;
 }
 
 /* 已登入大廳橫向列：隱藏捲軸，仍可用觸控／滾輪捲動 */

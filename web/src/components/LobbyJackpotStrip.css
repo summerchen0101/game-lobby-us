@@ -147,7 +147,8 @@
 }
 
 .lobby-jackpot-strip__amount.is-scrambling {
-  animation: lobby-jackpot-amount-tick 0.12s ease-in-out infinite;
+  /* 固定次數，避免 infinite 與捲動疊加時持續合成 */
+  animation: lobby-jackpot-amount-tick 0.14s ease-in-out 4;
   filter: brightness(1.15);
 }
 

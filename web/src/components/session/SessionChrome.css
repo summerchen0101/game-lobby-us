@@ -22,6 +22,7 @@
   z-index: 200;
   background: var(--hdr-bg);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: none;
 }
 
@@ -97,6 +98,14 @@
   --hdr-wallet-track-bg: rgba(11, 141, 59, 0.4);
 
   backdrop-filter: blur(10px);
+}
+
+/* 窄螢幕：大廳疊圖頂欄關閉 blur（需在本檔其他 .session-header backdrop 規則之後） */
+@media (max-width: 47.99rem) {
+  .session-layout--hero-overlay .session-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 .session-header__inner {
