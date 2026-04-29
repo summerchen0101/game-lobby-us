@@ -22,6 +22,11 @@ const WithdrawSuccessPushType = mustLookup("megaman.WithdrawSuccessPush");
 
 /**
  * megaman CreateWithdrawOrderReq.paymentType — 對齊 proto/dsk/dsk.proto PaymentTypeRec（美國提現）
+ *
+ * 若後端 log 出現 `paymentType: 2` 而前端已選 PayPal：多為 **舊 bundle**（曾誤將 paypal 映成 2，對應 PaymentTypeRec.OVO）。
+ * 目前預期：PayPal=13、CreditCard=14、CashAPP=15、ACH=16。
+ *
+ * 後端若以 [`proto/payment/payment.proto`](../../../proto/payment/payment.proto) 全文 merge（含 email/phone 等 21–32），與 megaman wire **並存**時仍以 **field 3** 為準；仍報錯請對齊 **amount 單位／必填／業務規則**。
  */
 export const WITHDRAW_PAYMENT_TYPE_REC = {
   PayPal: 13,
@@ -205,7 +210,6 @@ export function encodeCreateWithdrawOrderRequestBytes(
     default:
       break;
   }
-  console.log(msg);
   const err = CreateWithdrawOrderReqType.verify(msg);
   if (err) throw new Error(`CreateWithdrawOrderReq: ${err}`);
   const created = CreateWithdrawOrderReqType.create(msg);

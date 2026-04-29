@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "proto:generate": "node scripts/generate-gateway-schema.mjs && node scripts/generate-lobby-schema.mjs",
+    "verify:withdraw-wire": "node scripts/verify-withdraw-wire.mjs",
     "git:company-branch": "bash ../scripts/company-web-subtree.sh"
   },
   "dependencies": {

@@ -424,7 +424,6 @@ export function RedeemMethodModal({ open, onClose, onOrderCreated }: Props) {
 
       setSubmitBusy(true);
       try {
-        console.log(data);
         const r = await req({
           type: GATEWAY_API_CREATE_WITHDRAW_ORDER,
           data,

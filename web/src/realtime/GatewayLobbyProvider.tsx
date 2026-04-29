@@ -71,7 +71,9 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
 
   const requestRef = useRef<GatewayWsRequestFn | null>(null);
   const paymentFinishListenersRef = useRef(new Set<PaymentFinishListener>());
-  const withdrawSuccessListenersRef = useRef(new Set<WithdrawSuccessPushListener>());
+  const withdrawSuccessListenersRef = useRef(
+    new Set<WithdrawSuccessPushListener>(),
+  );
 
   const subscribeWithdrawSuccessPush = useCallback(
     (listener: WithdrawSuccessPushListener) => {

@@ -116,6 +116,7 @@ export function decodeGatewayRequestDataForDevLog(
   }
 
   if (apiType === GATEWAY_API_CREATE_WITHDRAW_ORDER) {
+    // megaman decode：預期 PayPal 時 paymentType === 13（proto/dsk PaymentTypeRec）；若見 2 多為舊前端快取
     try {
       return decodeCreateWithdrawOrderRequestForDevLog(raw)
     } catch (e) {
