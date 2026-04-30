@@ -115,16 +115,16 @@ export function decodeGatewayResponseDataForDevLog(
           new Error("ListJackPotResp decode empty or failed"),
         );
       }
+      const listForPush = decodeListJackPotRespToObjectForDev(raw);
+      if (listForPush && listForPush.infoCount > 0) {
+        return {
+          kind: "LIST_JACKPOT",
+          list: listForPush,
+        };
+      }
       const slot = decodeSlotJackPotInfoToObjectForDev(raw);
       if (slot && slot.jackpotAmounts.length > 0) {
         return { kind: "SLOT_JACKPOT", slot };
-      }
-      const list = decodeListJackPotRespToObjectForDev(raw);
-      if (list && list.infoCount > 0) {
-        return {
-          kind: "LIST_JACKPOT",
-          list,
-        };
       }
       return fallbackHex(raw, new Error("jackpot wire decode failed"));
     }

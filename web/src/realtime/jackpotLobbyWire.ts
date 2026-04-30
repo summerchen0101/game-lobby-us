@@ -1,4 +1,5 @@
 import * as protobuf from "protobufjs/light.js";
+import type { ActiveWallet } from "../wallet/walletContext";
 import schema from "../gen/lobby_wire.schema.js";
 import { GATEWAY_API_GET_JACKPOT_INFO } from "./gatewayApi";
 
@@ -15,6 +16,9 @@ function mustLookup(name: string): protobuf.Type {
 const SlotJackPotInfoType = mustLookup("megaman.SlotJackPotInfo");
 const ListJackPotRespType = mustLookup("megaman.ListJackPotResp");
 
+/** backend `JackPotType.SlotJackPot` / proto `SLOT_JACK_POT` */
+const WIRE_JACK_POT_TYPE_SLOT = 1;
+
 function parseAmount(v: unknown): number {
   if (typeof v === "number" && Number.isFinite(v)) {
     return Math.max(0, Math.round(v));
@@ -26,32 +30,94 @@ function parseAmount(v: unknown): number {
   return 0;
 }
 
-function awardsTripleFromJpInfoRows(
-  rows: unknown[] | undefined,
-): readonly [number, number, number] | null {
-  if (!Array.isArray(rows) || rows.length === 0) return null;
-  const n0 = rowAward(rows[0]);
-  const n1 = rowAward(rows[1]);
-  const n2 = rowAward(rows[2]);
-  if (n0 <= 0 && n1 <= 0 && n2 <= 0) return null;
-  return [n0, n1, n2] as const;
-}
-
-function rowAward(row: unknown): number {
-  if (!row || typeof row !== "object") return 0;
-  const r = row as Record<string, unknown>;
-  const award = r.award ?? r.Award;
-  if (award !== undefined) return parseAmount(award);
-  const amount = r.amount ?? r.Amount;
+/** 顯示金額：僅 `amount`（見 docs/lobby_jackpot.md），勿用 `award`。 */
+function parseRowDisplayAmount(row: Record<string, unknown>): number {
+  const amount = row.amount ?? row.Amount;
   if (typeof amount === "number" && Number.isFinite(amount)) {
     return Math.max(0, Math.round(amount));
+  }
+  if (typeof amount === "string" && amount.trim()) {
+    const n = Number(amount);
+    return Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0;
   }
   return 0;
 }
 
-/** `ListJackPotResp` 解碼後取前三筆 `award` 作為顯示金額；無有效資料時回傳 null */
+function readWireJackPotType(row: Record<string, unknown>): unknown {
+  return row.JackPotType ?? row.jackPotType;
+}
+
+function isSlotJackPotWireType(raw: unknown): boolean {
+  if (raw === WIRE_JACK_POT_TYPE_SLOT || raw === String(WIRE_JACK_POT_TYPE_SLOT))
+    return true;
+  if (typeof raw === "string") {
+    return raw.trim().toUpperCase() === "SLOT_JACK_POT";
+  }
+  return false;
+}
+
+function readWireWalletType(row: Record<string, unknown>): unknown {
+  return row.walletType ?? row.WalletType;
+}
+
+function rowMatchesActiveWallet(
+  row: Record<string, unknown>,
+  active: ActiveWallet,
+): boolean {
+  const w = readWireWalletType(row);
+  if (active === "GC") {
+    return w === 1 || w === "1" || w === "GC";
+  }
+  return w === 2 || w === "2" || w === "SC";
+}
+
+/**
+ * `ListJackPotResp.info`：依 docs/lobby_jackpot.md，Slot JP 以 `award` 1–3 對應 JP1–JP3，
+ * 金額用 `amount`；只納入 `SLOT_JACK_POT`；同格重複則最後一筆覆寫。
+ * `requireWalletMatch`：為 true 時僅 `walletType` 與 `activeWallet` 一致之列。
+ */
+function tripleFromJackPotInfoRowsWithWalletFilter(
+  rows: unknown[] | undefined,
+  activeWallet: ActiveWallet,
+  requireWalletMatch: boolean,
+): readonly [number, number, number] | null {
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  const triple: [number, number, number] = [0, 0, 0];
+  let filled = false;
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const r = row as Record<string, unknown>;
+    if (requireWalletMatch && !rowMatchesActiveWallet(r, activeWallet)) continue;
+    if (!isSlotJackPotWireType(readWireJackPotType(r))) continue;
+    const awardRaw = r.award ?? r.Award;
+    const award =
+      typeof awardRaw === "string" ? Number(awardRaw) : Number(awardRaw);
+    if (!Number.isFinite(award) || award < 1 || award > 3) continue;
+    const idx = award - 1;
+    triple[idx] = parseRowDisplayAmount(r);
+    filled = true;
+  }
+  if (!filled) return null;
+  if (triple[0] <= 0 && triple[1] <= 0 && triple[2] <= 0) return null;
+  return triple;
+}
+
+/**
+ * 先依目前錢包過濾；若無有效三格則不過濾 `walletType` 重算（後端欄位異常時仍盡量顯示）。
+ */
+export function tripleFromJackPotInfoRows(
+  rows: unknown[] | undefined,
+  activeWallet: ActiveWallet,
+): readonly [number, number, number] | null {
+  return (
+    tripleFromJackPotInfoRowsWithWalletFilter(rows, activeWallet, true) ??
+    tripleFromJackPotInfoRowsWithWalletFilter(rows, activeWallet, false)
+  );
+}
+
 export function tripleFromListJackPotRespBytes(
   data: Uint8Array,
+  activeWallet: ActiveWallet,
 ): readonly [number, number, number] | null {
   try {
     const msg = ListJackPotRespType.decode(data);
@@ -59,27 +125,33 @@ export function tripleFromListJackPotRespBytes(
       longs: String,
       defaults: false,
     }) as { info?: unknown[] };
-    return awardsTripleFromJpInfoRows(o.info);
+    return tripleFromJackPotInfoRows(o.info, activeWallet);
   } catch {
     return null;
   }
 }
 
+export type DecodeLobbyJackpotOptions = {
+  wallet: ActiveWallet;
+};
+
 /**
  * 大廳 JP 顯示用三格。
- * `GET_JACKPOT_INFO`(141) 的 `data` 為 **`ListJackPotResp`**；若以 `SlotJackPotInfo` 解同一串 bytes，
- * protobuf 會把巢狀 message 誤拆成 `jackpot_amounts`，出現看似 tag／value 的數字列（不可用）。
- * **14**／**1043** 常見為 **`SlotJackPotInfo`**，失敗再嘗試 **`ListJackPotResp`**。
+ * - `GET_JACKPOT_INFO`(141)：`data` 為 **`ListJackPotResp`**。
+ * - Push **14**／**1043**：實務上多為 **`ListJackPotResp`**（與 141 相同）；先解 `ListJackPotResp` 再 **`SlotJackPotInfo`** fallback，避免誤用 `jackpot_amounts` 解出小假數（如 8/2/21）。
  */
 export function decodeLobbyJackpotDisplayTriple(
   data: Uint8Array,
   apiType: number,
+  options: DecodeLobbyJackpotOptions,
 ): readonly [number, number, number] | null {
+  const { wallet } = options;
   if (apiType === GATEWAY_API_GET_JACKPOT_INFO) {
-    return tripleFromListJackPotRespBytes(data);
+    return tripleFromListJackPotRespBytes(data, wallet);
   }
   return (
-    decodeSlotJackPotInfoBytes(data) ?? tripleFromListJackPotRespBytes(data)
+    tripleFromListJackPotRespBytes(data, wallet) ??
+    decodeSlotJackPotInfoBytes(data)
   );
 }
 
@@ -105,10 +177,17 @@ export function decodeSlotJackPotInfoBytes(
   }
 }
 
-/** 供 dev log 還原 `ListJackPotResp.info` 摘要 */
+export type ListJackPotDevRowPreview = {
+  amount: number;
+  award: unknown;
+  jackPotType: unknown;
+  walletType: unknown;
+};
+
+/** 供 dev log 還原 `ListJackPotResp.info` 摘要（金額為 `amount`，非 `award`） */
 export function decodeListJackPotRespToObjectForDev(
   data: Uint8Array,
-): { infoCount: number; awardsPreview: number[] } | null {
+): { infoCount: number; rowsPreview: ListJackPotDevRowPreview[] } | null {
   try {
     const msg = ListJackPotRespType.decode(data);
     const o = ListJackPotRespType.toObject(msg, {
@@ -116,11 +195,25 @@ export function decodeListJackPotRespToObjectForDev(
       defaults: false,
     }) as { info?: unknown[] };
     const rows = o.info;
-    if (!Array.isArray(rows)) return { infoCount: 0, awardsPreview: [] };
-    const awardsPreview = rows
-      .slice(0, 8)
-      .map((row) => rowAward(row));
-    return { infoCount: rows.length, awardsPreview };
+    if (!Array.isArray(rows)) return { infoCount: 0, rowsPreview: [] };
+    const rowsPreview = rows.slice(0, 8).map((row): ListJackPotDevRowPreview => {
+      if (!row || typeof row !== "object") {
+        return {
+          amount: 0,
+          award: null,
+          jackPotType: null,
+          walletType: null,
+        };
+      }
+      const r = row as Record<string, unknown>;
+      return {
+        amount: parseRowDisplayAmount(r),
+        award: r.award ?? r.Award ?? null,
+        jackPotType: readWireJackPotType(r),
+        walletType: readWireWalletType(r),
+      };
+    });
+    return { infoCount: rows.length, rowsPreview };
   } catch {
     return null;
   }

@@ -12,7 +12,7 @@ package megaman;
 //   proto/msg/msg.proto Message（apiType=14、data=10）→ WirePushMessage
 // - 帳號綁定：proto/megaman/playerinfo.proto MegaAccountBindingRequest/Response
 // - WalletUseRequest：與 megaman lobby WalletUseRequest 欄位 1 二進位相容（WalletType 與 ActiveWalletMode 均 1=GC、2=SC）
-// - SlotJackPotInfo／ListJackPotResp：Gateway ApiType 14 / 141 / 1043（主 repo 見 proto/gateway/gateway.proto）
+// - JP：ApiType 14 / 141 / 1043（見 proto/gateway/gateway.proto）。Push 多為 SlotJackPotInfo（int64 陣列）；GET_JACKPOT_INFO(141) 為 ListJackPotResp（JackPotInfo 列，依 type+award+wallet+amount 組大廳三格，見 docs/lobby_jackpot.md）。
 
 enum YesNo {
   NO = 0;
@@ -69,12 +69,12 @@ message WalletUseRequest {
   ActiveWalletMode mode = 1;
 }
 
-// Gateway ApiType SLOT_JACKPOT_INFO_PUSH(14)：Slot 累積獎池（伺服器主動下發）；jackpot_amounts 至少 1 筆，前端取前三格顯示。
+// Gateway push（如 SLOT_JACKPOT_INFO_PUSH 14）：累積獎池；jackpot_amounts 前三個元素對應大廳 JP1～JP3。
 message SlotJackPotInfo {
   repeated int64 jackpot_amounts = 1;
 }
 
-// ApiType GET_JACKPOT_INFO (141) 回應；對齊 proto/megaman/ranking.proto ListJackPotResp / JackPotInfo
+// GET_JACKPOT_INFO (141) 回應；對齊 proto/megaman/ranking.proto。大廳僅用 SLOT_JACK_POT + award 1～3 + amount + walletType（與目前 GC/SC）組三格，勿以 info 陣列前後順序當 JP1～JP3。
 enum JackPotType {
   UNKNOWN_JACK_POT_TYPE = 0;
   SLOT_JACK_POT = 1;

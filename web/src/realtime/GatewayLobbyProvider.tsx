@@ -45,6 +45,7 @@ import {
 } from "./shopLobbyWire";
 import { decodeWithdrawSuccessPushBytes } from "./withdrawLobbyWire";
 import type { WithdrawSuccessPushListener } from "./gatewayLobbyContext";
+import type { ActiveWallet } from "../wallet/walletContext";
 import { wireUInt64Field } from "./wireUint64";
 
 function devGatewayWsProbeEnabled(): boolean {
@@ -54,7 +55,7 @@ function devGatewayWsProbeEnabled(): boolean {
 
 export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
   const { token, user, mergeUser } = useAuth();
-  const { setActiveWallet } = useWallet();
+  const { setActiveWallet, activeWallet } = useWallet();
   const wsLobbyEnabled = isWsLobbyGamesEnabled();
   const gatewayWsEnabled =
     !isMockMode() && (devGatewayWsProbeEnabled() || wsLobbyEnabled);
@@ -72,6 +73,14 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
   const [gatewayRequestReady, setGatewayRequestReady] = useState(false);
 
   const requestRef = useRef<GatewayWsRequestFn | null>(null);
+  /** header 切換 GC/SC 時用上一則 JP 封包依目前錢包重解，不必等 push */
+  const lastJackpotWireRef = useRef<{
+    apiType: number;
+    data: Uint8Array;
+  } | null>(null);
+  const prevActiveWalletForJackpotSyncRef = useRef<ActiveWallet | null>(
+    null,
+  );
   const paymentFinishListenersRef = useRef(new Set<PaymentFinishListener>());
   const withdrawSuccessListenersRef = useRef(
     new Set<WithdrawSuccessPushListener>(),
@@ -197,11 +206,42 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
     setLobbyLoading(false);
     setLiveJackpotAmounts(null);
     setLobbyGet(null);
+    lastJackpotWireRef.current = null;
+    prevActiveWalletForJackpotSyncRef.current = null;
     requestRef.current = null;
     setGatewayRequestReady(false);
     paymentFinishListenersRef.current.clear();
     withdrawSuccessListenersRef.current.clear();
   }, [token]);
+
+  useEffect(() => {
+    if (!token?.trim() || !gatewayWsEnabled) return;
+    const cached = lastJackpotWireRef.current;
+    if (!cached) return;
+    const triple = decodeLobbyJackpotDisplayTriple(cached.data, cached.apiType, {
+      wallet: activeWallet,
+    });
+    if (triple) setLiveJackpotAmounts(triple);
+  }, [activeWallet, gatewayWsEnabled, token]);
+
+  useEffect(() => {
+    if (!gatewayWsEnabled || !token?.trim() || !gatewayRequestReady) return;
+    const prev = prevActiveWalletForJackpotSyncRef.current;
+    prevActiveWalletForJackpotSyncRef.current = activeWallet;
+    if (prev === null || prev === activeWallet) return;
+    const req = requestRef.current;
+    if (!req) return;
+    void req({
+      type: GATEWAY_API_GET_JACKPOT_INFO,
+      data: new Uint8Array(0),
+      debugLabel: "GET_JACKPOT_INFO(active_wallet_changed)",
+    }).catch((e) => {
+      console.warn(
+        "[gateway-ws] GET_JACKPOT_INFO after wallet change failed",
+        e,
+      );
+    });
+  }, [activeWallet, gatewayRequestReady, gatewayWsEnabled, token]);
 
   useGatewayWs({
     enabled: gatewayWsEnabled && Boolean(token?.trim()),
@@ -226,7 +266,10 @@ export function GatewayLobbyProvider({ children }: { children: ReactNode }) {
         t === GATEWAY_API_GET_JACKPOT_INFO
       ) {
         if (!(raw instanceof Uint8Array) || raw.byteLength === 0) return;
-        const triple = decodeLobbyJackpotDisplayTriple(raw, t);
+        lastJackpotWireRef.current = { apiType: t, data: raw.slice() };
+        const triple = decodeLobbyJackpotDisplayTriple(raw, t, {
+          wallet: activeWallet,
+        });
         if (triple) setLiveJackpotAmounts(triple);
         return;
       }

@@ -7,7 +7,7 @@ export const GATEWAY_API_PING_PONG = 0
 /** 連線後伺服器登入；對應 ApiType ServerLogin / SERVER_LOGIN；`data` 為空 */
 export const GATEWAY_API_SERVER_LOGIN = 4
 export const GATEWAY_API_LOBBY_GET = 11
-/** 伺服器主動推播：與 proto/gateway/gateway.proto ApiType SLOT_JACKPOT_INFO_PUSH(14) 一致；body 為 megaman.SlotJackPotInfo（見 web/proto/lobby_wire.proto） */
+/** 伺服器主動推播：ApiType SLOT_JACKPOT_INFO_PUSH(14)；body 常以 megaman.ListJackPotResp（與 141 相同），相容舊版 megaman.SlotJackPotInfo */
 export const GATEWAY_API_SLOT_JACKPOT_PUSH = 14
 /** 拉取 JP 資訊；回應常為 megaman.ListJackPotResp（見 web/proto/lobby_wire.proto） */
 export const GATEWAY_API_GET_JACKPOT_INFO = 141
@@ -38,7 +38,7 @@ export const GATEWAY_API_SEND_MESSAGE_PUSH = 1000
 /** MsgResp.msg.apiType：付款完成（內層 data 為 megaman.PaymentPush） */
 export const GATEWAY_API_PAYMENT_FINISH_PUSH = 1013
 
-/** 伺服器主動推播 JP（1000 段）；Web 視情況以 SlotJackPotInfo 或 ListJackPotResp 解碼（見 proto 註解） */
+/** 伺服器主動推播 JP（JACKPOT_INFO_PUSH 1043）；解碼優先 ListJackPotResp，再 fallback SlotJackPotInfo（與 jackpotLobbyWire 一致） */
 export const GATEWAY_API_JACKPOT_INFO_PUSH = 1043
 
 /** 伺服器推播：其他玩家提現成功輪播；body 為 megaman.WithdrawSuccessPush */
